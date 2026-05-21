@@ -163,10 +163,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 
   <div class="step pending" id="stp-5"><div class="step-num">5</div><span class="step-label">Confirm</span></div>
 </div>
 
-<!-- ═══ STEP 1: Branch + Event Type ═══ -->
+<!-- ═══ STEP 1: Branch + Party Type ═══ -->
 <div id="view-1">
-  <h2 style="font-size:17px;font-weight:800;margin-bottom:4px;">What type of event?</h2>
-  <p style="font-size:12px;color:var(--gray);margin-bottom:14px;">Select your event type and branch to get started.</p>
+  <h2 style="font-size:17px;font-weight:800;margin-bottom:4px;">What type of party?</h2>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:14px;">Select your party package and branch to get started.</p>
 
   <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Branch</div>
   <div class="branch-bar">
@@ -174,16 +174,26 @@ input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 
     <button class="branch-btn" id="br-rosebank" onclick="setBranch('rosebank')">📍 Rosebank</button>
   </div>
 
-  <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Event Type</div>
-  <div class="etype-grid" id="etype-grid">
-    <div class="etype-card" onclick="selectEtype(this,'Corporate Event')"><div class="etype-icon">🏢</div><div class="etype-name">Corporate Event</div></div>
-    <div class="etype-card" onclick="selectEtype(this,'Brand Activation')"><div class="etype-icon">🎯</div><div class="etype-name">Brand Activation</div></div>
-    <div class="etype-card" onclick="selectEtype(this,'Competition / Tournament')"><div class="etype-icon">🏆</div><div class="etype-name">Competition / Tournament</div></div>
-    <div class="etype-card" onclick="selectEtype(this,'School / Sports Day')"><div class="etype-icon">🏫</div><div class="etype-name">School / Sports Day</div></div>
-    <div class="etype-card" onclick="selectEtype(this,'Concert / Performance')"><div class="etype-icon">🎤</div><div class="etype-name">Concert / Performance</div></div>
-    <div class="etype-card" onclick="selectEtype(this,'Filming / Shoot')"><div class="etype-icon">🎬</div><div class="etype-name">Filming / Shoot</div></div>
-    <div class="etype-card" onclick="selectEtype(this,'Community Event')"><div class="etype-icon">🤝</div><div class="etype-name">Community Event</div></div>
-    <div class="etype-card" onclick="selectEtype(this,'Private Function')"><div class="etype-icon">🎉</div><div class="etype-name">Private Function</div></div>
+  <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Party Package</div>
+  <div class="etype-grid" id="pkg-grid">
+    <div class="etype-card" onclick="selectPackage(this,'Skate Party','🛹')"><div class="etype-icon">🛹</div><div class="etype-name">Skate Party<div style="font-size:10px;color:var(--gray);font-weight:400;">From R1,800</div></div></div>
+    <div class="etype-card" onclick="selectPackage(this,'Esports Party','🎮')"><div class="etype-icon">🎮</div><div class="etype-name">Esports Party<div style="font-size:10px;color:var(--gray);font-weight:400;">From R2,200</div></div></div>
+    <div class="etype-card" onclick="selectPackage(this,'Street Soccer Party','⚽')"><div class="etype-icon">⚽</div><div class="etype-name">Street Soccer<div style="font-size:10px;color:var(--gray);font-weight:400;">From R1,600</div></div></div>
+    <div class="etype-card" onclick="selectPackage(this,'Dance Party','💃')"><div class="etype-icon">💃</div><div class="etype-name">Dance Party<div style="font-size:10px;color:var(--gray);font-weight:400;">From R1,800</div></div></div>
+    <div class="etype-card" onclick="selectPackage(this,'Combo Package (Any 2)','⚡')"><div class="etype-icon">⚡</div><div class="etype-name">Combo (Any 2)<div style="font-size:10px;color:var(--gray);font-weight:400;">From R3,200</div></div></div>
+    <div class="etype-card" onclick="selectPackage(this,'Full Venue Party','🏟️')"><div class="etype-icon">🏟️</div><div class="etype-name">Full Venue<div style="font-size:10px;color:var(--gray);font-weight:400;">From R5,500</div></div></div>
+  </div>
+
+  <!-- Combo sub‑selection (hidden until Combo is picked) -->
+  <div id="combo-sub" style="display:none;margin-top:12px;padding:14px;background:var(--or-light);border:1.5px solid var(--or-soft);border-radius:var(--r);">
+    <div style="font-size:11px;font-weight:700;color:var(--or-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Pick 2 Activities</div>
+    <div class="chips" id="combo-chips">
+      <div class="chip" onclick="toggleComboChip(this,'skate')">🛹 Skate</div>
+      <div class="chip" onclick="toggleComboChip(this,'esports')">🎮 Esports</div>
+      <div class="chip" onclick="toggleComboChip(this,'soccer')">⚽ Soccer</div>
+      <div class="chip" onclick="toggleComboChip(this,'dance')">💃 Dance</div>
+    </div>
+    <div id="combo-err" style="color:var(--red);font-size:11px;font-weight:700;min-height:16px;margin-top:6px;"></div>
   </div>
 
   <div class="err" id="err-1"></div>
@@ -401,7 +411,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 
 
 <script>
 var branch='fourways';
-var selectedEtype='';
+var selectedPackage='';
+var selectedPackageIcon='';
+var comboSelection=[];
 var currentStep=1;
 
 // ─── Branch ───
@@ -411,13 +423,49 @@ function setBranch(b){
   document.getElementById('br-rosebank').className='branch-btn'+(b==='rosebank'?' active':'');
 }
 
-// ─── Event type ───
-function selectEtype(el,name){
-  document.querySelectorAll('.etype-card').forEach(c=>c.classList.remove('selected'));
+// ─── Party Package ───
+function selectPackage(el,name,icon){
+  document.querySelectorAll('#pkg-grid .etype-card').forEach(c=>c.classList.remove('selected'));
   el.classList.add('selected');
-  selectedEtype=name;
+  selectedPackage=name;
+  selectedPackageIcon=icon;
+  comboSelection=[];
   document.getElementById('btn-1').disabled=false;
   document.getElementById('err-1').textContent='';
+
+  // Show/hide combo sub-selection
+  var comboSub=document.getElementById('combo-sub');
+  if(name==='Combo Package (Any 2)'){
+    comboSub.style.display='';
+    // Deselect all combo chips
+    document.querySelectorAll('#combo-chips .chip').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('combo-err').textContent='';
+    document.getElementById('btn-1').disabled=true; // need 2 picks first
+  }else{
+    comboSub.style.display='none';
+    document.getElementById('combo-err').textContent='';
+  }
+}
+
+function toggleComboChip(el,id){
+  el.classList.toggle('selected');
+  var chips=document.querySelectorAll('#combo-chips .chip.selected');
+  comboSelection=[...chips].map(function(c){
+    var t=c.textContent.trim();
+    return t.replace(/^[🛹🎮⚽💃]\s*/,'');
+  });
+  var err=document.getElementById('combo-err');
+  if(comboSelection.length===2){
+    err.textContent='';
+    document.getElementById('btn-1').disabled=false;
+  }else if(comboSelection.length>2){
+    el.classList.remove('selected');
+    comboSelection=comboSelection.slice(0,2);
+    err.textContent='Select exactly 2 activities';
+  }else{
+    document.getElementById('btn-1').disabled=true;
+    err.textContent='';
+  }
 }
 
 // ─── Chips ───
@@ -447,7 +495,14 @@ function showStep(n){
   });
   currentStep=n;
   if(n===2){
-    document.getElementById('etype-pill').textContent=selectedEtype;
+    var pill=selectedPackageIcon+' '+selectedPackage;
+    if(comboSelection.length)pill+=' ('+comboSelection.join(' + ')+')';
+    document.getElementById('etype-pill').textContent=pill;
+  }
+  if(n===4 && selectedPackage==='Full Venue Party'){
+    // Auto-select all areas + services for Full Venue
+    document.querySelectorAll('#areas-chips .chip').forEach(function(c){c.classList.add('selected');});
+    document.querySelectorAll('#services-chips .chip').forEach(function(c){c.classList.add('selected');});
   }
   if(n===5)buildSummary();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -514,7 +569,7 @@ function buildSummary(){
 
   let rows=[
     ['Branch',branchLabel],
-    ['Event Type',selectedEtype],
+    ['Party Package',selectedPackageIcon+' '+selectedPackage+(comboSelection.length?' ('+comboSelection.join(' + ')+')':'')],
     ['Date',fmtDate(d)+(ed&&ed!==d?' → '+fmtDate(ed):'')],
     ['Time',st+' – '+et],
     ['Name',fn+' '+ln+(co?' ('+co+')':'')],
@@ -560,7 +615,8 @@ function submitEnquiry(){
     contact,
     phone:ph,
     email:em,
-    etype:selectedEtype,
+    etype:selectedPackageIcon+' '+selectedPackage,
+    combo:comboSelection,
     attendance:att,
     date:d,
     edate:ed||d,
@@ -593,8 +649,9 @@ function submitEnquiry(){
 
 // ─── Reset ───
 function resetForm(){
-  selectedEtype='';branch='fourways';currentStep=1;
-  document.querySelectorAll('.etype-card').forEach(c=>c.classList.remove('selected'));
+  selectedPackage='';selectedPackageIcon='';comboSelection=[];branch='fourways';currentStep=1;
+  document.querySelectorAll('#pkg-grid .etype-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('combo-sub').style.display='none';
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
   ['f-date','f-edate','f-stime','f-etime','f-fname','f-lname','f-company','f-phone','f-email','f-attendance','f-notes'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value='';
@@ -733,7 +790,11 @@ validate=function(step){
   var err=document.getElementById('err-'+step);
   if(err)err.textContent='';
   if(step===1){
-    if(!selectedEtype){document.getElementById('err-1').textContent='Please select an event type.';return false;}
+    if(!selectedPackage){document.getElementById('err-1').textContent='Please select a party package.';return false;}
+    if(selectedPackage==='Combo Package (Any 2)' && comboSelection.length!==2){
+      document.getElementById('combo-err').textContent='Please select exactly 2 activities.';
+      return false;
+    }
     return true;
   }
   if(step===2){
