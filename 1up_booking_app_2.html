@@ -27,9 +27,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nav-branch-btn{padding:4px 14px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:#222;color:#888;transition:all 0.15s;white-space:nowrap;}
 .nav-branch-btn.active-fw{background:var(--or);color:#111;}
 .nav-branch-btn.active-rb{background:#00E5FF;color:#111;}
-.nav-tabs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #ffffff20;}
-.tab{padding:12px 2px 10px;text-align:center;font-size:14px;font-weight:700;color:#ffffff60;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.5px;}
+.nav-tabs{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #ffffff20;}
+.tab{padding:10px 2px 8px;text-align:center;font-size:11px;font-weight:700;color:#ffffff60;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.5px;}
 .tab.active{color:var(--or);border-bottom-color:var(--or);}
+.booking-subtabs{display:flex;gap:4px;margin-bottom:12px;background:var(--gray-light);border-radius:10px;padding:4px;}
+.booking-subtab{flex:1;padding:8px 6px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--gray);transition:all 0.15s;font-family:inherit;text-align:center;}
+.booking-subtab.active{background:#111;color:var(--or);}
 .page{display:none;padding:14px;max-width:600px;margin:0 auto;}
 .page.active{display:block;}
 .card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px;}
@@ -159,9 +162,7 @@ textarea{resize:vertical;min-height:70px;}
     <div class="tab active" onclick="showTab('dashboard')">📊 Home</div>
     <div class="tab" onclick="showTab('bookings')">📋 Bookings</div>
     <div class="tab" onclick="showTab('activities')">🎮 Activities</div>
-    <div class="tab" onclick="showTab('venue-hire')">🏟️ Venue Hire</div>
     <div class="tab" onclick="showTab('stock')">🍬 Stock</div>
-    <div class="tab" onclick="showTab('customer-form')">📩 Customer Form</div>
     <div class="tab" onclick="showTab('setup')">⚙️ Setup</div>
   </div>
 </div>
@@ -179,48 +180,105 @@ textarea{resize:vertical;min-height:70px;}
     <div style="font-size:12px;color:#aaa;line-height:1.8;" id="branch-info-body">Shop CF02, 11 Ruby Close, Fourways · Hours: Weekdays 10am–7pm · Weekends 10am–9pm</div>
   </div>
   <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">‹</button>
-      <div style="font-weight:900;font-size:16px;" id="cal-title"></div>
-      <button class="btn btn-ghost btn-sm" onclick="calNav(1)">›</button>
-    </div>
-    <div class="cal-legend">
-      <div class="cal-legend-item"><span class="cal-dot"></span> Party booking</div>
-      <div class="cal-legend-item"><span class="cal-dot-venue"></span> Venue hire (blocked)</div>
-      <div class="cal-legend-item"><span class="cal-dot-stock"></span> Low stock warning</div>
-    </div>
-    <div class="cal-grid" id="cal-headers"></div>
-    <div class="cal-grid" id="cal-body" style="margin-top:4px;"></div>
-  </div>
-  <div class="card">
     <div style="font-weight:900;font-size:15px;margin-bottom:10px;">📅 Upcoming Bookings</div>
     <div id="upcoming-list"><div style="color:var(--gray);font-size:13px;">No upcoming bookings</div></div>
   </div>
 </div>
 
-<!-- BOOKINGS -->
+<!-- BOOKINGS HUB -->
 <div class="page" id="page-bookings">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
     <div style="font-weight:900;font-size:17px;">📋 Bookings</div>
     <div style="display:flex;gap:6px;">
       <button class="btn btn-green btn-sm" onclick="openExport()">📥 Export</button>
-      <button class="btn btn-o btn-sm" onclick="openBook()">+ New</button>
+      <button class="btn btn-o btn-sm" id="bhub-new-btn" onclick="openBook()">+ New</button>
     </div>
   </div>
-  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-    <button class="btn btn-sm" id="filter-all" onclick="setFilter('all')" style="background:#111;color:var(--or);">All</button>
-    <button class="btn btn-sm btn-ghost" id="filter-new" onclick="setFilter('new')">🆕 New</button>
-    <button class="btn btn-sm btn-ghost" id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
-    <button class="btn btn-sm btn-ghost" id="filter-confirmed" onclick="setFilter('confirmed')">✅ Confirmed</button>
-    <button class="btn btn-sm btn-ghost" id="filter-fourways" onclick="setFilter('fourways')">Fourways</button>
-    <button class="btn btn-sm btn-ghost" id="filter-rosebank" onclick="setFilter('rosebank')">Rosebank</button>
+
+  <!-- Sub-tabs -->
+  <div class="booking-subtabs">
+    <button class="booking-subtab active" id="bsub-parties" onclick="showBookingSub('parties')">🎉 Party Bookings</button>
+    <button class="booking-subtab" id="bsub-venue" onclick="showBookingSub('venue')">🏟️ Venue Hire</button>
+    <button class="booking-subtab" id="bsub-forms" onclick="showBookingSub('forms')">📩 Customer Form</button>
   </div>
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" placeholder="Search name, package, date, phone..." oninput="renderBookings(this.value)">
+
+  <!-- Party Bookings sub-view -->
+  <div id="booking-sub-parties">
+    <!-- Calendar -->
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">‹</button>
+        <div style="font-weight:900;font-size:15px;" id="cal-title"></div>
+        <button class="btn btn-ghost btn-sm" onclick="calNav(1)">›</button>
+      </div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><span class="cal-dot"></span> Party booking</div>
+        <div class="cal-legend-item"><span class="cal-dot-venue"></span> Venue hire (blocked)</div>
+        <div class="cal-legend-item"><span class="cal-dot-stock"></span> Low stock warning</div>
+      </div>
+      <div class="cal-grid" id="cal-headers"></div>
+      <div class="cal-grid" id="cal-body" style="margin-top:4px;"></div>
+    </div>
+
+    <!-- Filters -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="btn btn-sm" id="filter-all" onclick="setFilter('all')" style="background:#111;color:var(--or);">All</button>
+      <button class="btn btn-sm btn-ghost" id="filter-new" onclick="setFilter('new')">🆕 New</button>
+      <button class="btn btn-sm btn-ghost" id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
+      <button class="btn btn-sm btn-ghost" id="filter-confirmed" onclick="setFilter('confirmed')">✅ Confirmed</button>
+      <button class="btn btn-sm btn-ghost" id="filter-fourways" onclick="setFilter('fourways')">Fourways</button>
+      <button class="btn btn-sm btn-ghost" id="filter-rosebank" onclick="setFilter('rosebank')">Rosebank</button>
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search name, package, date, phone..." oninput="renderBookings(this.value)">
+    </div>
+    <div id="book-list"></div>
   </div>
-  <div id="book-list"></div>
+
+  <!-- Venue Hire sub-view -->
+  <div id="booking-sub-venue" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="font-weight:800;font-size:15px;">🏟️ Venue Hire</div>
+      <button class="btn btn-o btn-sm" onclick="openVenue()">+ New Hire</button>
+    </div>
+    <div class="card" style="background:#111;color:#fff;margin-bottom:12px;">
+      <div style="font-size:13px;color:#aaa;line-height:1.8;">Full-day venue hire for corporate events, competitions, activations, filming, school events and more.</div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="btn btn-sm" id="vfilter-all" onclick="setVFilter('all')" style="background:#111;color:var(--or);">All</button>
+      <button class="btn btn-sm btn-ghost" id="vfilter-upcoming" onclick="setVFilter('upcoming')">Upcoming</button>
+      <button class="btn btn-sm btn-ghost" id="vfilter-confirmed" onclick="setVFilter('confirmed')">✅ Confirmed</button>
+      <button class="btn btn-sm btn-ghost" id="vfilter-pending" onclick="setVFilter('pending')">⏳ Pending</button>
+    </div>
+    <div id="venue-list"></div>
+  </div>
+
+  <!-- Customer Form sub-view -->
+  <div id="booking-sub-forms" style="display:none;">
+    <div class="card" style="background:#111;color:#fff;">
+      <div style="font-weight:900;font-size:15px;margin-bottom:6px;color:var(--or);">🏟️ Venue Hire Booking Form</div>
+      <p style="font-size:13px;color:#aaa;line-height:1.6;margin-bottom:14px;">Send customers the link below. When they submit, their enquiry appears instantly in your <strong style="color:#fff;">Venue Hire</strong> sub-tab.</p>
+      <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--or);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Customer Form Link</div>
+        <div style="font-size:12px;font-weight:600;color:#ccc;word-break:break-all;" id="form-link-display">1up-venue-booking.html (same folder as this app)</div>
+      </div>
+      <button class="btn btn-o" style="width:100%;margin-bottom:8px;" onclick="window.open('1up-venue-booking.html','_blank')">👁️ Open / Preview Form</button>
+    </div>
+    <div class="card">
+      <div style="font-weight:800;font-size:14px;margin-bottom:4px;">📋 Recent Venue Hire Enquiries</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Submitted via the customer form — also visible in Venue Hire sub-tab.</p>
+      <div id="form-submissions-list"><div style="color:var(--gray);font-size:13px;">No submissions yet.</div></div>
+    </div>
+  </div>
 </div>
+
+<!-- VENUE HIRE (page kept for compatibility, hidden) -->
+<div class="page" id="page-venue-hire" style="display:none;"></div>
+
+<!-- CUSTOMER FORM (page kept for compatibility, hidden) -->
+<div class="page" id="page-customer-form" style="display:none;"></div>
 
 <!-- ACTIVITIES / EQUIPMENT -->
 <div class="page" id="page-activities">
@@ -241,24 +299,6 @@ textarea{resize:vertical;min-height:70px;}
     <div style="font-weight:800;font-size:14px;margin-bottom:10px;color:var(--red);">💃 Dance Arena</div>
     <div id="dance-list"></div>
   </div>
-</div>
-
-<!-- VENUE HIRE -->
-<div class="page" id="page-venue-hire">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-    <div style="font-weight:900;font-size:17px;">🏟️ Venue Hire</div>
-    <button class="btn btn-o btn-sm" onclick="openVenue()">+ New Hire</button>
-  </div>
-  <div class="card" style="background:#111;color:#fff;margin-bottom:12px;">
-    <div style="font-size:13px;color:#aaa;line-height:1.8;">Full-day or multi-day venue hire for corporate events, competitions, activations, filming, school events and more. The entire 1-Up space can be booked exclusively.</div>
-  </div>
-  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-    <button class="btn btn-sm" id="vfilter-all" onclick="setVFilter('all')" style="background:#111;color:var(--or);">All</button>
-    <button class="btn btn-sm btn-ghost" id="vfilter-upcoming" onclick="setVFilter('upcoming')">Upcoming</button>
-    <button class="btn btn-sm btn-ghost" id="vfilter-confirmed" onclick="setVFilter('confirmed')">✅ Confirmed</button>
-    <button class="btn btn-sm btn-ghost" id="vfilter-pending" onclick="setVFilter('pending')">⏳ Pending</button>
-  </div>
-  <div id="venue-list"></div>
 </div>
 
 <!-- STOCK TAKE -->
@@ -414,24 +454,6 @@ textarea{resize:vertical;min-height:70px;}
       <button class="btn btn-o" style="flex:1;" onclick="saveVenue()">💾 Save</button>
       <button class="btn btn-ghost" onclick="closeVenue()">Cancel</button>
     </div>
-  </div>
-</div>
-
-<!-- CUSTOMER FORM TAB -->
-<div class="page" id="page-customer-form">
-  <div class="card" style="background:#111;color:#fff;">
-    <div style="font-weight:900;font-size:15px;margin-bottom:6px;color:var(--or);">🏟️ Venue Hire Booking Form</div>
-    <p style="font-size:13px;color:#aaa;line-height:1.6;margin-bottom:14px;">Send customers the link below. When they submit, their enquiry appears instantly in your <strong style="color:#fff;">Venue Hire</strong> tab.</p>
-    <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:700;color:var(--or);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Customer Form Link</div>
-      <div style="font-size:12px;font-weight:600;color:#ccc;word-break:break-all;" id="form-link-display">1up-venue-booking.html (same folder as this app)</div>
-    </div>
-    <button class="btn btn-o" style="width:100%;margin-bottom:8px;" onclick="window.open('1up-venue-booking.html','_blank')">👁️ Open / Preview Form</button>
-  </div>
-  <div class="card">
-    <div style="font-weight:800;font-size:14px;margin-bottom:4px;">📋 Recent Venue Hire Enquiries</div>
-    <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Submitted via the customer form — also visible in Venue Hire tab.</p>
-    <div id="form-submissions-list"><div style="color:var(--gray);font-size:13px;">No submissions yet.</div></div>
   </div>
 </div>
 
@@ -868,8 +890,12 @@ function setBranch(b){
   renderDashboard();renderBookings();
   // Refresh current tab if it's a branch-sensitive page
   if(document.getElementById('page-stock').classList.contains('active')){renderStockTable();}
-  if(document.getElementById('page-venue-hire').classList.contains('active')){loadVenue();renderVenueList();}
   if(document.getElementById('page-activities').classList.contains('active')){renderActivities();}
+  // Refresh bookings sub-tabs if bookings page is active
+  if(document.getElementById('page-bookings').classList.contains('active')){
+    initBookingsCalendar();
+    loadVenue();renderVenueList();renderFormSubmissions();
+  }
 }
 
 // ===== TAB =====
@@ -877,16 +903,36 @@ function showTab(t){
   if(t==="cust-booking"){document.getElementById("modal-cust-form").classList.add("open");return;}
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(tb=>tb.classList.remove("active"));
-  const tabs=["dashboard","bookings","activities","venue-hire","stock","customer-form","setup"];
+  const tabs=["dashboard","bookings","activities","stock","setup"];
   const idx=tabs.indexOf(t);
   if(idx>=0){document.querySelectorAll(".tab")[idx].classList.add("active");}
   document.getElementById("page-"+t).classList.add("active");
   if(t==="dashboard")renderDashboard();
-  if(t==="bookings")renderBookings();
+  if(t==="bookings"){initBookingsCalendar();renderBookings();loadVenue();renderVenueList();renderFormSubmissions();}
   if(t==="activities")renderActivities();
-  if(t==="venue-hire"){loadVenue();renderVenueList();}
   if(t==="stock"){loadStock();renderStockTable();}
-  if(t==="customer-form")renderFormSubmissions();
+}
+
+// ===== BOOKINGS SUB-NAV =====
+var bookingsSubTab='parties';
+function showBookingSub(sub){
+  bookingsSubTab=sub;
+  document.querySelectorAll('.booking-subtab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('bsub-'+sub).classList.add('active');
+  document.getElementById('booking-sub-parties').style.display=sub==='parties'?'':'none';
+  document.getElementById('booking-sub-venue').style.display=sub==='venue'?'':'none';
+  document.getElementById('booking-sub-forms').style.display=sub==='forms'?'':'none';
+  // Update the +New button
+  var nb=document.getElementById('bhub-new-btn');
+  if(sub==='venue'){nb.textContent='+ New Hire';nb.onclick=function(){openVenue();};}
+  else{nb.textContent='+ New';nb.onclick=function(){openBook();};}
+  if(sub==='venue'){loadVenue();renderVenueList();}
+  if(sub==='forms')renderFormSubmissions();
+}
+
+function initBookingsCalendar(){
+  var d=new Date();calYear=d.getFullYear();calMonth=d.getMonth();
+  renderCalendar();
 }
 
 // ===== DASHBOARD =====
@@ -904,7 +950,7 @@ function renderDashboard(){
   document.getElementById("s-weekend").textContent=br.filter(b=>b.date===satS||b.date===sunS).length;
   const upcoming=br.filter(b=>b.date&&b.date>=td&&b.status!=="cancelled").sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
   const ul=document.getElementById("upcoming-list");
-  if(!upcoming.length){ul.innerHTML='<div style="color:var(--gray);font-size:13px;">No upcoming bookings</div>';renderCalendar();return;}
+  if(!upcoming.length){ul.innerHTML='<div style="color:var(--gray);font-size:13px;">No upcoming bookings</div>';return;}
   ul.innerHTML=upcoming.map(b=>{
     const d=new Date(b.date+"T00:00:00");
     const statusBadge=b.status==="new"?'<span class="badge badge-new new-badge-pulse">NEW</span>':`<span class="badge badge-${b.status==="confirmed"?"confirmed":b.status==="done"?"done":"pending"}">${b.status}</span>`;
@@ -916,7 +962,6 @@ function renderDashboard(){
       ${statusBadge}
     </div>`;
   }).join("");
-  renderCalendar();
 }
 
 // ===== CALENDAR =====
