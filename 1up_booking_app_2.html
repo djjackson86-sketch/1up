@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>1-Up Urban Playground — Booking Manager</title>
+<style>
+:root{
+  --or:#E8FF00;--or2:#c8dc00;--or-light:#fafee0;--or-dark:#8a9800;
+  --teal:#00C4B4;--teal-light:#e0faf8;
+  --nav:#111111;
+  --green:#16a34a;--green-light:#dcfce7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --yellow:#d97706;--yellow-light:#fef9c4;
+  --purple:#7B2D8B;--purple-light:#F5EDF8;
+  --gray:#6b7280;--gray-light:#f3f4f6;--gray-mid:#e5e7eb;
+  --dark:#111827;--white:#ffffff;
+  --radius:12px;--shadow:0 2px 12px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0f0;color:var(--dark);min-height:100vh;}
+.nav{background:#111111;padding:10px 0 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+.nav-title{color:var(--or);font-weight:900;font-size:17px;text-align:center;padding:0 0 8px;letter-spacing:1px;}
+.nav-title span{color:#fff;}
+.nav-tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-top:1px solid #ffffff20;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:60px;padding:10px 4px 8px;text-align:center;font-size:11px;font-weight:700;color:#ffffff60;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all 0.2s;letter-spacing:0.5px;}
+.tab.active{color:var(--or);border-bottom-color:var(--or);}
+.page{display:none;padding:14px;max-width:600px;margin:0 auto;}
+.page.active{display:block;}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.15s;}
+.btn-o{background:var(--or);color:#111;}
+.btn-o:active{background:var(--or2);}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:7px;}
+.btn-ghost{background:var(--gray-light);color:var(--dark);}
+.btn-red{background:var(--red-light);color:var(--red);}
+.btn-green{background:var(--green-light);color:var(--green);border:1.5px solid #16a34a40;}
+.btn-teal{background:var(--teal-light);color:var(--teal);border:1.5px solid #00C4B440;}
+.btn-purple{background:var(--purple-light);color:var(--purple);border:1.5px solid #7B2D8B40;}
+.btn-dark{background:#111;color:var(--or);border:none;}
+.form-group{margin-bottom:12px;}
+label{display:block;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark);outline:none;transition:border 0.15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--or);}
+textarea{resize:vertical;min-height:70px;}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-confirmed{background:var(--green-light);color:var(--green);}
+.badge-pending{background:var(--yellow-light);color:var(--yellow);}
+.badge-done{background:var(--teal-light);color:var(--teal);}
+.badge-cancelled{background:var(--red-light);color:var(--red);}
+.badge-new{background:var(--or-light);color:var(--or-dark);border:1px solid var(--or);}
+.book-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:12px;margin-bottom:10px;border-left:4px solid var(--gray-mid);}
+.book-card.confirmed{border-left-color:var(--green);}
+.book-card.pending{border-left-color:var(--yellow);}
+.book-card.done{border-left-color:var(--teal);}
+.book-card.cancelled{border-left-color:var(--red);}
+.book-card.new{border-left-color:var(--or);background:#fffde8;}
+.book-name{font-weight:800;font-size:15px;}
+.book-meta{font-size:12px;color:var(--gray);margin-top:3px;}
+.book-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;align-items:flex-end;}
+.modal-bg.open{display:flex;}
+.modal{background:#fff;border-radius:18px 18px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:18px 16px 32px;}
+.modal-title{font-weight:900;font-size:18px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;text-align:center;}
+.stat-num{font-size:28px;font-weight:900;color:#111;}
+.stat-label{font-size:11px;color:var(--gray);font-weight:600;margin-top:2px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-day-hdr{text-align:center;font-size:10px;font-weight:700;color:var(--gray);padding:4px 0;}
+.cal-day{min-height:38px;border-radius:8px;padding:4px;cursor:pointer;background:#fff;border:1.5px solid transparent;}
+.cal-day:hover{border-color:var(--or);}
+.cal-day.today{border-color:var(--or);background:var(--or-light);}
+.cal-day.has-booking{background:var(--or-light);}
+.cal-day-num{font-size:12px;font-weight:700;}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:var(--or);display:inline-block;margin:1px;}
+.cal-empty{min-height:38px;}
+.extras-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.extra-btn{padding:6px 10px;border-radius:20px;border:1.5px solid var(--gray-mid);background:#fff;font-size:12px;cursor:pointer;transition:all 0.15s;}
+.extra-btn.selected{background:var(--or-light);border-color:var(--or);color:#8a9800;font-weight:700;}
+.eq-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-mid);}
+.eq-row:last-child{border-bottom:none;}
+.eq-name{font-weight:600;font-size:13px;}
+.eq-sub{font-size:11px;color:var(--gray);}
+.eq-status{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.eq-available{background:var(--green-light);color:var(--green);}
+.eq-booked{background:var(--red-light);color:var(--red);}
+.search-wrap{position:relative;margin-bottom:12px;}
+.search-wrap input{padding-left:36px;}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray);}
+.smart-area{background:var(--or-light);border-radius:10px;padding:12px;margin-bottom:14px;border:1px solid #e8e800;}
+.smart-area label{color:var(--or-dark);}
+.upcoming-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-mid);}
+.upcoming-item:last-child{border-bottom:none;}
+.upcoming-date{background:#111;color:var(--or);border-radius:8px;padding:6px 8px;text-align:center;min-width:44px;}
+.upcoming-date-day{font-size:18px;font-weight:900;line-height:1;}
+.upcoming-date-mo{font-size:10px;font-weight:700;}
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:3px solid #111;}
+.inv-logo{font-size:22px;font-weight:900;color:#111;}
+.inv-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.inv-num{text-align:right;font-size:12px;color:var(--gray);}
+.inv-num strong{display:block;font-size:15px;color:var(--dark);}
+.inv-section{margin-bottom:14px;}
+.inv-section-title{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.inv-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--gray-light);font-size:13px;}
+.inv-row:last-child{border-bottom:none;}
+.inv-total-box{background:#111;color:var(--or);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.inv-balance-box{background:var(--green-light);color:var(--green);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.inv-footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--gray-mid);font-size:11px;color:var(--gray);text-align:center;line-height:1.6;}
+.branch-pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;background:#111;color:var(--or);margin-left:6px;vertical-align:middle;}
+.branch-pill.rb{background:#1a1a40;color:#00E5FF;}
+.cal-day.venue-block{background:#111;border-color:#111;}
+.cal-day.venue-block .cal-day-num{color:var(--or);}
+.cal-day.stock-warn{border-color:var(--red);}
+.cal-dot-venue{width:6px;height:6px;border-radius:50%;background:var(--or);display:inline-block;margin:1px;}
+.cal-dot-stock{width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;margin:1px;}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 0 2px;font-size:11px;color:var(--gray);}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-weight:600;}
+/* CUSTOMER FORM STYLES */
+.form-page{max-width:500px;margin:0 auto;padding:0;}
+.form-hero{background:#111;padding:24px 20px 20px;text-align:center;}
+.form-logo{font-size:28px;font-weight:900;color:var(--or);letter-spacing:3px;text-transform:uppercase;}
+.form-logo span{color:#fff;}
+.form-tagline{font-size:12px;color:#888;margin-top:6px;letter-spacing:1px;}
+.form-body{padding:16px;}
+.pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+.pkg-card{border:2px solid var(--gray-mid);border-radius:10px;padding:12px;cursor:pointer;transition:all 0.2s;background:#fff;text-align:center;}
+.pkg-card:hover{border-color:var(--or);}
+.pkg-card.selected{border-color:var(--or);background:var(--or-light);}
+.pkg-card .pkg-icon{font-size:22px;margin-bottom:4px;}
+.pkg-card .pkg-name{font-size:12px;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:0.5px;}
+.pkg-card .pkg-price{font-size:13px;font-weight:900;color:#8a9800;margin-top:4px;}
+.success-card{background:var(--green-light);border:1.5px solid var(--green);border-radius:12px;padding:20px;text-align:center;display:none;}
+.success-card.show{display:block;}
+</style>
+</head>
+<body>
+
+<!-- BRANCH SWITCHER always visible at very top -->
+<div style="background:#000;padding:8px 14px;display:flex;justify-content:center;align-items:center;gap:10px;position:sticky;top:0;z-index:110;">
+  <span style="font-size:11px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;">Branch:</span>
+  <button onclick="setBranch('fourways')" id="btn-fw" style="padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:var(--or);color:#111;" >Fourways Mall</button>
+  <button onclick="setBranch('rosebank')" id="btn-rb" style="padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:#222;color:#888;">Rosebank</button>
+</div>
+
+<div class="nav">
+  <div class="nav-title" id="nav-title">1-UP <span>Urban Playground</span></div>
+  <div class="nav-tabs">
+    <div class="tab active" onclick="showTab('dashboard')">📊 Home</div>
+    <div class="tab" onclick="showTab('calendar')">📅 Calendar</div>
+    <div class="tab" onclick="showTab('bookings')">📋 Bookings</div>
+    <div class="tab" onclick="showTab('activities')">🎮 Activities</div>
+    <div class="tab" onclick="showTab('venue-hire')">🏟️ Venue Hire</div>
+    <div class="tab" onclick="showTab('stock')">🍬 Stock</div>
+    <div class="tab" onclick="showTab('customer-form')">📩 Customer Form</div>
+    <div class="tab" onclick="showTab('setup')">⚙️ Setup</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="s-confirmed" style="color:var(--green);">0</div><div class="stat-label">✅ Confirmed</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-pending" style="color:var(--yellow);">0</div><div class="stat-label">⏳ Pending</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-new" style="color:var(--or-dark);">0</div><div class="stat-label">🆕 New (Form)</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-weekend">0</div><div class="stat-label">🗓️ This Weekend</div></div>
+  </div>
+  <div class="card" id="branch-info-card" style="background:#111;color:#fff;">
+    <div style="font-weight:900;font-size:14px;color:var(--or);margin-bottom:6px;" id="branch-info-title">📍 Fourways Mall</div>
+    <div style="font-size:12px;color:#aaa;line-height:1.8;" id="branch-info-body">Shop CF02, 11 Ruby Close, Fourways · Hours: Weekdays 10am–7pm · Weekends 10am–9pm</div>
+  </div>
+  <div class="card">
+    <div style="font-weight:900;font-size:15px;margin-bottom:10px;">📅 Upcoming Bookings</div>
+    <div id="upcoming-list"><div style="color:var(--gray);font-size:13px;">No upcoming bookings</div></div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div class="page" id="page-calendar">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">‹</button>
+      <div style="font-weight:900;font-size:16px;" id="cal-title"></div>
+      <button class="btn btn-ghost btn-sm" onclick="calNav(1)">›</button>
+    </div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><span class="cal-dot"></span> Party booking</div>
+      <div class="cal-legend-item"><span class="cal-dot-venue"></span> Venue hire (blocked)</div>
+      <div class="cal-legend-item"><span class="cal-dot-stock"></span> Low stock warning</div>
+    </div>
+    <div class="cal-grid" id="cal-headers"></div>
+    <div class="cal-grid" id="cal-body" style="margin-top:4px;"></div>
+  </div>
+</div>
+
+<!-- BOOKINGS -->
+<div class="page" id="page-bookings">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="font-weight:900;font-size:17px;">📋 Bookings</div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-green btn-sm" onclick="openExport()">📥 Export</button>
+      <button class="btn btn-o btn-sm" onclick="openBook()">+ New</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+    <button class="btn btn-sm" id="filter-all" onclick="setFilter('all')" style="background:#111;color:var(--or);">All</button>
+    <button class="btn btn-sm btn-ghost" id="filter-new" onclick="setFilter('new')">🆕 New</button>
+    <button class="btn btn-sm btn-ghost" id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
+    <button class="btn btn-sm btn-ghost" id="filter-confirmed" onclick="setFilter('confirmed')">✅ Confirmed</button>
+    <button class="btn btn-sm btn-ghost" id="filter-fourways" onclick="setFilter('fourways')">Fourways</button>
+    <button class="btn btn-sm btn-ghost" id="filter-rosebank" onclick="setFilter('rosebank')">Rosebank</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search name, package, date, phone..." oninput="renderBookings(this.value)">
+  </div>
+  <div id="book-list"></div>
+</div>
+
+<!-- ACTIVITIES / EQUIPMENT -->
+<div class="page" id="page-activities">
+  <div style="font-weight:900;font-size:17px;margin-bottom:12px;">🎮 Activities & Packages</div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;color:var(--or-dark);">🛹 Skatepark</div>
+    <div id="skate-list"></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;color:var(--purple);">🎮 Esports & Gaming</div>
+    <div id="esports-list"></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;color:var(--teal);">⚽ Street Soccer</div>
+    <div id="soccer-list"></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;color:var(--red);">💃 Dance Arena</div>
+    <div id="dance-list"></div>
+  </div>
+</div>
+
+<!-- VENUE HIRE -->
+<div class="page" id="page-venue-hire">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="font-weight:900;font-size:17px;">🏟️ Venue Hire</div>
+    <button class="btn btn-o btn-sm" onclick="openVenue()">+ New Hire</button>
+  </div>
+  <div class="card" style="background:#111;color:#fff;margin-bottom:12px;">
+    <div style="font-size:13px;color:#aaa;line-height:1.8;">Full-day or multi-day venue hire for corporate events, competitions, activations, filming, school events and more. The entire 1-Up space can be booked exclusively.</div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+    <button class="btn btn-sm" id="vfilter-all" onclick="setVFilter('all')" style="background:#111;color:var(--or);">All</button>
+    <button class="btn btn-sm btn-ghost" id="vfilter-upcoming" onclick="setVFilter('upcoming')">Upcoming</button>
+    <button class="btn btn-sm btn-ghost" id="vfilter-confirmed" onclick="setVFilter('confirmed')">✅ Confirmed</button>
+    <button class="btn btn-sm btn-ghost" id="vfilter-pending" onclick="setVFilter('pending')">⏳ Pending</button>
+  </div>
+  <div id="venue-list"></div>
+</div>
+
+<!-- STOCK TAKE -->
+<div class="page" id="page-stock">
+  <!-- Stats -->
+  <div class="stats-grid" style="margin-bottom:12px;">
+    <div class="stat-card"><div class="stat-num" id="sk-total" style="font-size:20px;">0</div><div class="stat-label">Items</div></div>
+    <div class="stat-card"><div class="stat-num" id="sk-ok" style="font-size:20px;color:var(--green);">0</div><div class="stat-label">✅ OK</div></div>
+    <div class="stat-card"><div class="stat-num" id="sk-low" style="font-size:20px;color:var(--yellow);">0</div><div class="stat-label">⚠️ Low</div></div>
+    <div class="stat-card"><div class="stat-num" id="sk-out" style="font-size:20px;color:var(--red);">0</div><div class="stat-label">🔴 Out</div></div>
+  </div>
+
+  <!-- Search & Category Filter -->
+  <div class="card" style="padding:10px 12px;margin-bottom:10px;">
+    <div class="search-wrap" style="margin-bottom:8px;">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="stock-search" placeholder="Search items..." oninput="renderStockTable()">
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn btn-sm" id="scat-all" onclick="setStockCat('all')" style="background:#111;color:var(--or);">All</button>
+      <button class="btn btn-sm btn-ghost" id="scat-machines" onclick="setStockCat('machines')">☕ Machines</button>
+      <button class="btn btn-sm btn-ghost" id="scat-drinks" onclick="setStockCat('drinks')">🥤 Drinks</button>
+      <button class="btn btn-sm btn-ghost" id="scat-snacks" onclick="setStockCat('snacks')">🍿 Snacks</button>
+      <button class="btn btn-sm btn-ghost" id="scat-sweets" onclick="setStockCat('sweets')">🍭 Sweets</button>
+      <button class="btn btn-sm btn-ghost" id="scat-low" onclick="setStockCat('low')">⚠️ Low/Out</button>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <button class="btn btn-dark btn-sm" onclick="genOrderSheet()">🗒 Generate Order Sheet</button>
+    <button class="btn btn-ghost btn-sm" onclick="genStockTakeSheet()">📋 Stock Take Sheet</button>
+  </div>
+
+  <!-- Stock Item Cards -->
+  <div id="stock-tbody"></div>
+
+  <!-- Add Custom Item -->
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;">➕ Add New Item</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="form-group" style="margin:0;"><label>Item Name</label><input id="new-item-name" placeholder="e.g. Monster Energy 500ml"></div>
+      <div class="form-group" style="margin:0;"><label>Category</label>
+        <select id="new-item-cat">
+          <option value="machines">☕ Machines</option>
+          <option value="energy">⚡ Energy Drinks</option>
+          <option value="fizzy">🫧 Fizzy Drinks</option>
+          <option value="slush">🧊 Slush</option>
+          <option value="coffee">☕ Coffee</option>
+          <option value="boba">🧋 Boba</option>
+          <option value="water">💧 Water</option>
+          <option value="snacks">🍿 Snacks</option>
+          <option value="sweets">🍭 Sweets</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="form-group" style="margin:0;"><label>Unit</label><input id="new-item-unit" placeholder="e.g. can, bag, kg"></div>
+      <div class="form-group" style="margin:0;"><label>Reorder Pt</label><input id="new-item-min" type="number" placeholder="e.g. 12" min="0"></div>
+      <div class="form-group" style="margin:0;"><label>Order Qty</label><input id="new-item-cost" type="number" placeholder="e.g. 24" min="0"></div>
+    </div>
+    <button class="btn btn-o" style="width:100%;" onclick="addStockItem()">➕ Add Item</button>
+  </div>
+</div>
+
+<!-- VENUE HIRE MODAL -->
+<div class="modal-bg" id="modal-venue">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="modal-title" id="modal-venue-title">New Venue Hire</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeVenue()">✕</button>
+    </div>
+    <div class="smart-area">
+      <label>🧠 Smart Fill — paste enquiry message</label>
+      <textarea id="venue-smart" placeholder="Paste enquiry message here..." rows="3" style="margin-top:6px;"></textarea>
+      <button class="btn btn-o btn-sm" style="width:100%;margin-top:6px;" onclick="venueSmartFill()">✨ Auto Fill</button>
+    </div>
+    <div class="form-group">
+      <label>Branch *</label>
+      <select id="vf-branch">
+        <option value="fourways">Fourways Mall</option>
+        <option value="rosebank">Rosebank</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Organiser / Company Name *</label><input id="vf-name" placeholder="e.g. Nike SA / Thandeka Dube"></div>
+    <div class="form-group"><label>Contact Person</label><input id="vf-contact" placeholder="e.g. Sipho Khumalo"></div>
+    <div class="form-group"><label>WhatsApp / Phone *</label><input id="vf-phone" type="tel" placeholder="e.g. 082 555 1234"></div>
+    <div class="form-group"><label>Email</label><input id="vf-email" type="email" placeholder="e.g. events@company.co.za"></div>
+    <div class="form-group">
+      <label>Event Type</label>
+      <select id="vf-etype">
+        <option value="">Select event type...</option>
+        <option>Corporate Event</option>
+        <option>Brand Activation</option>
+        <option>School / Sports Day</option>
+        <option>Competition / Tournament</option>
+        <option>Filming / Shoot</option>
+        <option>Concert / Performance</option>
+        <option>Community Event</option>
+        <option>Private Function</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Expected Attendance</label><input id="vf-attendance" type="number" placeholder="e.g. 200" min="1"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group"><label>Start Date *</label><input id="vf-date" type="date"></div>
+      <div class="form-group"><label>End Date</label><input id="vf-edate" type="date"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group"><label>Start Time</label><input id="vf-stime" type="time" placeholder="e.g. 08:00"></div>
+      <div class="form-group"><label>End Time</label><input id="vf-etime" type="time" placeholder="e.g. 20:00"></div>
+    </div>
+    <div class="form-group">
+      <label>Areas Required</label>
+      <div class="extras-grid" id="vf-areas-grid">
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🛹 Skatepark</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🎮 Esports Zone</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">⚽ Soccer Cage</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">💃 Dance Arena</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">☕ Café Area</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🛍️ Retail Area</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🌇 Rooftop (Phase 2)</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🏟️ Entire Venue</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Services Needed</label>
+      <div class="extras-grid" id="vf-services-grid">
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🔊 PA / Sound System</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">💡 Lighting Rig</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🍕 Catering</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">☕ Coffee Bar</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">📸 Photo / Video</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🎤 MC / Host</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🛡️ Security</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">🎨 Branding / Décor</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="vf-status">
+        <option value="enquiry">📨 Enquiry</option>
+        <option value="pending">⏳ Pending / Quote Sent</option>
+        <option value="confirmed">✅ Confirmed</option>
+        <option value="done">✔️ Done</option>
+        <option value="cancelled">❌ Cancelled</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Agreed Price (R)</label><input id="vf-price" type="number" placeholder="e.g. 25000" min="0"></div>
+    <div class="form-group"><label>Deposit Paid (R)</label><input id="vf-deposit" type="number" placeholder="e.g. 10000" min="0"></div>
+    <div class="form-group"><label>Notes / Requirements</label><textarea id="vf-notes" placeholder="Layout needs, load-in times, special requirements, parking, etc..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-o" style="flex:1;" onclick="saveVenue()">💾 Save</button>
+      <button class="btn btn-ghost" onclick="closeVenue()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER FORM TAB -->
+<div class="page" id="page-customer-form">
+  <div class="card" style="background:#111;color:#fff;">
+    <div style="font-weight:900;font-size:15px;margin-bottom:6px;color:var(--or);">🏟️ Venue Hire Booking Form</div>
+    <p style="font-size:13px;color:#aaa;line-height:1.6;margin-bottom:14px;">Send customers the link below. When they submit, their enquiry appears instantly in your <strong style="color:#fff;">Venue Hire</strong> tab.</p>
+    <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--or);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Customer Form Link</div>
+      <div style="font-size:12px;font-weight:600;color:#ccc;word-break:break-all;" id="form-link-display">1up-venue-booking.html (same folder as this app)</div>
+    </div>
+    <button class="btn btn-o" style="width:100%;margin-bottom:8px;" onclick="window.open('1up-venue-booking.html','_blank')">👁️ Open / Preview Form</button>
+  </div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:4px;">📋 Recent Venue Hire Enquiries</div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Submitted via the customer form — also visible in Venue Hire tab.</p>
+    <div id="form-submissions-list"><div style="color:var(--gray);font-size:13px;">No submissions yet.</div></div>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div class="page" id="page-setup">
+  <div style="font-weight:900;font-size:17px;margin-bottom:12px;">⚙️ Setup</div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:8px;">📥 Export Info</div>
+    <p style="font-size:13px;color:var(--gray);line-height:1.6;">Tap <strong>📥 Export</strong> in Bookings to download a CSV of all bookings.</p>
+  </div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;">📍 Branch Details</div>
+    <div style="font-size:13px;color:var(--gray);line-height:2;">
+      <strong style="color:var(--dark);">Fourways Mall</strong><br>
+      📍 Shop CF02, 11 Ruby Close, Fourways, Sandton<br>
+      🕐 Weekdays: 10am–7pm · Weekends: 10am–9pm<br>
+      📞 (contact Fourways branch)<br><br>
+      <strong style="color:var(--dark);">Rosebank</strong><br>
+      📍 Rosebank Mall, Rosebank, Johannesburg<br>
+      🕐 Mall trading hours apply<br>
+      📞 (contact Rosebank branch)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:8px;color:var(--red);">⚠️ Reset App Data</div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Deletes ALL bookings for current branch. Export first!</p>
+    <button class="btn btn-red btn-sm" onclick="resetAll()">Reset Branch Data</button>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-bg" id="modal-export">
+  <div class="modal" style="max-height:60vh;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="modal-title">📥 Export Bookings</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeExport()">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:14px;">Choose a date range. Leave blank to export all.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div class="form-group"><label>From Date</label><input id="export-from" type="date"></div>
+      <div class="form-group"><label>To Date</label><input id="export-to" type="date"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-green" style="flex:1;" onclick="exportCSV()">📥 Download CSV</button>
+      <button class="btn btn-ghost" onclick="closeExport()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div class="modal-bg" id="modal-invoice">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="modal-title">🧾 Invoice / Quote</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeInvoice()">✕</button>
+    </div>
+    <div id="invoice-inputs">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group"><label>Invoice Number</label><input id="inv-num" placeholder="e.g. 1UP-001"></div>
+        <div class="form-group"><label>Invoice Date</label><input id="inv-date" type="date"></div>
+      </div>
+      <div class="form-group"><label>Total Amount (R)</label><input id="inv-total" type="number" placeholder="e.g. 2200"></div>
+      <div class="form-group"><label>Deposit Paid (R)</label><input id="inv-deposit" type="number" placeholder="e.g. 500"></div>
+      <div class="form-group"><label>VAT</label>
+        <select id="inv-vat">
+          <option value="none">No VAT</option>
+          <option value="included">VAT included in total</option>
+          <option value="excluded">Add 15% VAT on top</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select Notes to Include</label>
+        <div style="background:var(--gray-light);border-radius:10px;padding:12px;margin-top:6px;">
+          <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💳 Payment</div>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="deposit_50pct" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">50% deposit required to confirm booking</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="payment_eft" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">Balance payable via EFT 48 hours before the event or cash on the day</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="pop" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">Send proof of payment to confirm your booking slot</label>
+          <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 8px;">🎉 Party Rules</div>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="arrive_early" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">Please arrive 15 minutes before your session start time</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="waiver" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">All participants must sign a waiver before the session begins</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="safety_gear" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">Safety gear is compulsory for skate sessions (helmets & pads provided)</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="no_outside_food" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">No outside food or drinks (birthday cakes excluded with prior arrangement)</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="supervision" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">Adult supervision required for children under 10 at all times</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;text-transform:none;font-size:13px;color:var(--dark);letter-spacing:0;font-weight:400;cursor:pointer;">
+            <input type="checkbox" class="inv-note-check" value="dress_code" style="width:18px;height:18px;accent-color:var(--or-dark);flex-shrink:0;">Closed-toe shoes required for skate & soccer sessions</label>
+        </div>
+      </div>
+      <div class="form-group"><label>Additional Notes (optional)</label>
+        <textarea id="inv-notes" rows="2" placeholder="Add anything extra..."></textarea>
+      </div>
+      <button class="btn btn-o" style="width:100%;margin-bottom:10px;" onclick="generateInvoice()">🧾 Generate Invoice</button>
+    </div>
+    <div id="invoice-preview" style="display:none;">
+      <div style="background:#fff;border-radius:var(--radius);padding:20px;font-family:'Georgia',serif;" id="invoice-content"></div>
+      <div style="margin-top:14px;padding:12px;background:var(--gray-light);border-radius:10px;">
+        <p style="font-size:13px;color:var(--gray);text-align:center;margin-bottom:10px;">📸 Screenshot to save or share with customer</p>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-o btn-sm" style="flex:1;" onclick="downloadInvoice()">📥 Download Invoice</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="backToInputs()">← Edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-bg" id="modal-book">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="modal-title" id="modal-book-title">New Booking</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeBook()">✕</button>
+    </div>
+    <div class="smart-area">
+      <label>🧠 Smart Fill — paste WhatsApp message</label>
+      <textarea id="smart-paste" placeholder="Paste WhatsApp or form message here..." rows="3" style="margin-top:6px;"></textarea>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button class="btn btn-o btn-sm" style="flex:1;" onclick="smartFill()">✨ Auto Fill</button>
+        <button class="btn btn-ghost btn-sm" id="voice-btn" onclick="toggleVoice()" style="flex:1;">🎤 Speak</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Branch *</label>
+      <select id="f-branch">
+        <option value="fourways">Fourways Mall</option>
+        <option value="rosebank">Rosebank</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Customer Name *</label><input id="f-name" placeholder="e.g. Thandeka Mokoena"></div>
+    <div class="form-group"><label>WhatsApp Number</label><input id="f-phone" type="tel" placeholder="e.g. 082 555 1234"></div>
+    <div class="form-group"><label>Email</label><input id="f-email" type="email" placeholder="e.g. customer@email.com"></div>
+    <div class="form-group"><label>Birthday Child's Name</label><input id="f-kidname" placeholder="e.g. Kai"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div class="form-group"><label>Age Turning</label><input id="f-age" type="number" min="1" max="25" placeholder="e.g. 10"></div>
+      <div class="form-group"><label>No. of Kids</label><input id="f-kids" type="number" min="0" placeholder="e.g. 12" oninput="updateGuestsTotal('f')"></div>
+      <div class="form-group"><label>No. of Adults</label><input id="f-adults" type="number" min="0" placeholder="e.g. 5" oninput="updateGuestsTotal('f')"></div>
+    </div>
+    <div style="background:var(--gray-light);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--gray);">
+      Total guests: <strong id="f-guests-total" style="color:var(--dark);">0</strong>
+    </div>
+    <div class="form-group">
+      <label>🍔 Kids Meal Choice</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;">
+        <div style="border:1.5px solid var(--gray-mid);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;background:#fff;transition:all 0.15s;" id="meal-mini-burger" onclick="selectMeal('f','mini-burger',this)">
+          <div style="font-size:18px;margin-bottom:3px;">🍔</div>
+          <div style="font-size:11px;font-weight:700;color:var(--dark);">Mini Burger</div>
+          <div style="font-size:10px;color:var(--gray);">& Chips</div>
+        </div>
+        <div style="border:1.5px solid var(--gray-mid);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;background:#fff;transition:all 0.15s;" id="meal-hotdog" onclick="selectMeal('f','hotdog',this)">
+          <div style="font-size:18px;margin-bottom:3px;">🌭</div>
+          <div style="font-size:11px;font-weight:700;color:var(--dark);">Hotdog</div>
+          <div style="font-size:10px;color:var(--gray);">& Chips</div>
+        </div>
+        <div style="border:1.5px solid var(--gray-mid);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;background:#fff;transition:all 0.15s;" id="meal-nuggets" onclick="selectMeal('f','nuggets',this)">
+          <div style="font-size:18px;margin-bottom:3px;">🍗</div>
+          <div style="font-size:11px;font-weight:700;color:var(--dark);">Nuggets</div>
+          <div style="font-size:10px;color:var(--gray);">& Chips</div>
+        </div>
+      </div>
+      <input type="hidden" id="f-kidsmeal" value="">
+    </div>
+    <div class="form-group">
+      <label>Party Package *</label>
+      <select id="f-package">
+        <option value="">Select package...</option>
+        <option value="Skate Party">🛹 Skate Party — From R1,800</option>
+        <option value="Esports Party">🎮 Esports Party — From R2,200</option>
+        <option value="Street Soccer Party">⚽ Street Soccer Party — From R1,600</option>
+        <option value="Dance Party">💃 Dance Party — From R1,800</option>
+        <option value="Combo Package (Any 2)">⚡ Combo Package (Any 2) — From R3,200</option>
+        <option value="Full Venue Party">🏟️ Full Venue Party — From R5,500</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group"><label>Date</label><input id="f-date" type="date"></div>
+      <div class="form-group"><label>Time Slot</label>
+        <select id="f-timeslot">
+          <option value="">Select time...</option>
+          <option>10:00 – 12:00</option>
+          <option>12:00 – 14:00</option>
+          <option>14:00 – 16:00</option>
+          <option>16:00 – 18:00</option>
+          <option>18:00 – 20:00</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Status</label>
+      <select id="f-status">
+        <option value="new">🆕 New (Form Submission)</option>
+        <option value="pending">⏳ Pending</option>
+        <option value="confirmed">✅ Confirmed</option>
+        <option value="done">✔️ Done</option>
+        <option value="cancelled">❌ Cancelled</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Add-ons / Extras</label>
+      <div class="extras-grid" id="extras-grid"></div>
+    </div>
+    <div class="form-group"><label>Catering</label>
+      <select id="f-catering">
+        <option value="None">No catering</option>
+        <option>Pizza &amp; slush (kids)</option>
+        <option>Boba drinks &amp; snacks</option>
+        <option>Full kids' party buffet</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="f-notes" placeholder="Allergy info, theme ideas, special requests..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-o" style="flex:1;" onclick="saveBook()">💾 Save Booking</button>
+      <button class="btn btn-ghost" onclick="closeBook()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DAY MODAL -->
+<div class="modal-bg" id="modal-day">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="modal-title" id="modal-day-title">Bookings</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeDay()">✕</button>
+    </div>
+    <div id="modal-day-content"></div>
+    <button class="btn btn-o" id="day-new-btn" style="width:100%;margin-top:12px;" onclick="openBookFromDay()">+ New Booking</button>
+  </div>
+</div>
+
+<!-- CUSTOMER BOOKING FORM PAGE (shown as separate embedded page) -->
+<div class="modal-bg" id="modal-cust-form">
+  <div class="modal" style="border-radius:18px 18px 0 0;padding:0;">
+    <div class="form-hero">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div></div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-cust-form').classList.remove('open')" style="background:#333;color:#fff;">✕ Close</button>
+      </div>
+      <div class="form-logo">1-UP <span>URBAN</span></div>
+      <div class="form-tagline">FOURWAYS MALL & ROSEBANK · BOOK YOUR PARTY</div>
+    </div>
+    <div class="form-body">
+      <div id="cust-success" class="success-card">
+        <div style="font-size:28px;margin-bottom:8px;">🎉</div>
+        <div style="font-weight:900;font-size:18px;color:var(--green);margin-bottom:6px;">Booking Request Sent!</div>
+        <div style="font-size:13px;color:var(--gray);">The 1-Up team will confirm your booking within 24 hours via WhatsApp.</div>
+      </div>
+      <div id="cust-form-body">
+        <div class="form-group">
+          <label>Branch *</label>
+          <select id="cf-branch">
+            <option value="fourways">Fourways Mall</option>
+            <option value="rosebank">Rosebank</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group"><label>First Name *</label><input id="cf-fname" placeholder="e.g. Thandeka"></div>
+          <div class="form-group"><label>Last Name *</label><input id="cf-lname" placeholder="e.g. Mokoena"></div>
+        </div>
+        <div class="form-group"><label>WhatsApp Number *</label><input id="cf-phone" type="tel" placeholder="e.g. 082 555 1234"></div>
+        <div class="form-group"><label>Email Address</label><input id="cf-email" type="email" placeholder="e.g. you@email.com"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="form-group"><label>Child's Name</label><input id="cf-kidname" placeholder="e.g. Kai"></div>
+          <div class="form-group"><label>Age Turning</label><input id="cf-age" type="number" min="1" max="25" placeholder="e.g. 10"></div>
+          <div class="form-group"><label>No. of Kids</label><input id="cf-kids" type="number" min="0" placeholder="e.g. 12" oninput="updateGuestsTotal('cf')"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group"><label>No. of Adults</label><input id="cf-adults" type="number" min="0" placeholder="e.g. 5" oninput="updateGuestsTotal('cf')"></div>
+          <div style="display:flex;align-items:flex-end;padding-bottom:12px;">
+            <div style="font-size:12px;color:var(--gray);">Total: <strong id="cf-guests-total" style="color:var(--dark);">0</strong> guests</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>🍔 Kids Meal Choice</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;">
+            <div style="border:2px solid var(--gray-mid);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;background:#fff;transition:all 0.15s;" id="cfmeal-mini-burger" onclick="selectMeal('cf','mini-burger',this)">
+              <div style="font-size:22px;margin-bottom:4px;">🍔</div>
+              <div style="font-size:12px;font-weight:700;color:var(--dark);">Mini Burger</div>
+              <div style="font-size:11px;color:var(--gray);">& Chips</div>
+            </div>
+            <div style="border:2px solid var(--gray-mid);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;background:#fff;transition:all 0.15s;" id="cfmeal-hotdog" onclick="selectMeal('cf','hotdog',this)">
+              <div style="font-size:22px;margin-bottom:4px;">🌭</div>
+              <div style="font-size:12px;font-weight:700;color:var(--dark);">Hotdog</div>
+              <div style="font-size:11px;color:var(--gray);">& Chips</div>
+            </div>
+            <div style="border:2px solid var(--gray-mid);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;background:#fff;transition:all 0.15s;" id="cfmeal-nuggets" onclick="selectMeal('cf','nuggets',this)">
+              <div style="font-size:22px;margin-bottom:4px;">🍗</div>
+              <div style="font-size:12px;font-weight:700;color:var(--dark);">Nuggets</div>
+              <div style="font-size:11px;color:var(--gray);">& Chips</div>
+            </div>
+          </div>
+          <input type="hidden" id="cf-kidsmeal" value="">
+        </div>
+        <div class="form-group">
+          <label>Choose Your Party Package *</label>
+          <div class="pkg-grid" id="cf-pkg-grid">
+            <div class="pkg-card selected" data-pkg="Skate Party" onclick="selectPkg(this)"><div class="pkg-icon">🛹</div><div class="pkg-name">Skate Party</div><div class="pkg-price">From R1,800</div></div>
+            <div class="pkg-card" data-pkg="Esports Party" onclick="selectPkg(this)"><div class="pkg-icon">🎮</div><div class="pkg-name">Esports Party</div><div class="pkg-price">From R2,200</div></div>
+            <div class="pkg-card" data-pkg="Street Soccer Party" onclick="selectPkg(this)"><div class="pkg-icon">⚽</div><div class="pkg-name">Street Soccer</div><div class="pkg-price">From R1,600</div></div>
+            <div class="pkg-card" data-pkg="Combo Package (Any 2)" onclick="selectPkg(this)"><div class="pkg-icon">⚡</div><div class="pkg-name">Combo (Any 2)</div><div class="pkg-price">From R3,200</div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group"><label>Preferred Date *</label><input id="cf-date" type="date"></div>
+          <div class="form-group"><label>Time Slot *</label>
+            <select id="cf-timeslot">
+              <option value="">Select time...</option>
+              <option>10:00 – 12:00</option>
+              <option>12:00 – 14:00</option>
+              <option>14:00 – 16:00</option>
+              <option>16:00 – 18:00</option>
+              <option>18:00 – 20:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cake & Décor</label>
+          <select id="cf-cake">
+            <option value="None">No thanks</option>
+            <option>Themed cake (by 1-Up)</option>
+            <option>Décor package only</option>
+            <option>Cake + décor bundle</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Catering</label>
+          <select id="cf-catering">
+            <option value="None">No catering</option>
+            <option>Pizza &amp; slush (kids)</option>
+            <option>Boba drinks &amp; snacks</option>
+            <option>Full kids' party buffet</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Special Requests / Notes</label><textarea id="cf-notes" placeholder="Allergy info, theme ideas, accessibility needs..."></textarea></div>
+        <button class="btn btn-o" style="width:100%;padding:14px;font-size:15px;" onclick="submitCustomerForm()">🎉 Send Booking Request</button>
+        <p style="font-size:11px;color:var(--gray);text-align:center;margin-top:10px;line-height:1.6;">1-Up Urban Playground · Fourways Mall & Rosebank · Ages 5+ · You'll be contacted within 24 hours to confirm.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA DEFINITIONS =====
+const PACKAGES_DEF=[
+  {id:"skate",    name:"Skate Party",             icon:"🛹", from:1800, desc:"Private skatepark + skate coaching for your crew"},
+  {id:"esports",  name:"Esports Party",            icon:"🎮", from:2200, desc:"Gaming stations, tournaments & prizes"},
+  {id:"soccer",   name:"Street Soccer Party",      icon:"⚽", from:1600, desc:"Cage soccer battles + UGS coaching"},
+  {id:"dance",    name:"Dance Party",              icon:"💃", from:1800, desc:"Dance arena session + choreography intro"},
+  {id:"combo",    name:"Combo Package (Any 2)",    icon:"⚡", from:3200, desc:"Mix any 2 activities — the ultimate party"},
+  {id:"fullvenue",name:"Full Venue Party",         icon:"🏟️", from:5500, desc:"Book the entire 1-Up space exclusively"},
+];
+const ACTIVITIES_DEF={
+  skate:[
+    {name:"Skate Session (Public)",    detail:"Per person, open skate"},
+    {name:"Skate Lessons",             detail:"Group or private lessons available"},
+    {name:"Skate Party (Private)",     detail:"Exclusive skatepark hire, 2hr session"},
+    {name:"BMX Session",               detail:"Open BMX park access"},
+  ],
+  esports:[
+    {name:"Esports Session (Public)",  detail:"Per station, per hour"},
+    {name:"Esports Party (Private)",   detail:"Dedicated gaming stations + tournament setup"},
+    {name:"Coding Intro Workshop",     detail:"You Can Code programme"},
+  ],
+  soccer:[
+    {name:"Street Soccer (Public)",    detail:"Open cage session"},
+    {name:"Soccer Party (Private)",    detail:"Exclusive cage hire + coaching"},
+    {name:"Soccer League",             detail:"UGS Social Street Soccer Leagues"},
+  ],
+  dance:[
+    {name:"Dance Session (Public)",    detail:"Open dance arena"},
+    {name:"Dance Party (Private)",     detail:"Private studio hire + choreography"},
+    {name:"Dance Workshop",            detail:"Group workshop / events"},
+  ]
+};
+const EXTRAS_LIST=["🎂 Birthday Cake","🎈 Balloon Décor","📸 Photo Backdrop","🍕 Pizza & Slush","🧋 Boba Drinks","🎵 DJ / Sound System","🎨 Face Painting","🏆 Trophy / Medal","🎁 Goodie Bags"];
+
+// ===== STATE =====
+let bookings=[],editId=null,selectedDay=null,activeBranch="fourways";
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+let recognition=null,isListening=false;
+let invoiceBookingId=null,invCounter=1;
+let bookingFilter="all";
+
+// ===== STORAGE =====
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+function saveAll(){lsSet("1up_bk_"+activeBranch,bookings);lsSet("1up_inv",invCounter);}
+function loadAll(){
+  bookings=lsGet("1up_bk_"+activeBranch,[]);
+  invCounter=lsGet("1up_inv",1);
+}
+
+// ===== UTILS =====
+function pad(n){return String(n).padStart(2,"0");}
+function today(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function formatDate(s){if(!s)return"";const d=new Date(s+"T00:00:00");return d.toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"});}
+function fmtR(n){return"R "+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
+
+// ===== BRANCH =====
+function setBranch(b){
+  activeBranch=b;
+  loadAll();loadVenue();loadStock();
+  document.getElementById("btn-fw").style.background=b==="fourways"?"var(--or)":"#222";
+  document.getElementById("btn-fw").style.color=b==="fourways"?"#111":"#888";
+  document.getElementById("btn-rb").style.background=b==="rosebank"?"#00E5FF":"#222";
+  document.getElementById("btn-rb").style.color=b==="rosebank"?"#111":"#888";
+  document.getElementById("nav-title").innerHTML='1-UP <span>'+( b==="fourways"?"Fourways":"Rosebank")+'</span>';
+  document.getElementById("branch-info-title").textContent=b==="fourways"?"📍 Fourways Mall":"📍 Rosebank";
+  document.getElementById("branch-info-body").textContent=b==="fourways"
+    ?"Shop CF02, 11 Ruby Close, Fourways · Weekdays 10am–7pm · Weekends 10am–9pm"
+    :"Rosebank Mall, Rosebank, Johannesburg · Mall trading hours apply";
+  renderDashboard();renderCalendar();renderBookings();
+}
+
+// ===== TAB =====
+function showTab(t){
+  if(t==="cust-booking"){document.getElementById("modal-cust-form").classList.add("open");return;}
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(tb=>tb.classList.remove("active"));
+  const tabs=["dashboard","calendar","bookings","activities","venue-hire","stock","customer-form","setup"];
+  const idx=tabs.indexOf(t);
+  if(idx>=0){document.querySelectorAll(".tab")[idx].classList.add("active");}
+  document.getElementById("page-"+t).classList.add("active");
+  if(t==="dashboard")renderDashboard();
+  if(t==="calendar")renderCalendar();
+  if(t==="bookings")renderBookings();
+  if(t==="activities")renderActivities();
+  if(t==="venue-hire"){loadVenue();renderVenueList();}
+  if(t==="stock"){loadStock();renderStockTable();}
+  if(t==="customer-form")renderFormSubmissions();
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  const td=today();
+  const br=bookings;
+  document.getElementById("s-confirmed").textContent=br.filter(b=>b.status==="confirmed").length;
+  document.getElementById("s-pending").textContent=br.filter(b=>b.status==="pending").length;
+  document.getElementById("s-new").textContent=br.filter(b=>b.status==="new").length;
+  const day=new Date().getDay();
+  const toSat=(6-day+7)%7;
+  const sat=new Date();sat.setDate(sat.getDate()+toSat);
+  const sun=new Date(sat);sun.setDate(sat.getDate()+1);
+  const satS=sat.toISOString().slice(0,10);const sunS=sun.toISOString().slice(0,10);
+  document.getElementById("s-weekend").textContent=br.filter(b=>b.date===satS||b.date===sunS).length;
+  const upcoming=br.filter(b=>b.date&&b.date>=td&&b.status!=="cancelled").sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+  const ul=document.getElementById("upcoming-list");
+  if(!upcoming.length){ul.innerHTML='<div style="color:var(--gray);font-size:13px;">No upcoming bookings</div>';return;}
+  ul.innerHTML=upcoming.map(b=>{
+    const d=new Date(b.date+"T00:00:00");
+    const statusBadge=b.status==="new"?'<span class="badge badge-new new-badge-pulse">NEW</span>':`<span class="badge badge-${b.status==="confirmed"?"confirmed":b.status==="done"?"done":"pending"}">${b.status}</span>`;
+    return`<div class="upcoming-item">
+      <div class="upcoming-date"><div class="upcoming-date-day">${d.getDate()}</div><div class="upcoming-date-mo">${d.toLocaleString("en",{month:"short"}).toUpperCase()}</div></div>
+      <div style="flex:1;"><div style="font-weight:700;font-size:13px;">${b.name||"?"}</div>
+      <div style="font-size:12px;color:var(--gray);">${b.package||"No package"} · ${b.timeslot||""}</div>
+      <div style="font-size:11px;color:var(--gray);">${b.kidname?b.kidname+" turns "+b.age:""}${(b.kids||b.adults)?` · 👶${b.kids||0} 🧑${b.adults||0}`:(b.guests?` · ${b.guests} guests`:"")}${b.kidsmeal?" · "+mealLabel(b.kidsmeal):""}</div></div>
+      ${statusBadge}
+    </div>`;
+  }).join("");
+}
+
+// ===== CALENDAR =====
+function getStockWarningDates(){
+  // Returns a Set of YYYY-MM-DD strings for next 30 days where low stock exists
+  const hasLow=checkHasLowStock();
+  if(!hasLow)return new Set();
+  // Flag next weekend + next 7 days as needing restock
+  const dates=new Set();
+  const now=new Date();
+  for(let i=1;i<=14;i++){
+    const d=new Date(now);d.setDate(now.getDate()+i);
+    dates.add(d.toISOString().slice(0,10));
+  }
+  return dates;
+}
+function checkHasLowStock(){
+  if(!stockData)return false;
+  const allItems=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets];
+  return allItems.some(item=>{
+    const sc=_storeCatOf(item.cat);
+    const d=stockData[sc]?.[item.id];
+    const qty=d!=null?d.qty:item.qty;
+    const rp=d!=null?d.reorderPt:item.reorderPt;
+    return stockStatus(qty,rp)!=="ok";
+  });
+}
+function renderCalendar(){
+  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  document.getElementById("cal-title").textContent=months[calMonth]+" "+calYear;
+  document.getElementById("cal-headers").innerHTML=["M","T","W","T","F","S","S"].map(d=>`<div class="cal-day-hdr">${d}</div>`).join("");
+  const first=new Date(calYear,calMonth,1).getDay();
+  const offset=(first===0?6:first-1);
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const td=today();
+  // Build blocked venue dates for this branch
+  const venueBlocked=new Set();
+  venueBookings.filter(v=>v.status!=="cancelled"&&v.status!=="done").forEach(v=>{
+    if(!v.date)return;
+    const start=new Date(v.date+"T00:00:00");
+    const end=v.edate?new Date(v.edate+"T00:00:00"):start;
+    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+      venueBlocked.add(d.toISOString().slice(0,10));
+    }
+  });
+  const stockWarnDates=getStockWarningDates();
+  let html="";
+  for(let i=0;i<offset;i++)html+='<div class="cal-empty"></div>';
+  for(let d=1;d<=days;d++){
+    const ds=calYear+"-"+pad(calMonth+1)+"-"+pad(d);
+    const dayBooks=bookings.filter(b=>b.date===ds&&b.status!=="cancelled");
+    const isVenueBlocked=venueBlocked.has(ds);
+    const isStockWarn=stockWarnDates.has(ds)&&d<=7; // only flag first 7 days ahead
+    let classes=`cal-day${ds===td?" today":""}${dayBooks.length?" has-booking":""}${isVenueBlocked?" venue-block":""}${isStockWarn&&!isVenueBlocked?" stock-warn":""}`;
+    let dots=dayBooks.slice(0,2).map(()=>'<span class="cal-dot"></span>').join("");
+    if(isVenueBlocked)dots+='<span class="cal-dot-venue"></span>';
+    if(isStockWarn&&d<=7)dots+='<span class="cal-dot-stock"></span>';
+    html+=`<div class="${classes}" onclick="showDay('${ds}','${isVenueBlocked?'blocked':''}')">
+      <div class="cal-day-num">${d}</div>${dots}
+    </div>`;
+  }
+  document.getElementById("cal-body").innerHTML=html;
+}
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+
+function showDay(ds,flag=''){
+  selectedDay=ds;
+  const dayBooks=bookings.filter(b=>b.date===ds&&b.status!=="cancelled");
+  const dayVenue=venueBookings.filter(v=>{
+    if(v.status==="cancelled"||v.status==="done")return false;
+    if(!v.date)return false;
+    const end=v.edate||v.date;
+    return ds>=v.date&&ds<=end;
+  });
+  const d=new Date(ds+"T00:00:00");
+  document.getElementById("modal-day-title").textContent=d.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
+  let html="";
+  // Venue block banner
+  if(dayVenue.length){
+    html+=`<div style="background:#111;color:var(--or);border-radius:10px;padding:10px 14px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;margin-bottom:4px;">🏟️ VENUE HIRE — BLOCKED FOR PARTIES</div>
+      ${dayVenue.map(v=>`<div style="font-size:13px;color:#fff;">${v.name||"?"} · ${v.etype||"Event"} · ${v.stime||""}${v.etime?"–"+v.etime:""}</div>`).join("")}
+    </div>`;
+  }
+  // Stock warning banner
+  if(checkHasLowStock()){
+    const td2=today();
+    const diff=(new Date(ds+"T00:00:00")-new Date(td2+"T00:00:00"))/(1000*60*60*24);
+    if(diff>=0&&diff<=7){
+      html+=`<div style="background:var(--red-light);border:1px solid var(--red);border-radius:10px;padding:10px 14px;margin-bottom:10px;cursor:pointer;" onclick="closeDay();showTab('stock');">
+        <div style="font-size:12px;font-weight:700;color:var(--red);">⚠️ LOW STOCK — Tap to view stock take</div>
+        <div style="font-size:11px;color:var(--red);margin-top:2px;">Some items need to be restocked before this date</div>
+      </div>`;
+    }
+  }
+  // Party bookings
+  if(dayBooks.length){
+    html+=dayBooks.map(b=>`
+      <div class="book-card ${b.status==="new"?"new":b.status}">
+        <div class="book-name">${b.name||"?"}</div>
+        <div class="book-meta">🎉 ${b.package||"No package"} · ${b.timeslot||""}</div>
+        <div class="book-meta">📞 ${b.phone||"No phone"}</div>
+        ${b.kidname?`<div class="book-meta">🎂 ${b.kidname} turns ${b.age||"?"}</div>`:""}
+        ${(b.kids||b.adults)?`<div class="book-meta">👶 ${b.kids||0} kids · 🧑 ${b.adults||0} adults</div>`:""}
+        ${b.kidsmeal?`<div class="book-meta">🍽️ Kids meal: ${b.kidsmeal==="mini-burger"?"🍔 Mini Burger & Chips":b.kidsmeal==="hotdog"?"🌭 Hotdog & Chips":"🍗 Nuggets & Chips"}</div>`:""}
+        <div class="book-actions">
+          <span class="badge badge-${b.status==="confirmed"?"confirmed":b.status==="done"?"done":b.status==="new"?"new":"pending"}">${b.status}</span>
+          ${dayVenue.length?'<span style="font-size:11px;color:var(--red);font-weight:700;">⚠️ Venue conflict</span>':""}
+          <button class="btn btn-ghost btn-sm" onclick="closeDay();openBook(${b.id})">✏️ Edit</button>
+          <button class="btn btn-purple btn-sm" onclick="closeDay();openInvoice(${b.id})">🧾 Invoice</button>
+        </div>
+      </div>`).join("");
+  } else if(!dayVenue.length){
+    html+='<div style="color:var(--gray);font-size:13px;padding:10px 0;">No bookings on this day</div>';
+  }
+  document.getElementById("modal-day-content").innerHTML=html;
+  // Hide "New Booking" button if venue is blocking the whole day
+  document.getElementById("day-new-btn").style.display=dayVenue.length&&!dayBooks.length?"none":"block";
+  document.getElementById("modal-day").classList.add("open");
+}
+function closeDay(){document.getElementById("modal-day").classList.remove("open");}
+function openBookFromDay(){const ds=selectedDay;closeDay();setTimeout(()=>openBook(null,ds),50);}
+
+// ===== BOOKINGS LIST =====
+let currentFilterStr="all";
+function setFilter(f){
+  currentFilterStr=f;
+  document.querySelectorAll("[id^='filter-']").forEach(b=>{b.style.background="var(--gray-light)";b.style.color="var(--dark)";});
+  const el=document.getElementById("filter-"+f);
+  if(el){el.style.background="#111";el.style.color="var(--or)";}
+  renderBookings();
+}
+
+function renderBookings(q=""){
+  const list=document.getElementById("book-list");
+  let filtered=bookings.filter(b=>{
+    if(currentFilterStr==="new")return b.status==="new";
+    if(currentFilterStr==="pending")return b.status==="pending";
+    if(currentFilterStr==="confirmed")return b.status==="confirmed";
+    if(currentFilterStr==="fourways")return b.branch==="fourways"||!b.branch;
+    if(currentFilterStr==="rosebank")return b.branch==="rosebank";
+    return true;
+  });
+  if(q){const s=q.toLowerCase();filtered=filtered.filter(b=>
+    (b.name||"").toLowerCase().includes(s)||(b.package||"").toLowerCase().includes(s)||
+    (b.date||"").includes(s)||(b.phone||"").includes(s)||(b.kidname||"").toLowerCase().includes(s)
+  );}
+  filtered.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  if(!filtered.length){list.innerHTML='<div class="card" style="color:var(--gray);text-align:center;padding:24px;">No bookings — tap + New to add one!</div>';return;}
+  list.innerHTML=filtered.map(b=>{
+    const extras=Array.isArray(b.extras)?b.extras:[];
+    const branchPill=b.branch==="rosebank"?'<span class="branch-pill rb">Rosebank</span>':'<span class="branch-pill">Fourways</span>';
+    const statusKey=b.status==="confirmed"?"confirmed":b.status==="done"?"done":b.status==="cancelled"?"cancelled":b.status==="new"?"new":"pending";
+    return`<div class="book-card ${b.status==="new"?"new":b.status}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="book-name">${b.name||"?"}${branchPill}</div>
+        <span class="badge badge-${statusKey}">${b.status||"pending"}</span>
+      </div>
+      <div class="book-meta">📅 ${formatDate(b.date)} ${b.timeslot?'· '+b.timeslot:""}</div>
+      <div class="book-meta">🎉 ${b.package||"No package"}</div>
+      ${b.kidname?`<div class="book-meta">🎂 ${b.kidname} turns ${b.age||"?"}</div>`:""}
+      ${(b.kids||b.adults)?`<div class="book-meta">👶 ${b.kids||0} kids · 🧑 ${b.adults||0} adults · <strong>${(+b.kids||0)+(+b.adults||0)} total</strong></div>`:(b.guests?`<div class="book-meta">👥 ${b.guests} guests</div>`:"")}
+      ${b.kidsmeal?`<div class="book-meta" style="color:var(--or-dark);">🍽️ Kids meal: ${mealLabel(b.kidsmeal)}</div>`:""}
+      ${extras.length?`<div class="book-meta" style="color:var(--or-dark);">✨ ${extras.join(", ")}</div>`:""}
+      ${b.notes?`<div class="book-meta">📝 ${b.notes}</div>`:""}
+      <div class="book-actions">
+        ${b.status!=="confirmed"?`<button class="btn btn-green btn-sm" onclick="quickStatus(${b.id},'confirmed')">✅ Confirm</button>`:""}
+        ${b.status!=="done"?`<button class="btn btn-teal btn-sm" onclick="quickStatus(${b.id},'done')">✔️ Done</button>`:""}
+        <button class="btn btn-ghost btn-sm" onclick="openBook(${b.id})">✏️ Edit</button>
+        <button class="btn btn-purple btn-sm" onclick="openInvoice(${b.id})">🧾 Invoice</button>
+        <button class="btn btn-red btn-sm" onclick="delBook(${b.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function delBook(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>+b.id!==+id);saveAll();renderDashboard();renderBookings();}
+function quickStatus(id,s){const b=bookings.find(x=>+x.id===+id);if(!b)return;b.status=s;saveAll();renderDashboard();renderBookings();}
+
+// ===== ACTIVITIES =====
+function renderActivities(){
+  const render=(id,data)=>{
+    document.getElementById(id+"-list").innerHTML=data.map(a=>`
+      <div class="eq-row"><div><div class="eq-name">${a.name}</div><div class="eq-sub">${a.detail}</div></div></div>`).join("");
+  };
+  render("skate",ACTIVITIES_DEF.skate);
+  render("esports",ACTIVITIES_DEF.esports);
+  render("soccer",ACTIVITIES_DEF.soccer);
+  render("dance",ACTIVITIES_DEF.dance);
+}
+
+// ===== FORM SUBMISSIONS =====
+function renderFormSubmissions(){
+  const newBk=bookings.filter(b=>b.status==="new").sort((a,b)=>(b.id||0)-(a.id||0));
+  const el=document.getElementById("form-submissions-list");
+  if(!newBk.length){el.innerHTML='<div style="color:var(--gray);font-size:13px;">No new form submissions yet.</div>';return;}
+  el.innerHTML=newBk.map(b=>`
+    <div style="background:var(--or-light);border:1.5px solid var(--or);border-radius:10px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-weight:800;font-size:14px;">${b.name||"?"}</div>
+        <span class="badge badge-new">NEW</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray);">📅 ${formatDate(b.date)} ${b.timeslot||""} · 🎉 ${b.package||""}</div>
+      <div style="font-size:12px;color:var(--gray);">📞 ${b.phone||""} · 👶 ${b.kids||0} kids · 🧑 ${b.adults||0} adults</div>
+      ${b.kidsmeal?`<div style="font-size:12px;color:var(--or-dark);">🍽️ Kids meal: ${mealLabel(b.kidsmeal)}</div>`:""}
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button class="btn btn-green btn-sm" onclick="quickStatus(${b.id},'confirmed');renderFormSubmissions();">✅ Confirm</button>
+        <button class="btn btn-ghost btn-sm" onclick="openBook(${b.id})">✏️ Edit</button>
+        <button class="btn btn-purple btn-sm" onclick="openInvoice(${b.id})">🧾 Invoice</button>
+      </div>
+    </div>`).join("");
+}
+
+function openFormInNewTab(){
+  alert("To share the customer form:\n\n1. Save this HTML file\n2. Open it in a browser\n3. The Customer Form tab contains the public-facing form\n4. Share the URL with your customers\n\nCustomers fill in the form → submissions appear in your Bookings tab as 'New'.");
+}
+
+// ===== BOOKING MODAL =====
+function openBook(id=null,presetDate=null){
+  editId=id;
+  const b=id?bookings.find(x=>+x.id===+id):null;
+  document.getElementById("modal-book-title").textContent=id?"Edit Booking":"New Booking";
+  document.getElementById("f-branch").value=b?b.branch||activeBranch:activeBranch;
+  document.getElementById("f-name").value=b?b.name||"":"";
+  document.getElementById("f-phone").value=b?b.phone||"":"";
+  document.getElementById("f-email").value=b?b.email||"":"";
+  document.getElementById("f-kidname").value=b?b.kidname||"":"";
+  document.getElementById("f-age").value=b?b.age||"":"";
+  document.getElementById("f-kids").value=b?b.kids||"":"";
+  document.getElementById("f-adults").value=b?b.adults||"":"";
+  updateGuestsTotal('f');
+  // Reset meal selection
+  ["mini-burger","hotdog","nuggets"].forEach(m=>{
+    const el=document.getElementById("meal-"+m);
+    if(el){el.style.borderColor="var(--gray-mid)";el.style.background="#fff";}
+  });
+  const savedMeal=b?b.kidsmeal||"":"";
+  document.getElementById("f-kidsmeal").value=savedMeal;
+  if(savedMeal){
+    const mel=document.getElementById("meal-"+savedMeal);
+    if(mel){mel.style.borderColor="var(--or)";mel.style.background="var(--or-light)";}
+  }
+  document.getElementById("f-package").value=b?b.package||"":"";
+  document.getElementById("f-date").value=b?b.date||"":(presetDate||today());
+  document.getElementById("f-timeslot").value=b?b.timeslot||"":"";
+  document.getElementById("f-status").value=b?b.status||"pending":"pending";
+  document.getElementById("f-catering").value=b?b.catering||"None":"None";
+  document.getElementById("f-notes").value=b?b.notes||"":"";
+  document.getElementById("smart-paste").value="";
+  const selExtras=Array.isArray(b?.extras)?b.extras:[];
+  document.getElementById("extras-grid").innerHTML=EXTRAS_LIST.map(e=>`<button class="extra-btn ${selExtras.includes(e)?"selected":""}" onclick="this.classList.toggle('selected')">${e}</button>`).join("");
+  document.getElementById("modal-book").classList.add("open");
+}
+
+function saveBook(){
+  const name=document.getElementById("f-name").value.trim();
+  if(!name){alert("Please enter customer name.");return;}
+  const extras=[...document.querySelectorAll(".extra-btn.selected")].map(b=>b.textContent);
+  const kids=+document.getElementById("f-kids").value||0;
+  const adults=+document.getElementById("f-adults").value||0;
+  // Check venue conflict
+  const bkDate=document.getElementById("f-date").value;
+  if(bkDate){
+    const conflict=venueBookings.find(v=>v.status!=="cancelled"&&v.status!=="done"&&v.date&&bkDate>=v.date&&bkDate<=(v.edate||v.date));
+    if(conflict&&!confirm(`⚠️ WARNING: "${conflict.name}" has a Venue Hire booking on this date (${formatDate(bkDate)}).\n\nThe venue may be fully blocked for that event.\n\nSave party booking anyway?`))return;
+  }
+  const bk={
+    id:editId||Date.now(),
+    branch:document.getElementById("f-branch").value,
+    name,
+    phone:document.getElementById("f-phone").value.trim(),
+    email:document.getElementById("f-email").value.trim(),
+    kidname:document.getElementById("f-kidname").value.trim(),
+    age:document.getElementById("f-age").value,
+    kids,adults,
+    guests:kids+adults,
+    kidsmeal:document.getElementById("f-kidsmeal").value,
+    package:document.getElementById("f-package").value,
+    date:bkDate,
+    timeslot:document.getElementById("f-timeslot").value,
+    status:document.getElementById("f-status").value,
+    catering:document.getElementById("f-catering").value,
+    extras,
+    notes:document.getElementById("f-notes").value.trim()
+  };
+  if(editId)bookings=bookings.map(b=>+b.id===+editId?bk:b);else bookings.push(bk);
+  saveAll();closeBook();renderDashboard();renderBookings();
+}
+function closeBook(){document.getElementById("modal-book").classList.remove("open");editId=null;}
+
+// ===== SMART FILL =====
+function smartFill(){
+  const txt=document.getElementById("smart-paste").value.trim();
+  if(!txt){alert("Paste some text first!");return;}
+  const t=txt.toLowerCase();
+  const nm=txt.match(/(?:name[:\-\s]+|for[:\s]+|booking for[:\s]+|customer[:\s]+)([A-Z][a-z]+(?: [A-Z][a-z]+)?)/i)||txt.match(/^([A-Z][a-z]+(?: [A-Z][a-z]+)?)[,\n]/m);
+  if(nm)document.getElementById("f-name").value=nm[1];
+  const ph=txt.match(/(?:0|\+27)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}/);
+  if(ph)document.getElementById("f-phone").value=ph[0].replace(/[\s-]/g,"");
+  const months={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  const dt=txt.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)/i);
+  if(dt){const mo=months[dt[2].toLowerCase().slice(0,3)];if(mo)document.getElementById("f-date").value=new Date().getFullYear()+"-"+pad(mo)+"-"+pad(+dt[1]);}
+  const kidM=txt.match(/(?:child|kid|birthday|celebrating)[:\s]+([A-Z][a-z]+)/i);
+  if(kidM)document.getElementById("f-kidname").value=kidM[1];
+  const ageM=txt.match(/(?:turning|age[:\s]+|turns)[\s]+(\d{1,2})/i);
+  if(ageM)document.getElementById("f-age").value=ageM[1];
+  const guestM=txt.match(/(\d{1,3})\s*(?:guests|kids|children|people)/i);
+  if(guestM)document.getElementById("f-guests").value=guestM[1];
+  const pkgMap={skate:"Skate Party",esport:"Esports Party",gaming:"Esports Party",soccer:"Street Soccer Party",dance:"Dance Party",combo:"Combo Package (Any 2)",full:"Full Venue Party"};
+  for(const[key,val]of Object.entries(pkgMap)){if(t.includes(key)){document.getElementById("f-package").value=val;break;}}
+  const timeM=txt.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)?/i);
+  if(timeM){
+    const slots=["10:00 – 12:00","12:00 – 14:00","14:00 – 16:00","16:00 – 18:00","18:00 – 20:00"];
+    const hr=+timeM[1];
+    const matched=slots.find(s=>+s.split(":")[0]===hr);
+    if(matched)document.getElementById("f-timeslot").value=matched;
+  }
+  if(t.includes("rosebank"))document.getElementById("f-branch").value="rosebank";
+  if(t.includes("fourways"))document.getElementById("f-branch").value="fourways";
+}
+
+function toggleVoice(){
+  if(!("webkitSpeechRecognition" in window||"SpeechRecognition" in window)){alert("Voice not supported. Try Chrome.");return;}
+  if(isListening){recognition.stop();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();recognition.lang="en-ZA";recognition.continuous=false;recognition.interimResults=false;
+  recognition.onstart=()=>{isListening=true;document.getElementById("voice-btn").textContent="🔴 Stop";};
+  recognition.onresult=e=>{document.getElementById("smart-paste").value=e.results[0][0].transcript;smartFill();};
+  recognition.onend=()=>{isListening=false;document.getElementById("voice-btn").textContent="🎤 Speak";};
+  recognition.start();
+}
+
+// ===== MEAL & GUEST HELPERS =====
+function updateGuestsTotal(prefix){
+  const kids=+document.getElementById(prefix+"-kids").value||0;
+  const adults=+document.getElementById(prefix+"-adults").value||0;
+  const el=document.getElementById(prefix+"-guests-total");
+  if(el)el.textContent=kids+adults;
+}
+function selectMeal(prefix,meal,el){
+  const pre=prefix==="f"?"meal-":"cfmeal-";
+  ["mini-burger","hotdog","nuggets"].forEach(m=>{
+    const btn=document.getElementById(pre+m);
+    if(btn){btn.style.borderColor="var(--gray-mid)";btn.style.background="#fff";}
+  });
+  el.style.borderColor="var(--or)";el.style.background="var(--or-light)";
+  document.getElementById(prefix+"-kidsmeal").value=meal;
+}
+function mealLabel(m){
+  if(!m)return"";
+  return m==="mini-burger"?"🍔 Mini Burger & Chips":m==="hotdog"?"🌭 Hotdog & Chips":"🍗 Nuggets & Chips";
+}
+
+// ===== CUSTOMER FORM =====
+function selectPkg(el){
+  document.querySelectorAll("#cf-pkg-grid .pkg-card").forEach(c=>c.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+function submitCustomerForm(){
+  const fname=document.getElementById("cf-fname").value.trim();
+  const lname=document.getElementById("cf-lname").value.trim();
+  const phone=document.getElementById("cf-phone").value.trim();
+  const date=document.getElementById("cf-date").value;
+  const timeslot=document.getElementById("cf-timeslot").value;
+  if(!fname||!phone||!date||!timeslot){alert("Please fill in your name, WhatsApp number, preferred date and time slot.");return;}
+  // Venue conflict check
+  const cfBranch=document.getElementById("cf-branch").value;
+  const cfBranchVenue=lsGet("1up_venue_"+cfBranch,[]);
+  const cfConflict=cfBranchVenue.find(v=>v.status!=="cancelled"&&v.status!=="done"&&v.date&&date>=v.date&&date<=(v.edate||v.date));
+  if(cfConflict){
+    alert("Sorry! The venue is fully booked for a private event on "+formatDate(date)+". Please choose a different date.");
+    return;
+  }
+  const pkg=(document.querySelector("#cf-pkg-grid .pkg-card.selected")||{}).dataset?.pkg||"Skate Party";
+  const extras=[];
+  const cake=document.getElementById("cf-cake").value;
+  const catering=document.getElementById("cf-catering").value;
+  if(cake!=="None")extras.push("🎂 "+cake);
+  if(catering!=="None")extras.push("🍽️ "+catering);
+  const cfKids=+document.getElementById("cf-kids").value||0;
+  const cfAdults=+document.getElementById("cf-adults").value||0;
+  const bk={
+    id:Date.now(),
+    branch:cfBranch,
+    name:fname+" "+lname,
+    phone,
+    email:document.getElementById("cf-email").value.trim(),
+    kidname:document.getElementById("cf-kidname").value.trim(),
+    age:document.getElementById("cf-age").value,
+    kids:cfKids,
+    adults:cfAdults,
+    guests:cfKids+cfAdults,
+    kidsmeal:document.getElementById("cf-kidsmeal").value,
+    package:pkg,
+    date,timeslot,
+    status:"new",
+    catering,extras,
+    notes:document.getElementById("cf-notes").value.trim(),
+    fromForm:true
+  };
+  // Save to correct branch
+  const branchKey="1up_bk_"+bk.branch;
+  const existing=lsGet(branchKey,[]);
+  existing.push(bk);
+  lsSet(branchKey,existing);
+  // If same branch active, reload
+  if(bk.branch===activeBranch){bookings=existing;}
+  // Show success
+  document.getElementById("cust-form-body").style.display="none";
+  document.getElementById("cust-success").classList.add("show");
+  setTimeout(()=>{
+    document.getElementById("cust-form-body").style.display="block";
+    document.getElementById("cust-success").classList.remove("show");
+    ["cf-fname","cf-lname","cf-phone","cf-email","cf-kidname","cf-age","cf-kids","cf-adults","cf-date","cf-notes"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("cf-guests-total").textContent="0";
+    document.getElementById("cf-timeslot").value="";
+    document.getElementById("cf-cake").value="None";
+    document.getElementById("cf-catering").value="None";
+    document.getElementById("cf-kidsmeal").value="";
+    ["mini-burger","hotdog","nuggets"].forEach(m=>{const el=document.getElementById("cfmeal-"+m);if(el){el.style.borderColor="var(--gray-mid)";el.style.background="#fff";}});
+    document.querySelectorAll("#cf-pkg-grid .pkg-card").forEach(c=>c.classList.remove("selected"));
+    document.querySelector("#cf-pkg-grid .pkg-card").classList.add("selected");
+  },4000);
+  renderDashboard();
+}
+
+// ===== EXPORT =====
+function openExport(){document.getElementById("export-from").value=today();document.getElementById("export-to").value="";document.getElementById("modal-export").classList.add("open");}
+function closeExport(){document.getElementById("modal-export").classList.remove("open");}
+function exportCSV(){
+  const from=document.getElementById("export-from").value;
+  const to=document.getElementById("export-to").value;
+  let filtered=bookings.filter(b=>b.status!=="cancelled");
+  if(from)filtered=filtered.filter(b=>b.date&&b.date>=from);
+  if(to)filtered=filtered.filter(b=>b.date&&b.date<=to);
+  if(!filtered.length){alert("No bookings found for that range.");return;}
+  filtered.sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  const headers=["Date","Time Slot","Customer Name","WhatsApp","Email","Birthday Child","Age","Guests","Package","Catering","Extras","Notes","Status","Branch"];
+  const rows=filtered.map(b=>[b.date||"",b.timeslot||"",b.name||"",b.phone||"",b.email||"",b.kidname||"",b.age||"",b.guests||"",b.package||"",b.catering||"",(b.extras||[]).join("; "),b.notes||"",b.status||"",b.branch||"fourways"]);
+  const csv=[headers,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="1UP_Bookings_"+(activeBranch==="fourways"?"Fourways":"Rosebank")+"_"+(from||"all")+".csv";
+  a.click();URL.revokeObjectURL(url);closeExport();
+}
+
+// ===== INVOICE =====
+function openInvoice(id){
+  invoiceBookingId=id;
+  document.getElementById("inv-num").value="1UP-"+String(invCounter).padStart(3,"0");
+  document.getElementById("inv-date").value=today();
+  document.getElementById("inv-total").value="";
+  document.getElementById("inv-deposit").value="";
+  document.getElementById("inv-vat").value="none";
+  document.getElementById("inv-notes").value="";
+  document.querySelectorAll(".inv-note-check").forEach(cb=>cb.checked=false);
+  document.getElementById("invoice-inputs").style.display="block";
+  document.getElementById("invoice-preview").style.display="none";
+  document.getElementById("modal-invoice").classList.add("open");
+}
+function closeInvoice(){document.getElementById("modal-invoice").classList.remove("open");invoiceBookingId=null;}
+function backToInputs(){document.getElementById("invoice-inputs").style.display="block";document.getElementById("invoice-preview").style.display="none";}
+
+function generateInvoice(){
+  const b=bookings.find(x=>+x.id===+invoiceBookingId);
+  if(!b){alert("Booking not found.");return;}
+  const invNum=document.getElementById("inv-num").value||"1UP-001";
+  const invDate=document.getElementById("inv-date").value;
+  const totalInput=+document.getElementById("inv-total").value||0;
+  const deposit=+document.getElementById("inv-deposit").value||0;
+  const vatOpt=document.getElementById("inv-vat").value;
+  const invNotes=document.getElementById("inv-notes").value.trim();
+  const NOTE_TEXT={
+    deposit_50pct:"💳 A 50% deposit is required to confirm your booking.",
+    payment_eft:"💸 Balance payable via EFT 48 hours before the event, or cash on the day.",
+    pop:"📄 Please send proof of payment (POP) to confirm your booking slot.",
+    arrive_early:"⏰ Please arrive 15 minutes before your session start time.",
+    waiver:"📋 All participants must sign a waiver before the session begins.",
+    safety_gear:"⛑️ Safety gear is compulsory for skate sessions (helmets & pads are provided).",
+    no_outside_food:"🚫 No outside food or drinks (birthday cakes excluded with prior arrangement).",
+    supervision:"👀 Adult supervision is required for children under 10 at all times.",
+    dress_code:"👟 Closed-toe shoes are required for skate and soccer sessions.",
+  };
+  const tickedNotes=[...document.querySelectorAll(".inv-note-check:checked")].map(cb=>NOTE_TEXT[cb.value]).filter(Boolean);
+  if(invNotes)tickedNotes.push("📝 "+invNotes);
+  const extras=Array.isArray(b.extras)?b.extras:[];
+  let subtotal=totalInput,vatAmt=0,grandTotal=totalInput;
+  if(vatOpt==="included"){vatAmt=totalInput-(totalInput/1.15);subtotal=totalInput/1.15;grandTotal=totalInput;}
+  else if(vatOpt==="excluded"){vatAmt=totalInput*0.15;grandTotal=totalInput+vatAmt;}
+  const balance=grandTotal-deposit;
+  const branchAddr=b.branch==="rosebank"?"Rosebank Mall, Rosebank, Johannesburg":"Shop CF02, 11 Ruby Close, Fourways Mall";
+  const html=`
+    <div class="inv-header">
+      <div><div class="inv-logo">1-UP URBAN</div>
+      <div class="inv-sub">Urban Playground · ${b.branch==="rosebank"?"Rosebank":"Fourways Mall"}</div>
+      <div class="inv-sub">${branchAddr}</div>
+      <div class="inv-sub">1up_southafrica (Instagram)</div></div>
+      <div class="inv-num"><strong>${invNum}</strong>${formatDate(invDate)}<br>
+      <span class="badge badge-${b.status==="confirmed"?"confirmed":b.status==="done"?"done":"pending"}" style="margin-top:6px;">${b.status}</span></div>
+    </div>
+    <div class="inv-section">
+      <div class="inv-section-title">Bill To</div>
+      <div style="font-size:14px;font-weight:700;">${b.name||"—"}</div>
+      <div style="font-size:12px;color:var(--gray);">${b.phone||""}</div>
+      <div style="font-size:12px;color:var(--gray);">${b.email||""}</div>
+    </div>
+    <div class="inv-section">
+      <div class="inv-section-title">Event Details</div>
+      <div class="inv-row"><span>Date</span><span>${formatDate(b.date)}</span></div>
+      <div class="inv-row"><span>Time Slot</span><span>${b.timeslot||"—"}</span></div>
+      <div class="inv-row"><span>Package</span><span>${b.package||"—"}</span></div>
+      ${b.kidname?`<div class="inv-row"><span>Birthday Child</span><span>${b.kidname} (turns ${b.age})</span></div>`:""}
+      ${(b.kids||b.adults)?`<div class="inv-row"><span>Kids</span><span>${b.kids||0}</span></div><div class="inv-row"><span>Adults</span><span>${b.adults||0}</span></div><div class="inv-row"><span>Total Guests</span><span>${(+b.kids||0)+(+b.adults||0)}</span></div>`:b.guests?`<div class="inv-row"><span>Guests</span><span>${b.guests}</span></div>`:""}
+      ${b.kidsmeal?`<div class="inv-row"><span>Kids Meal</span><span>${mealLabel(b.kidsmeal)}</span></div>`:""}
+      ${b.catering&&b.catering!=="None"?`<div class="inv-row"><span>Catering</span><span>${b.catering}</span></div>`:""}
+      ${extras.length?`<div class="inv-row"><span>Extras</span><span style="text-align:right;max-width:55%;">${extras.join(", ")}</span></div>`:""}
+    </div>
+    <div class="inv-section">
+      <div class="inv-section-title">Amount</div>
+      ${vatOpt!=="none"?`<div class="inv-row"><span>Subtotal</span><span>${fmtR(subtotal.toFixed(2))}</span></div><div class="inv-row"><span>VAT (15%)</span><span>${fmtR(vatAmt.toFixed(2))}</span></div>`:""}
+      <div class="inv-total-box"><span style="font-size:13px;font-weight:700;">Total</span><span style="font-size:20px;font-weight:900;">${fmtR(grandTotal.toFixed(2))}</span></div>
+      ${deposit>0?`<div class="inv-row" style="margin-top:8px;"><span>Deposit Paid</span><span style="color:var(--green);font-weight:700;">− ${fmtR(deposit)}</span></div>
+      <div class="inv-balance-box"><span style="font-size:13px;font-weight:700;">Balance Due</span><span style="font-size:20px;font-weight:900;">${fmtR(balance.toFixed(2))}</span></div>`:""}
+    </div>
+    ${tickedNotes.length?`<div class="inv-section"><div class="inv-section-title">Important Notes</div><div style="font-size:12px;color:#444;line-height:2.0;">${tickedNotes.map(n=>`<div style="margin-bottom:2px;">${n}</div>`).join("")}</div></div>`:""}
+    <div class="inv-footer">
+      <div style="background:#f9fafb;border-radius:8px;padding:10px;margin-bottom:10px;text-align:left;">
+        <div style="font-weight:700;color:#111827;font-size:12px;margin-bottom:4px;">🏦 Payment Details</div>
+        <div>Contact us via WhatsApp or Instagram @1up_southafrica for payment details.</div>
+      </div>
+      Thank you for choosing 1-Up Urban Playground!<br>
+      @1up_southafrica · Fourways Mall &amp; Rosebank<br>
+      Ages 5 and up · Skate · Esports · Soccer · Dance
+    </div>`;
+  document.getElementById("invoice-content").innerHTML=html;
+  document.getElementById("invoice-inputs").style.display="none";
+  document.getElementById("invoice-preview").style.display="block";
+  invCounter++;saveAll();
+}
+
+function downloadInvoice(){
+  const content=document.getElementById("invoice-content").innerHTML;
+  const invNum=document.getElementById("inv-num").value||"invoice";
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${invNum}</title>
+  <style>body{font-family:Georgia,serif;max-width:600px;margin:40px auto;padding:20px;color:#111827;}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:3px solid #111;}
+  .inv-logo{font-size:22px;font-weight:900;color:#111;}.inv-sub{font-size:11px;color:#6b7280;margin-top:2px;}
+  .inv-num{text-align:right;font-size:12px;color:#6b7280;}.inv-num strong{display:block;font-size:15px;color:#111827;}
+  .inv-section{margin-bottom:14px;}.inv-section-title{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .inv-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;}
+  .inv-total-box{background:#111;color:#E8FF00;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+  .inv-balance-box{background:#dcfce7;color:#16a34a;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  .inv-footer{margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;text-align:center;line-height:1.6;}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .badge-confirmed{background:#dcfce7;color:#16a34a;}.badge-pending{background:#fef9c4;color:#d97706;}.badge-done{background:#e0f7fa;color:#0891b2;}
+  </style></head><body>${content}</body></html>`;
+  const blob=new Blob([html],{type:"text/html;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=invNum.replace(/\s+/g,"-")+".html";a.click();URL.revokeObjectURL(url);
+}
+
+function resetAll(){if(!confirm("Reset ALL data for "+activeBranch+" branch?"))return;if(!confirm("Are you SURE? This cannot be undone."))return;bookings=[];saveAll();renderDashboard();renderBookings();renderCalendar();alert("Branch data reset.");}
+
+
+// ===== VENUE HIRE =====
+let venueBookings=[], venueEditId=null, venueFilter="all";
+
+function loadVenue(){venueBookings=lsGet("1up_venue_"+activeBranch,[]);}
+function saveVenueAll(){lsSet("1up_venue_"+activeBranch,venueBookings);}
+
+function setVFilter(f){
+  venueFilter=f;
+  document.querySelectorAll("[id^='vfilter-']").forEach(b=>{b.style.background="var(--gray-light)";b.style.color="var(--dark)";});
+  const el=document.getElementById("vfilter-"+f);
+  if(el){el.style.background="#111";el.style.color="var(--or)";}
+  renderVenueList();
+}
+
+function renderVenueList(){
+  const list=document.getElementById("venue-list");
+  if(!list)return;
+  const td=today();
+  let data=[...venueBookings];
+  if(venueFilter==="upcoming")data=data.filter(v=>v.date>=td&&v.status!=="cancelled"&&v.status!=="done");
+  else if(venueFilter==="confirmed")data=data.filter(v=>v.status==="confirmed");
+  else if(venueFilter==="pending")data=data.filter(v=>v.status==="pending"||v.status==="enquiry");
+  data.sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  if(!data.length){list.innerHTML='<div class="card" style="color:var(--gray);text-align:center;padding:24px;">No venue hire bookings yet — tap + New Hire to add one.</div>';return;}
+  const statusColors={enquiry:"badge-pending",pending:"badge-pending",confirmed:"badge-confirmed",done:"badge-done",cancelled:"badge-cancelled"};
+  list.innerHTML=data.map(v=>{
+    const areas=Array.isArray(v.areas)?v.areas:[];
+    const services=Array.isArray(v.services)?v.services:[];
+    const price=v.price?fmtR(v.price):"TBC";
+    const deposit=v.deposit?fmtR(v.deposit):"";
+    const balance=v.price&&v.deposit?fmtR(v.price-v.deposit):"";
+    return`<div class="book-card ${v.status==="confirmed"?"confirmed":v.status==="done"?"done":v.status==="cancelled"?"cancelled":"pending"}" style="border-left-width:4px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="book-name">${v.name||"?"}</div>
+        <span class="badge ${statusColors[v.status]||"badge-pending"}">${v.status||"enquiry"}</span>
+      </div>
+      ${v.contact?`<div class="book-meta">👤 ${v.contact}</div>`:""}
+      <div class="book-meta">📅 ${formatDate(v.date)}${v.edate&&v.edate!==v.date?" → "+formatDate(v.edate):""} ${v.stime?'· '+v.stime+(v.etime?'–'+v.etime:""):""}</div>
+      <div class="book-meta">🎪 ${v.etype||"Event"} · ${v.attendance||"?"} people</div>
+      <div class="book-meta">📞 ${v.phone||"—"}${v.email?' · '+v.email:""}</div>
+      ${areas.length?`<div class="book-meta" style="color:var(--or-dark);">📍 ${areas.join(" · ")}</div>`:""}
+      ${services.length?`<div class="book-meta" style="color:var(--teal);">🔧 ${services.join(", ")}</div>`:""}
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+        <span style="font-weight:900;font-size:15px;color:var(--green);">${price}</span>
+        ${deposit?`<span style="font-size:12px;color:var(--gray);">Deposit: ${deposit}</span>`:""}
+        ${balance?`<span style="font-size:12px;color:var(--red);">Balance: ${balance}</span>`:""}
+      </div>
+      ${v.notes?`<div class="book-meta">📝 ${v.notes}</div>`:""}
+      <div class="book-actions">
+        ${v.status!=="confirmed"?`<button class="btn btn-green btn-sm" onclick="quickVStatus(${v.id},'confirmed')">✅ Confirm</button>`:""}
+        ${v.status!=="done"?`<button class="btn btn-teal btn-sm" onclick="quickVStatus(${v.id},'done')">✔️ Done</button>`:""}
+        <button class="btn btn-ghost btn-sm" onclick="openVenue(${v.id})">✏️ Edit</button>
+        <button class="btn btn-red btn-sm" onclick="delVenue(${v.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openVenue(id=null){
+  venueEditId=id;
+  const v=id?venueBookings.find(x=>+x.id===+id):null;
+  document.getElementById("modal-venue-title").textContent=id?"Edit Venue Hire":"New Venue Hire";
+  document.getElementById("vf-branch").value=v?v.branch||activeBranch:activeBranch;
+  document.getElementById("vf-name").value=v?v.name||"":"";
+  document.getElementById("vf-contact").value=v?v.contact||"":"";
+  document.getElementById("vf-phone").value=v?v.phone||"":"";
+  document.getElementById("vf-email").value=v?v.email||"":"";
+  document.getElementById("vf-etype").value=v?v.etype||"":"";
+  document.getElementById("vf-attendance").value=v?v.attendance||"":"";
+  document.getElementById("vf-date").value=v?v.date||today():today();
+  document.getElementById("vf-edate").value=v?v.edate||"":"";
+  document.getElementById("vf-stime").value=v?v.stime||"":"";
+  document.getElementById("vf-etime").value=v?v.etime||"":"";
+  document.getElementById("vf-status").value=v?v.status||"enquiry":"enquiry";
+  document.getElementById("vf-price").value=v?v.price||"":"";
+  document.getElementById("vf-deposit").value=v?v.deposit||"":"";
+  document.getElementById("vf-notes").value=v?v.notes||"":"";
+  document.getElementById("venue-smart").value="";
+  const selAreas=Array.isArray(v?.areas)?v.areas:[];
+  const selServices=Array.isArray(v?.services)?v.services:[];
+  document.querySelectorAll("#vf-areas-grid .extra-btn").forEach(b=>{
+    b.classList.toggle("selected",selAreas.includes(b.textContent.trim()));
+  });
+  document.querySelectorAll("#vf-services-grid .extra-btn").forEach(b=>{
+    b.classList.toggle("selected",selServices.includes(b.textContent.trim()));
+  });
+  document.getElementById("modal-venue").classList.add("open");
+}
+
+function saveVenue(){
+  const name=document.getElementById("vf-name").value.trim();
+  if(!name){alert("Please enter an organiser or company name.");return;}
+  const date=document.getElementById("vf-date").value;
+  if(!date){alert("Please select a start date.");return;}
+  const areas=[...document.querySelectorAll("#vf-areas-grid .extra-btn.selected")].map(b=>b.textContent.trim());
+  const services=[...document.querySelectorAll("#vf-services-grid .extra-btn.selected")].map(b=>b.textContent.trim());
+  const v={
+    id:venueEditId||Date.now(),
+    branch:document.getElementById("vf-branch").value,
+    name,
+    contact:document.getElementById("vf-contact").value.trim(),
+    phone:document.getElementById("vf-phone").value.trim(),
+    email:document.getElementById("vf-email").value.trim(),
+    etype:document.getElementById("vf-etype").value,
+    attendance:document.getElementById("vf-attendance").value,
+    date,
+    edate:document.getElementById("vf-edate").value,
+    stime:document.getElementById("vf-stime").value,
+    etime:document.getElementById("vf-etime").value,
+    status:document.getElementById("vf-status").value,
+    price:+document.getElementById("vf-price").value||0,
+    deposit:+document.getElementById("vf-deposit").value||0,
+    notes:document.getElementById("vf-notes").value.trim(),
+    areas,services
+  };
+  if(venueEditId)venueBookings=venueBookings.map(x=>+x.id===+venueEditId?v:x);
+  else venueBookings.push(v);
+  saveVenueAll();closeVenue();renderVenueList();
+}
+
+function closeVenue(){document.getElementById("modal-venue").classList.remove("open");venueEditId=null;}
+function quickVStatus(id,s){const v=venueBookings.find(x=>+x.id===+id);if(!v)return;v.status=s;saveVenueAll();renderVenueList();}
+function delVenue(id){if(!confirm("Delete this venue hire booking?"))return;venueBookings=venueBookings.filter(x=>+x.id!==+id);saveVenueAll();renderVenueList();}
+
+function venueSmartFill(){
+  const txt=document.getElementById("venue-smart").value.trim();
+  if(!txt)return;
+  const t=txt.toLowerCase();
+  const nm=txt.match(/(?:company[:\s]+|organiser[:\s]+|from[:\s]+|name[:\s]+)([A-Za-z][\w\s&]+?)(?:\n|,|\.)/i)||txt.match(/^([A-Z][A-Za-z\s&]+?)[\n,]/m);
+  if(nm)document.getElementById("vf-name").value=nm[1].trim();
+  const ph=txt.match(/(?:0|\+27)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}/);
+  if(ph)document.getElementById("vf-phone").value=ph[0].replace(/[\s-]/g,"");
+  const emailM=txt.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  if(emailM)document.getElementById("vf-email").value=emailM[0];
+  const months={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  const dt=txt.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)/i);
+  if(dt){const mo=months[dt[2].toLowerCase().slice(0,3)];if(mo)document.getElementById("vf-date").value=new Date().getFullYear()+"-"+pad(mo)+"-"+pad(+dt[1]);}
+  const numM=txt.match(/(\d{2,4})\s*(?:people|guests|attendees|pax)/i);
+  if(numM)document.getElementById("vf-attendance").value=numM[1];
+  const etypeMap={corporate:"Corporate Event",brand:"Brand Activation",school:"School / Sports Day",compet:"Competition / Tournament",film:"Filming / Shoot",concert:"Concert / Performance",community:"Community Event",private:"Private Function"};
+  for(const[k,v]of Object.entries(etypeMap)){if(t.includes(k)){document.getElementById("vf-etype").value=v;break;}}
+  if(t.includes("rosebank"))document.getElementById("vf-branch").value="rosebank";
+  if(t.includes("fourways"))document.getElementById("vf-branch").value="fourways";
+}
+
+// ===== STOCK TAKE =====
+const STOCK_DEF={
+  machines:[
+    {id:"m_coffee",   name:"Coffee Machine",        cat:"machines", unit:"machine",     qty:1, reorderPt:1, orderQty:1},
+    {id:"m_slush",    name:"Slushy Machine",         cat:"machines", unit:"machine",     qty:1, reorderPt:1, orderQty:1},
+    {id:"m_popcorn",  name:"Popcorn Machine",        cat:"machines", unit:"machine",     qty:1, reorderPt:1, orderQty:1},
+    {id:"m_slush_syrup_strawberry", name:"Slush Syrup — Strawberry",    cat:"machines", unit:"bottle",      qty:4, reorderPt:2, orderQty:4},
+    {id:"m_slush_syrup_blue",       name:"Slush Syrup — Blue Raspberry", cat:"machines", unit:"bottle",     qty:4, reorderPt:2, orderQty:4},
+    {id:"m_coffee_beans",           name:"Coffee Beans",                 cat:"machines", unit:"kg bag",     qty:2, reorderPt:1, orderQty:2},
+    {id:"m_coffee_cups",            name:"Takeaway Cups",                cat:"machines", unit:"sleeve (50)",qty:3, reorderPt:2, orderQty:4},
+    {id:"m_popcorn_bags",           name:"Popcorn Bags",                 cat:"machines", unit:"pack (100)", qty:2, reorderPt:1, orderQty:2},
+    {id:"m_popcorn_kernels",        name:"Popcorn Kernels",              cat:"machines", unit:"kg bag",     qty:3, reorderPt:1, orderQty:2},
+    {id:"m_popcorn_oil",            name:"Popcorn Oil",                  cat:"machines", unit:"litre",      qty:2, reorderPt:1, orderQty:2},
+  ],
+  drinks:[
+    {id:"d_monster_orig",   name:"Monster Energy Original",       cat:"energy", unit:"can",         qty:24, reorderPt:12, orderQty:24},
+    {id:"d_monster_ultra",  name:"Monster Ultra White",           cat:"energy", unit:"can",         qty:24, reorderPt:12, orderQty:24},
+    {id:"d_redbull",        name:"Red Bull 250ml",                cat:"energy", unit:"can",         qty:24, reorderPt:12, orderQty:24},
+    {id:"d_adrenaline",     name:"Adrenaline Rush 500ml",         cat:"energy", unit:"can",         qty:18, reorderPt:8,  orderQty:18},
+    {id:"d_coke",           name:"Coca-Cola 330ml",               cat:"fizzy",  unit:"can",         qty:36, reorderPt:12, orderQty:24},
+    {id:"d_coke_zero",      name:"Coke Zero 330ml",               cat:"fizzy",  unit:"can",         qty:24, reorderPt:10, orderQty:24},
+    {id:"d_fanta_orange",   name:"Fanta Orange 330ml",            cat:"fizzy",  unit:"can",         qty:24, reorderPt:10, orderQty:24},
+    {id:"d_sprite",         name:"Sprite 330ml",                  cat:"fizzy",  unit:"can",         qty:24, reorderPt:10, orderQty:24},
+    {id:"d_cream_soda",     name:"Cream Soda 330ml",              cat:"fizzy",  unit:"can",         qty:18, reorderPt:8,  orderQty:18},
+    {id:"d_twist",          name:"Twist Lemon 330ml",             cat:"fizzy",  unit:"can",         qty:18, reorderPt:8,  orderQty:18},
+    {id:"d_slush_strawb",   name:"Slush — Strawberry",            cat:"slush",  unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_slush_blue",     name:"Slush — Blue Raspberry",        cat:"slush",  unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_cappuccino",     name:"Cappuccino",                    cat:"coffee", unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_latte",          name:"Latte",                         cat:"coffee", unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_espresso",       name:"Espresso",                      cat:"coffee", unit:"shot",        qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_classic",      name:"Boba — Classic Milk Tea",    cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_taro",         name:"Boba — Taro",                cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_strawberry",   name:"Boba — Strawberry",          cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_mango",        name:"Boba — Mango",               cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_matcha",       name:"Boba — Matcha Milk Tea",     cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_brown_sugar",  name:"Boba — Brown Sugar Tiger",   cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_passion",      name:"Boba — Passion Fruit",       cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_lychee",       name:"Boba — Lychee",              cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_peach",        name:"Boba — Peach",               cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_coconut",      name:"Boba — Coconut Milk Tea",    cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_winter_melon", name:"Boba — Winter Melon",        cat:"boba",   unit:"cup",         qty:0,  reorderPt:0,  orderQty:0},
+    {id:"d_boba_pearls",       name:"Tapioca Pearls (black)",     cat:"boba",   unit:"kg bag",      qty:3,  reorderPt:1,  orderQty:2},
+    {id:"d_boba_crystal",      name:"Crystal / Clear Pearls",     cat:"boba",   unit:"kg bag",      qty:2,  reorderPt:1,  orderQty:2},
+    {id:"d_boba_popping",      name:"Popping Boba (assorted)",    cat:"boba",   unit:"kg tub",      qty:2,  reorderPt:1,  orderQty:2},
+    {id:"d_boba_cups",         name:"Boba Cups 700ml",            cat:"boba",   unit:"sleeve (50)", qty:3,  reorderPt:2,  orderQty:4},
+    {id:"d_boba_straws",       name:"Wide Boba Straws",           cat:"boba",   unit:"pack (100)",  qty:3,  reorderPt:2,  orderQty:4},
+    {id:"d_boba_milk",         name:"Full Cream Milk (for boba)", cat:"boba",   unit:"litre",       qty:6,  reorderPt:3,  orderQty:6},
+    {id:"d_boba_creamer",      name:"Non-dairy Creamer / Oat Milk",cat:"boba",  unit:"litre",       qty:4,  reorderPt:2,  orderQty:4},
+    {id:"d_boba_tea_black",    name:"Black Tea Bags / Loose Leaf",cat:"boba",   unit:"pack",        qty:4,  reorderPt:2,  orderQty:4},
+    {id:"d_boba_tea_jasmine",  name:"Jasmine Green Tea",          cat:"boba",   unit:"pack",        qty:3,  reorderPt:1,  orderQty:2},
+    {id:"d_boba_syrup_vanilla",name:"Vanilla Syrup",              cat:"boba",   unit:"bottle",      qty:3,  reorderPt:1,  orderQty:2},
+    {id:"d_boba_syrup_caramel",name:"Caramel Syrup",              cat:"boba",   unit:"bottle",      qty:3,  reorderPt:1,  orderQty:2},
+    {id:"d_boba_syrup_brown",  name:"Brown Sugar Syrup",          cat:"boba",   unit:"bottle",      qty:3,  reorderPt:1,  orderQty:2},
+    {id:"d_boba_syrup_taro",   name:"Taro Powder / Syrup",        cat:"boba",   unit:"bag/btl",     qty:2,  reorderPt:1,  orderQty:2},
+    {id:"d_water_500",      name:"Still Water 500ml",             cat:"water",  unit:"bottle",      qty:24, reorderPt:12, orderQty:24},
+    {id:"d_water_1l",       name:"Still Water 1L",                cat:"water",  unit:"bottle",      qty:12, reorderPt:6,  orderQty:12},
+    {id:"d_sparkling",      name:"Sparkling Water 330ml",         cat:"water",  unit:"can",         qty:18, reorderPt:8,  orderQty:18},
+  ],
+  snacks:[
+    {id:"s_pizza_sl",   name:"Pizza Slices (frozen)",   cat:"snacks", unit:"portion", qty:20, reorderPt:10, orderQty:20},
+    {id:"s_chips_nik",  name:"Niknaks 30g",              cat:"snacks", unit:"packet",  qty:30, reorderPt:12, orderQty:24},
+    {id:"s_chips_lay",  name:"Lays 30g",                 cat:"snacks", unit:"packet",  qty:30, reorderPt:12, orderQty:24},
+    {id:"s_chips_jax",  name:"Jax Puff 30g",             cat:"snacks", unit:"packet",  qty:24, reorderPt:10, orderQty:24},
+    {id:"s_biltong",    name:"Biltong Snacks 30g",       cat:"snacks", unit:"packet",  qty:20, reorderPt:8,  orderQty:20},
+    {id:"s_choc_bar",   name:"Chocolate Bar (various)",  cat:"snacks", unit:"bar",     qty:30, reorderPt:12, orderQty:24},
+    {id:"s_choc_kit",   name:"Kit Kat 2-finger",         cat:"snacks", unit:"bar",     qty:24, reorderPt:10, orderQty:24},
+    {id:"s_choc_ld",    name:"Lion Bar",                 cat:"snacks", unit:"bar",     qty:20, reorderPt:8,  orderQty:20},
+    {id:"s_muesli_bar", name:"Muesli / Granola Bar",     cat:"snacks", unit:"bar",     qty:18, reorderPt:6,  orderQty:18},
+    {id:"s_nuts",       name:"Mixed Nuts 50g",           cat:"snacks", unit:"packet",  qty:15, reorderPt:6,  orderQty:15},
+  ],
+  sweets:[
+    {id:"sw_sourworm",    name:"Sour Worms (bulk)",        cat:"sweets", unit:"kg",     qty:2,  reorderPt:1, orderQty:2},
+    {id:"sw_jellybean",   name:"Jelly Beans (bulk)",       cat:"sweets", unit:"kg",     qty:1,  reorderPt:1, orderQty:2},
+    {id:"sw_gummy_bear",  name:"Gummy Bears (bulk)",       cat:"sweets", unit:"kg",     qty:2,  reorderPt:1, orderQty:2},
+    {id:"sw_fizz_pop",    name:"Fizz Pop / Pop Rocks",     cat:"sweets", unit:"packet", qty:30, reorderPt:10, orderQty:24},
+    {id:"sw_chupa",       name:"Chupa Chups Lollipop",     cat:"sweets", unit:"stick",  qty:40, reorderPt:15, orderQty:40},
+    {id:"sw_barratt",     name:"Barratt Sweets (mini)",    cat:"sweets", unit:"packet", qty:30, reorderPt:10, orderQty:24},
+    {id:"sw_pinata",      name:"Piñata Mix Sweets",        cat:"sweets", unit:"packet", qty:20, reorderPt:8,  orderQty:20},
+    {id:"sw_sherbet",     name:"Sherbet Sticks",           cat:"sweets", unit:"stick",  qty:30, reorderPt:10, orderQty:30},
+    {id:"sw_koeksisters", name:"Koeksisters (party bags)", cat:"sweets", unit:"bag",    qty:10, reorderPt:4,  orderQty:10},
+    {id:"sw_candy_floss_sugar", name:"Candy Floss Sugar", cat:"sweets", unit:"kg bag", qty:3,  reorderPt:1,  orderQty:2},
+  ]
+};
+
+let stockData={}, stockCatFilter="all";
+
+// Returns {singleName, unitTypes:[{name,size}]} largest-first, migrating old hasCase/hasPack fields
+function getUnitTypes(d, item){
+  const singleName=d?.singleName||(item?.unit)||"unit";
+  if(d?.unitTypes!==undefined)return{singleName,unitTypes:d.unitTypes};
+  const types=[];
+  const hasCase=d?.hasCase??((item?.reorderPt??0)>0);
+  if(hasCase)types.push({name:"Cases",size:d?.caseSize??24});
+  if(d?.hasPack)types.push({name:"Packs",size:d?.packSize??6});
+  return{singleName,unitTypes:types};
+}
+function largestUnit(unitTypes,singleName){
+  if(!unitTypes||!unitTypes.length)return{name:singleName,size:1};
+  return unitTypes.reduce((a,b)=>b.size>a.size?b:a);
+}
+const _storeCatOf=c=>c==="machines"?"machines":["energy","fizzy","slush","coffee","boba","water"].includes(c)?"drinks":c==="snacks"?"snacks":"sweets";
+
+function loadStock(){
+  const saved=lsGet("1up_stock_"+activeBranch,null);
+  stockData={machines:{},drinks:{},snacks:{},sweets:{}};
+  [...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets].forEach(item=>{
+    const sc=_storeCatOf(item.cat);
+    const prev=saved&&saved[sc]&&saved[sc][item.id];
+    if(prev?.deleted){["machines","drinks","snacks","sweets"].forEach(k=>{const idx=STOCK_DEF[k].findIndex(x=>x.id===item.id);if(idx!==-1)STOCK_DEF[k].splice(idx,1);});return;}
+    stockData[sc][item.id]={
+      qty:      prev!=null?(prev.qty??item.qty):item.qty,
+      reorderPt:prev!=null?(prev.reorderPt??prev.min??item.reorderPt):item.reorderPt,
+      orderQty: prev!=null?(prev.orderQty??item.orderQty):item.orderQty,
+      stockTakeTime:prev?.stockTakeTime||"",
+      unit:     prev?.unit||item.unit,
+      singleName:prev?.singleName||prev?.unit||item.unit,
+      unitTypes: prev?.unitTypes!==undefined?prev.unitTypes:undefined,
+      name:     prev?.name||item.name,
+      subcat:   item.cat
+    };
+  });
+  // Restore custom items
+  if(saved){
+    Object.entries(saved).forEach(([sc,items])=>{
+      Object.entries(items).forEach(([id,d])=>{
+        if(d?.deleted)return;
+        if(!stockData[sc][id]){
+          stockData[sc][id]={qty:d.qty||0,reorderPt:d.reorderPt??d.min??0,orderQty:d.orderQty||0,stockTakeTime:d.stockTakeTime||"",unit:d.unit||"unit",name:d.name||id,subcat:d.subcat||sc};
+          const defArr=STOCK_DEF[sc]||STOCK_DEF.sweets;
+          if(!defArr.find(x=>x.id===id))defArr.push({id,name:d.name||id,cat:d.subcat||sc,unit:d.unit||"unit",qty:d.qty||0,reorderPt:d.reorderPt??0,orderQty:d.orderQty||0});
+        }
+      });
+    });
+  }
+}
+
+function saveStockData(){lsSet("1up_stock_"+activeBranch,stockData);}
+
+function stockStatus(qty,rp){
+  if(qty===0)return"out";
+  if(rp>0&&qty<=rp)return"low";
+  return"ok";
+}
+
+function setStockCat(c){
+  stockCatFilter=c;
+  document.querySelectorAll("[id^='scat-']").forEach(b=>{b.style.background="var(--gray-light)";b.style.color="var(--dark)";});
+  const el=document.getElementById("scat-"+c);
+  if(el){el.style.background="#111";el.style.color="var(--or)";}
+  renderStockTable();
+}
+
+function renderStockTable(){
+  const q=(document.getElementById("stock-search")||{}).value?.toLowerCase()||"";
+  const allDefs=[
+    ...STOCK_DEF.machines.map(i=>({...i,storeCat:"machines"})),
+    ...STOCK_DEF.drinks.map(i=>({...i,storeCat:"drinks"})),
+    ...STOCK_DEF.snacks.map(i=>({...i,storeCat:"snacks"})),
+    ...STOCK_DEF.sweets.map(i=>({...i,storeCat:"sweets"}))
+  ];
+
+  // Stats always over all items
+  let total=0,ok=0,low=0,out=0;
+  allDefs.forEach(i=>{
+    const d=stockData[i.storeCat]?.[i.id];
+    const s=stockStatus(d!=null?d.qty:i.qty, d!=null?d.reorderPt:i.reorderPt);
+    total++;if(s==="ok")ok++;else if(s==="low")low++;else out++;
+  });
+  document.getElementById("sk-total").textContent=total;
+  document.getElementById("sk-ok").textContent=ok;
+  document.getElementById("sk-low").textContent=low;
+  document.getElementById("sk-out").textContent=out;
+
+  let visible=allDefs;
+  if(stockCatFilter==="low"){
+    visible=allDefs.filter(i=>{
+      const d=stockData[i.storeCat]?.[i.id];
+      return stockStatus(d!=null?d.qty:i.qty, d!=null?d.reorderPt:i.reorderPt)!=="ok";
+    });
+  } else if(stockCatFilter!=="all"){
+    visible=allDefs.filter(i=>i.storeCat===stockCatFilter);
+  }
+  if(q)visible=visible.filter(i=>i.name.toLowerCase().includes(q));
+
+  const tbody=document.getElementById("stock-tbody");
+  if(!tbody)return;
+  if(!visible.length){
+    tbody.innerHTML=`<div style="padding:24px;text-align:center;color:var(--gray);font-size:13px;background:#fff;border-radius:12px;">No items found</div>`;
+    return;
+  }
+  tbody.innerHTML=visible.map(item=>{
+    const sc=item.storeCat;
+    const d=stockData[sc]?.[item.id];
+    const qty=d!=null?d.qty:item.qty;
+    const rp=d!=null?d.reorderPt:item.reorderPt;
+    const oq=d!=null?d.orderQty:item.orderQty;
+    const ts=d?.stockTakeTime||"";
+    const {singleName,unitTypes}=getUnitTypes(d,item);
+    const showCalc=unitTypes.length>0;
+    const s=stockStatus(qty,rp);
+    const borderColor=s==="out"?"#dc2626":s==="low"?"#d97706":"#16a34a";
+    const badge=s==="out"
+      ?`<span style="background:var(--red-light);color:var(--red);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">OUT</span>`
+      :s==="low"
+      ?`<span style="background:var(--yellow-light);color:var(--yellow);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">LOW</span>`
+      :`<span style="background:var(--green-light);color:var(--green);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">OK</span>`;
+    const tsDisp=ts?ts.slice(8,10)+"/"+ts.slice(5,7)+"<br>"+ts.slice(11,16):"—";
+    return`<div id="srow-${item.id}" style="background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;border-left:4px solid ${borderColor};box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px 8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:14px;line-height:1.2;">${item.name}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div id="sstatus-${item.id}">${badge}</div>
+          <button onclick="openStockEdit('${item.id}','${sc}')"
+            style="padding:4px 10px;background:var(--gray-light);border:1.5px solid var(--gray-mid);border-radius:8px;cursor:pointer;font-size:12px;"
+            title="Item setup">✏️</button>
+          <button onclick="deleteStockItem('${item.id}','${sc}')"
+            style="padding:4px 8px;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;cursor:pointer;font-size:12px;color:#dc2626;"
+            title="Delete item">🗑</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;padding:8px 12px 10px;border-top:1px solid var(--gray-light);gap:8px;">
+        <div style="display:flex;align-items:center;gap:6px;flex:1;">
+          <input type="number" id="qty-inp-${item.id}" min="0" value="${qty}"
+            style="width:72px;padding:8px 6px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:18px;font-weight:700;text-align:center;"
+            onblur="skSaveQty('${item.id}','${sc}')"
+            onkeydown="if(event.key==='Enter')this.blur()">
+          <span style="font-size:13px;color:var(--gray);font-weight:500;">${singleName}s</span>
+          ${showCalc?`<button onclick="openStockCalc('${item.id}','${sc}')"
+            style="padding:7px 10px;background:var(--gray-light);border:1.5px solid var(--gray-mid);border-radius:8px;cursor:pointer;font-size:14px;margin-left:4px;"
+            title="Calculator">🧮</button>`:""}
+        </div>
+        <div id="skt-${item.id}" style="font-size:11px;color:var(--gray);text-align:right;line-height:1.5;">${tsDisp}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function skStartEdit(type,id,sc,val){
+  document.getElementById(type+"-disp-"+id).style.display="none";
+  const inp=document.getElementById(type+"-inp-"+id);
+  inp.style.display="inline-block";inp.value=val;inp.focus();inp.select();
+}
+function skCancelEdit(type,id){
+  document.getElementById(type+"-disp-"+id).style.display="";
+  document.getElementById(type+"-inp-"+id).style.display="none";
+}
+function skSaveEdit(type,id,sc){
+  const inp=document.getElementById(type+"-inp-"+id);
+  const disp=document.getElementById(type+"-disp-"+id);
+  const val=Math.max(0,parseInt(inp.value,10)||0);
+  if(!stockData[sc][id])stockData[sc][id]={};
+  if(type==="rp")stockData[sc][id].reorderPt=val;
+  else stockData[sc][id].orderQty=val;
+  saveStockData();
+  disp.textContent=val;inp.style.display="none";disp.style.display="";
+  const d=stockData[sc][id];
+  _updateStatusBadge(id,d.qty??0,type==="rp"?val:(d.reorderPt??0));
+}
+function skSaveQty(id,sc){
+  const inp=document.getElementById("qty-inp-"+id);
+  if(inp.value==="")return; // ignore blur without a value entered
+  const val=Math.max(0,parseFloat(inp.value)||0);
+  if(!stockData[sc][id])stockData[sc][id]={};
+  stockData[sc][id].qty=val;
+  const now=new Date();
+  const ts=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0")
+    +" "+String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
+  stockData[sc][id].stockTakeTime=ts;
+  saveStockData();
+  const tsEl=document.getElementById("skt-"+id);
+  if(tsEl){
+    tsEl.textContent=ts.slice(8,10)+"/"+ts.slice(5,7)+" "+ts.slice(11,16);
+    tsEl.style.color="var(--green)";
+    setTimeout(()=>{tsEl.style.color="var(--gray)";},2500);
+  }
+  _updateStatusBadge(id,val,stockData[sc][id].reorderPt??0);
+  // refresh stats
+  const allDefs=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets];
+  let total=0,ok=0,low=0,out=0;
+  allDefs.forEach(i=>{
+    const s_c=_storeCatOf(i.cat);
+    const dv=stockData[s_c]?.[i.id];
+    const s=stockStatus(dv!=null?dv.qty:i.qty,dv!=null?dv.reorderPt:i.reorderPt);
+    total++;if(s==="ok")ok++;else if(s==="low")low++;else out++;
+  });
+  document.getElementById("sk-total").textContent=total;
+  document.getElementById("sk-ok").textContent=ok;
+  document.getElementById("sk-low").textContent=low;
+  document.getElementById("sk-out").textContent=out;
+}
+function deleteStockItem(id,sc){
+  if(!confirm("Delete this item from the stock list?"))return;
+  if(!stockData[sc][id])stockData[sc][id]={};
+  stockData[sc][id].deleted=true;
+  // Remove from STOCK_DEF so it stays gone on re-render
+  ["machines","drinks","snacks","sweets"].forEach(k=>{
+    const idx=STOCK_DEF[k].findIndex(x=>x.id===id);
+    if(idx!==-1)STOCK_DEF[k].splice(idx,1);
+  });
+  saveStockData();
+  renderStockTable();
+  showStockToast("🗑 Item removed");
+}
+function _updateStatusBadge(id,qty,rp){
+  const el=document.getElementById("sstatus-"+id);if(!el)return;
+  const s=stockStatus(qty,rp);
+  const row=document.getElementById("srow-"+id);
+  if(row)row.style.borderLeftColor=s==="out"?"#dc2626":s==="low"?"#d97706":"#16a34a";
+  el.innerHTML=s==="out"
+    ?`<span style="background:var(--red-light);color:var(--red);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">OUT</span>`
+    :s==="low"
+    ?`<span style="background:var(--yellow-light);color:var(--yellow);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">LOW</span>`
+    :`<span style="background:var(--green-light);color:var(--green);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">OK</span>`;
+}
+
+function genOrderSheet(){
+  const allDefs=[
+    ...STOCK_DEF.machines.map(i=>({...i,storeCat:"machines"})),
+    ...STOCK_DEF.drinks.map(i=>({...i,storeCat:"drinks"})),
+    ...STOCK_DEF.snacks.map(i=>({...i,storeCat:"snacks"})),
+    ...STOCK_DEF.sweets.map(i=>({...i,storeCat:"sweets"}))
+  ];
+  const branch=activeBranch==="fourways"?"Fourways Mall":"Rosebank";
+  const now=new Date();
+  const dateStr=now.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" "+now.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
+  const lowItems=allDefs.filter(i=>{
+    const d=stockData[i.storeCat]?.[i.id];
+    return stockStatus(d!=null?d.qty:i.qty, d!=null?d.reorderPt:i.reorderPt)!=="ok";
+  });
+  if(!lowItems.length){alert("All items are above their reorder point — no order needed.");return;}
+  const rows=lowItems.map(i=>{
+    const d=stockData[i.storeCat]?.[i.id];
+    const qty=d!=null?d.qty:i.qty;
+    const rp=d!=null?d.reorderPt:i.reorderPt;
+    const oq=d!=null?d.orderQty:i.orderQty;
+    const{singleName,unitTypes}=getUnitTypes(d,i);
+    const largest=largestUnit(unitTypes,singleName);
+    const s=stockStatus(qty,rp);
+    const qtyColor=s==="out"?"#dc2626":"#d97706";
+    return`<tr>
+      <td>${i.name}</td>
+      <td style="text-align:center;color:${qtyColor};font-weight:700;">${qty}</td>
+      <td style="text-align:center;color:#888;font-size:11px;font-style:italic;">${singleName}s</td>
+      <td style="text-align:center;font-weight:700;">${oq}</td>
+      <td style="text-align:center;color:#888;font-size:11px;font-style:italic;">${largest.name.toLowerCase()}</td>
+      <td style="width:80px;border:1px solid #ccc;"></td></tr>`;
+  }).join("");
+  const w=window.open("","_blank","width=800,height=600");
+  w.document.write(`<!DOCTYPE html><html><head><title>Order Sheet — 1-Up ${branch}</title>
+  <style>body{font-family:Arial,sans-serif;padding:24px;color:#111;}h1{font-size:20px;margin-bottom:4px;}
+  .sub{font-size:12px;color:#666;margin-bottom:20px;}
+  table{width:100%;border-collapse:collapse;}th,td{padding:8px 10px;border:1px solid #ddd;font-size:13px;}
+  th{background:#111;color:#E8FF00;font-weight:700;text-align:center;}
+  th:first-child{text-align:left;}
+  tr:nth-child(even){background:#f9f9f9;}
+  td:nth-child(2),td:nth-child(4),td:nth-child(6){border-left:3px solid #111;}
+  th:nth-child(2),th:nth-child(3),th:nth-child(4){border-left:3px solid #111;}
+  @media print{.no-print{display:none;}}</style></head><body>
+  <h1>🗒 Order Sheet — 1-Up Urban Playground</h1>
+  <div class="sub">Branch: <strong>${branch}</strong> &nbsp;|&nbsp; Generated: ${dateStr}</div>
+  <table><thead>
+    <tr><th rowspan="2">Item</th><th colspan="2">Current Stock</th><th colspan="2">Order Qty</th><th rowspan="2">Ordered ✓</th></tr>
+  </thead>
+  <tbody>${rows}</tbody></table>
+  <br><button class="no-print" onclick="window.print()" style="padding:8px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;">🖨 Print / Save PDF</button>
+  </body></html>`);
+  w.document.close();
+}
+
+function genStockTakeSheet(){
+  const allDefs=[
+    ...STOCK_DEF.machines.map(i=>({...i,storeCat:"machines"})),
+    ...STOCK_DEF.drinks.map(i=>({...i,storeCat:"drinks"})),
+    ...STOCK_DEF.snacks.map(i=>({...i,storeCat:"snacks"})),
+    ...STOCK_DEF.sweets.map(i=>({...i,storeCat:"sweets"}))
+  ];
+  const branch=activeBranch==="fourways"?"Fourways Mall":"Rosebank";
+  const now=new Date();
+  const dateStr=now.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" "+now.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
+  const rows=allDefs.map(i=>{
+    const d=stockData[i.storeCat]?.[i.id];
+    const qty=d!=null?d.qty:i.qty;
+    const rp=d!=null?d.reorderPt:i.reorderPt;
+    const ts=d?.stockTakeTime||"";
+    const s=stockStatus(qty,rp);
+    const sc=s==="out"?"#dc2626":s==="low"?"#d97706":"#16a34a";
+    return`<tr><td>${i.name}</td><td style="text-align:center;">${i.unit}</td>
+      <td style="text-align:center;font-weight:700;color:${sc};">${qty}</td>
+      <td style="text-align:center;font-size:11px;color:#555;">${ts||"—"}</td>
+      <td style="text-align:center;font-weight:700;color:${sc};font-size:11px;">${s.toUpperCase()}</td></tr>`;
+  }).join("");
+  const w=window.open("","_blank","width=800,height=600");
+  w.document.write(`<!DOCTYPE html><html><head><title>Stock Take — 1-Up ${branch}</title>
+  <style>body{font-family:Arial,sans-serif;padding:24px;color:#111;}h1{font-size:20px;margin-bottom:4px;}
+  .sub{font-size:12px;color:#666;margin-bottom:20px;}
+  table{width:100%;border-collapse:collapse;}th,td{padding:8px 10px;border:1px solid #ddd;font-size:13px;}
+  th{background:#111;color:#E8FF00;font-weight:700;}tr:nth-child(even){background:#f9f9f9;}
+  @media print{.no-print{display:none;}}</style></head><body>
+  <h1>📋 Stock Take Sheet — 1-Up Urban Playground</h1>
+  <div class="sub">Branch: <strong>${branch}</strong> &nbsp;|&nbsp; Printed: ${dateStr}</div>
+  <table><thead><tr><th>Item</th><th>Unit</th><th>Stock Count</th><th>Stock Take Time</th><th>Status</th></tr></thead>
+  <tbody>${rows}</tbody></table>
+  <br><button class="no-print" onclick="window.print()" style="padding:8px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;">🖨 Print / Save PDF</button>
+  </body></html>`);
+  w.document.close();
+}
+
+function addStockItem(){
+  const name=document.getElementById("new-item-name").value.trim();
+  if(!name){alert("Enter an item name.");return;}
+  const cat=document.getElementById("new-item-cat").value;
+  const unit=document.getElementById("new-item-unit").value.trim()||"unit";
+  const rp=+document.getElementById("new-item-min").value||0;
+  const oq=+document.getElementById("new-item-cost").value||0;
+  const sc=_storeCatOf(cat);
+  const id="custom_"+Date.now();
+  if(!stockData[sc])stockData[sc]={};
+  stockData[sc][id]={qty:0,reorderPt:rp,orderQty:oq,stockTakeTime:"",unit,name,subcat:cat};
+  const defArr=STOCK_DEF[sc]||STOCK_DEF.sweets;
+  defArr.push({id,name,cat,unit,qty:0,reorderPt:rp,orderQty:oq});
+  saveStockData();
+  document.getElementById("new-item-name").value="";
+  document.getElementById("new-item-unit").value="";
+  document.getElementById("new-item-min").value="";
+  document.getElementById("new-item-cost").value="";
+  renderStockTable();
+  showStockToast("✅ Item added!");
+}
+
+function showStockToast(msg){
+  let t=document.getElementById("stock-toast");
+  if(!t){t=document.createElement("div");t.id="stock-toast";t.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 24px;border-radius:24px;font-weight:700;font-size:13px;z-index:999;";document.body.appendChild(t);}
+  t.textContent=msg;t.style.display="block";
+  setTimeout(()=>{t.style.display="none";},2000);
+}
+
+
+renderDashboard();
+renderCalendar();
+renderBookings();
+renderActivities();
+loadVenue();
+loadStock();
+
+// ===== STOCK CALCULATOR =====
+let _calcId="", _calcSc="", _calcUnitTypes=[];
+
+function openStockCalc(id,sc){
+  _calcId=id; _calcSc=sc;
+  const d=stockData[sc]?.[id];
+  const defItem=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets].find(x=>x.id===id);
+  const{singleName,unitTypes}=getUnitTypes(d,defItem||{});
+  _calcUnitTypes=unitTypes;
+  document.getElementById("calc-item-name").textContent=d?.name||id;
+  const singLabel=singleName.charAt(0).toUpperCase()+singleName.slice(1)+"s";
+  document.getElementById("calc-singles-label").textContent=singLabel;
+  // Build dynamic unit rows
+  const container=document.getElementById("calc-unit-rows");
+  container.innerHTML=unitTypes.map((u,i)=>`
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">${u.name}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input id="calc-u-qty-${i}" type="number" min="0" placeholder="0" oninput="calcUpdate()"
+          style="flex:1;padding:12px 8px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:22px;font-weight:700;text-align:center;">
+        <span style="font-size:13px;color:var(--gray);">× ${u.size}</span>
+        <span style="font-size:13px;color:var(--gray);">=</span>
+        <div id="calc-u-sub-${i}" style="font-size:20px;font-weight:800;min-width:42px;text-align:right;color:var(--dark);">0</div>
+      </div>
+    </div>`).join("");
+  document.getElementById("calc-singles-qty").value="";
+  calcUpdate();
+  document.getElementById("modal-stock-calc").classList.add("open");
+  const firstInput=unitTypes.length?document.getElementById("calc-u-qty-0"):document.getElementById("calc-singles-qty");
+  if(firstInput)firstInput.focus();
+}
+function closeStockCalc(){
+  document.getElementById("modal-stock-calc").classList.remove("open");
+}
+function calcUpdate(){
+  let total=0;
+  _calcUnitTypes.forEach((u,i)=>{
+    const qty=+document.getElementById("calc-u-qty-"+i)?.value||0;
+    const sub=qty*u.size;
+    const subEl=document.getElementById("calc-u-sub-"+i);
+    if(subEl)subEl.textContent=sub;
+    total+=sub;
+  });
+  const singlesQty=+document.getElementById("calc-singles-qty").value||0;
+  document.getElementById("calc-singles-sub").textContent=singlesQty;
+  total+=singlesQty;
+  document.getElementById("calc-total").textContent=total;
+}
+function calcConfirm(){
+  const total=+document.getElementById("calc-total").textContent||0;
+  const inp=document.getElementById("qty-inp-"+_calcId);
+  if(inp){inp.value=total;skSaveQty(_calcId,_calcSc);}
+  closeStockCalc();
+  showStockToast("✅ Stock updated: "+total);
+}
+
+// ===== ITEM EDIT MODAL =====
+let _editId="", _editSc="", _editUnitTypes=[];
+
+function openStockEdit(id,sc){
+  _editId=id; _editSc=sc;
+  const d=stockData[sc]?.[id];
+  const defItem=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets].find(x=>x.id===id);
+  document.getElementById("edit-item-name").textContent=d?.name||defItem?.name||id;
+  const{singleName,unitTypes}=getUnitTypes(d,defItem||{});
+  document.getElementById("edit-single-name").value=singleName;
+  _editUnitTypes=unitTypes.map(u=>({...u}));
+  renderEditUnitTypes();
+  document.getElementById("edit-reorder-pt").value=d?.reorderPt??defItem?.reorderPt??0;
+  document.getElementById("edit-order-qty").value=d?.orderQty??defItem?.orderQty??0;
+  editUpdateHint();
+  document.getElementById("modal-stock-edit").classList.add("open");
+}
+function closeStockEdit(){ document.getElementById("modal-stock-edit").classList.remove("open"); }
+
+function renderEditUnitTypes(){
+  const el=document.getElementById("edit-unit-types-list");
+  if(!el)return;
+  if(!_editUnitTypes.length){
+    el.innerHTML=`<div style="font-size:12px;color:var(--gray);text-align:center;padding:6px 0 10px;">No unit types — singles only</div>`;
+  } else {
+    el.innerHTML=_editUnitTypes.map((u,i)=>`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:8px 10px;background:var(--gray-light);border-radius:10px;">
+        <input type="text" value="${u.name}" placeholder="Name"
+          oninput="_editUnitTypes[${i}].name=this.value;editUpdateHint();"
+          style="flex:1;padding:7px 8px;border:1.5px solid var(--gray-mid);border-radius:7px;font-size:14px;font-weight:600;">
+        <span style="font-size:12px;color:var(--gray);flex-shrink:0;">×</span>
+        <input type="number" min="1" value="${u.size}" placeholder="24"
+          oninput="_editUnitTypes[${i}].size=Math.max(1,+this.value||1);editUpdateHint();"
+          style="width:54px;padding:7px 4px;border:1.5px solid var(--or);border-radius:7px;font-size:14px;font-weight:700;text-align:center;">
+        <button onclick="_editUnitTypes.splice(${i},1);renderEditUnitTypes();"
+          style="padding:5px 9px;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:7px;cursor:pointer;font-size:13px;color:#dc2626;flex-shrink:0;">✕</button>
+      </div>`).join("");
+  }
+  editUpdateHint();
+}
+
+function editAddUnitType(){
+  const maxSize=_editUnitTypes.length?Math.max(..._editUnitTypes.map(u=>u.size)):6;
+  _editUnitTypes.push({name:"Cases",size:maxSize*4});
+  renderEditUnitTypes();
+}
+
+function editUpdateHint(){
+  const singleName=(document.getElementById("edit-single-name")?.value||"unit").trim()||"unit";
+  const largest=_editUnitTypes.length?largestUnit(_editUnitTypes,singleName):null;
+  document.getElementById("edit-rp-hint").textContent="in "+singleName+"s";
+  document.getElementById("edit-oq-hint").textContent=largest?"in "+largest.name.toLowerCase():"in "+singleName+"s";
+}
+
+function editSuggestOQ(){
+  const singleName=(document.getElementById("edit-single-name")?.value||"unit").trim();
+  const largest=_editUnitTypes.length?largestUnit(_editUnitTypes,singleName):null;
+  document.getElementById("edit-order-qty").value=largest?1:1;
+}
+
+function saveStockEdit(){
+  const singleName=(document.getElementById("edit-single-name").value.trim()||"unit");
+  const rp=Math.max(0,+document.getElementById("edit-reorder-pt").value||0);
+  const oq=Math.max(0,+document.getElementById("edit-order-qty").value||0);
+  const unitTypes=_editUnitTypes.filter(u=>u.name.trim()&&u.size>0).sort((a,b)=>b.size-a.size);
+  const item=stockData[_editSc]?.[_editId];
+  if(item){
+    item.singleName=singleName;
+    item.unitTypes=unitTypes;
+    item.reorderPt=rp; item.orderQty=oq;
+    delete item.hasCase; delete item.hasPack;
+    delete item.caseSize; delete item.packSize;
+  }
+  saveStockData();
+  closeStockEdit();
+  renderStockTable();
+  showStockToast("✅ Saved!");
+}
+</script>
+
+<!-- STOCK CALCULATOR MODAL -->
+<div class="modal-bg" id="modal-stock-calc">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div class="modal-title">🧮 Stock Calculator</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeStockCalc()">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:18px;font-weight:600;" id="calc-item-name"></div>
+
+    <!-- Dynamic unit type rows (built by openStockCalc) -->
+    <div id="calc-unit-rows"></div>
+
+    <!-- Singles (base unit - always shown) -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;" id="calc-singles-label">Singles</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input id="calc-singles-qty" type="number" min="0" placeholder="0" oninput="calcUpdate()"
+          style="flex:1;padding:12px 8px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:22px;font-weight:700;text-align:center;">
+        <span style="font-size:13px;color:var(--gray);">× 1 =</span>
+        <div id="calc-singles-sub" style="font-size:20px;font-weight:800;min-width:42px;text-align:right;color:var(--dark);">0</div>
+      </div>
+    </div>
+
+    <!-- Total -->
+    <div style="background:#111;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="color:#888;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Total Stock</div>
+      <div id="calc-total" style="color:var(--or);font-size:30px;font-weight:900;letter-spacing:-1px;">0</div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-o" style="flex:1;" onclick="calcConfirm()">✅ Confirm & Save</button>
+      <button class="btn btn-ghost" onclick="closeStockCalc()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- STOCK ITEM EDIT MODAL -->
+<div class="modal-bg" id="modal-stock-edit">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div class="modal-title">✏️ Item Setup</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeStockEdit()">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:16px;font-weight:600;" id="edit-item-name"></div>
+
+    <!-- Base unit (singles) -->
+    <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Base Unit (Singles)</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 12px;background:var(--gray-light);border-radius:10px;">
+      <input id="edit-single-name" type="text" placeholder="e.g. bottle, can, bag"
+        oninput="editUpdateHint()"
+        style="flex:1;padding:8px 10px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:14px;font-weight:600;">
+      <span style="font-size:12px;color:var(--gray);flex-shrink:0;">× 1 always</span>
+    </div>
+
+    <!-- Larger unit types -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Larger Units</div>
+      <button onclick="editAddUnitType()"
+        style="font-size:12px;padding:4px 10px;background:var(--dark);color:var(--or);border:none;border-radius:7px;cursor:pointer;font-weight:700;">+ Add</button>
+    </div>
+    <div id="edit-unit-types-list" style="margin-bottom:16px;"></div>
+
+    <!-- Reorder point -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Reorder Point</div>
+        <div id="edit-rp-hint" style="font-size:11px;color:var(--gray);font-style:italic;"></div>
+      </div>
+      <input id="edit-reorder-pt" type="number" min="0" placeholder="0"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:16px;font-weight:700;text-align:center;box-sizing:border-box;">
+    </div>
+
+    <!-- Order qty -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Order Qty</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div id="edit-oq-hint" style="font-size:11px;color:var(--gray);font-style:italic;"></div>
+          <button onclick="editSuggestOQ()" style="font-size:11px;padding:3px 8px;background:var(--gray-light);border:1.5px solid var(--gray-mid);border-radius:6px;cursor:pointer;color:var(--gray);font-weight:600;">Auto ↩</button>
+        </div>
+      </div>
+      <input id="edit-order-qty" type="number" min="0" placeholder="0"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:16px;font-weight:700;text-align:center;box-sizing:border-box;">
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-o" style="flex:1;" onclick="saveStockEdit()">💾 Save</button>
+      <button class="btn btn-ghost" onclick="closeStockEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

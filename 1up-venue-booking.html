@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>1-Up Urban Playground — Venue Hire Enquiry</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --dark:#111;--or:#E85D04;--or2:#F97316;--or-light:#FFF7ED;--or-soft:#FDBA74;
+  --green:#16a34a;--green-bg:#f0fdf4;--green-b:#86efac;
+  --red:#dc2626;--red-bg:#fef2f2;
+  --gray:#888;--gray-light:#f5f5f5;--gray-mid:#ddd;
+  --bg:#F8F8F8;--surf:#fff;
+  --yellow:#E8FF00;
+  --r:12px;--sh:0 1px 4px rgba(0,0,0,.08);--sh2:0 6px 20px rgba(0,0,0,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--dark);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* Top bar */
+.topbar{background:#111;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.topbar-logo{width:38px;height:38px;background:var(--or);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--yellow);letter-spacing:1px;line-height:1;}
+.topbar-sub{font-size:10.5px;color:#888;margin-top:1px;}
+
+/* Layout */
+.layout{max-width:640px;margin:0 auto;padding:20px 14px 60px;}
+
+/* Step bar */
+.steps{display:flex;align-items:center;gap:2px;margin-bottom:20px;}
+.step{display:flex;align-items:center;gap:5px;flex:1;font-size:10.5px;font-weight:700;color:var(--gray);}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;transition:all .2s;}
+.step.active .step-num{background:var(--or);color:#fff;box-shadow:0 2px 8px rgba(232,93,4,.4);}
+.step.done .step-num{background:var(--green);color:#fff;}
+.step.pending .step-num{background:#e5e5e5;color:#aaa;border:2px solid var(--gray-mid);}
+.step-line{flex:1;height:2px;background:var(--gray-mid);border-radius:1px;}
+.step-line.done{background:var(--green);}
+.step-label{display:none;}
+@media(min-width:400px){.step-label{display:inline;}}
+
+/* Card */
+.card{background:#fff;border:1.5px solid var(--gray-mid);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:14px;overflow:hidden;}
+.pad{padding:16px 18px;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:inherit;}
+.btn-pri{background:var(--or);color:#fff;box-shadow:0 3px 10px rgba(232,93,4,.3);}
+.btn-pri:hover{background:var(--or2);transform:translateY(-1px);}
+.btn-pri:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn-sec{background:var(--gray-light);color:var(--dark);border:1.5px solid var(--gray-mid);}
+.btn-sec:hover{background:#eee;}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 3px 10px rgba(22,163,74,.3);}
+.btn-green:hover{filter:brightness(1.05);transform:translateY(-1px);}
+.btn-green:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn-wide{width:100%;justify-content:center;padding:13px;}
+.btn-back{background:transparent;color:var(--or);font-size:13px;font-weight:700;padding:8px 4px;cursor:pointer;border:none;font-family:inherit;display:flex;align-items:center;gap:4px;}
+
+/* Form */
+label{display:block;font-size:10.5px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:9px;font-size:13.5px;font-family:inherit;color:var(--dark);outline:none;background:#fff;transition:border .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(232,93,4,.1);}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.fr{margin-bottom:12px;}
+@media(max-width:420px){.row{grid-template-columns:1fr;}}
+
+/* Event type cards */
+.etype-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.etype-card{padding:14px 10px;border:1.5px solid var(--gray-mid);border-radius:var(--r);cursor:pointer;text-align:center;transition:all .15s;background:#fff;}
+.etype-card:hover{border-color:var(--or);background:var(--or-light);}
+.etype-card.selected{border-color:var(--or);background:var(--or-light);box-shadow:0 0 0 2px var(--or);}
+.etype-icon{font-size:28px;margin-bottom:6px;}
+.etype-name{font-size:12px;font-weight:700;line-height:1.3;}
+
+/* Toggle chips (areas, services) */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
+.chip{padding:7px 12px;border:1.5px solid var(--gray-mid);border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;background:#fff;transition:all .12s;user-select:none;}
+.chip:hover{border-color:var(--or);color:var(--or);}
+.chip.selected{background:var(--or);border-color:var(--or);color:#fff;}
+
+/* Summary */
+.summary{background:var(--or-light);border:1.5px solid var(--or-soft);border-radius:var(--r);padding:14px 16px;font-size:13px;color:var(--dark);line-height:1.85;}
+.sum-row{display:flex;justify-content:space-between;padding:1px 0;gap:8px;}
+.sum-row .lbl{color:var(--gray);font-size:12px;font-weight:600;flex-shrink:0;}
+.sum-row .val{font-weight:700;text-align:right;}
+
+/* Branch pill */
+.branch-bar{display:flex;gap:6px;margin-bottom:18px;}
+.branch-btn{flex:1;padding:9px;border:1.5px solid var(--gray-mid);border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;text-align:center;transition:all .12s;font-family:inherit;}
+.branch-btn.active{background:#111;color:var(--yellow);border-color:#111;}
+
+/* Error */
+.err{color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:8px;}
+
+/* POPIA box */
+.popia-box{display:flex;align-items:flex-start;gap:10px;background:#F5F5F5;border:1.5px solid var(--gray-mid);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;cursor:pointer;font-size:12.5px;color:#444;line-height:1.6;}
+.popia-box input[type=checkbox]{width:17px;height:17px;flex-shrink:0;margin-top:2px;accent-color:var(--or);cursor:pointer;}
+
+/* Success */
+.success{text-align:center;padding:36px 20px;}
+.success-icon{font-size:56px;margin-bottom:14px;}
+.success h2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green);letter-spacing:1px;margin-bottom:8px;}
+.success p{font-size:13.5px;color:var(--gray);margin-bottom:6px;line-height:1.7;}
+.ref-badge{display:inline-block;background:#111;color:var(--yellow);font-family:'Bebas Neue',sans-serif;letter-spacing:2px;font-size:16px;padding:8px 18px;border-radius:8px;margin:10px 0;}
+
+/* Privacy modal */
+#privacy-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-end;justify-content:center;padding:0;}
+#privacy-modal.open{display:flex;}
+.priv-sheet{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:20px 18px 36px;}
+.priv-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;position:sticky;top:0;background:#fff;padding-bottom:10px;border-bottom:1.5px solid var(--gray-mid);}
+.priv-body{font-size:13px;color:#444;line-height:1.75;}
+.priv-body p.hd{font-weight:800;color:#111;margin:14px 0 4px;}
+.priv-body ul{padding-left:18px;margin:4px 0 8px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">🏟️</div>
+  <div>
+    <div class="topbar-title">1-Up Urban Playground</div>
+    <div class="topbar-sub">Venue Hire Enquiry</div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- Step indicator -->
+<div class="steps" id="step-bar">
+  <div class="step active" id="stp-1"><div class="step-num">1</div><span class="step-label">Event</span></div>
+  <div class="step-line" id="sl-1"></div>
+  <div class="step pending" id="stp-2"><div class="step-num">2</div><span class="step-label">Dates</span></div>
+  <div class="step-line" id="sl-2"></div>
+  <div class="step pending" id="stp-3"><div class="step-num">3</div><span class="step-label">Details</span></div>
+  <div class="step-line" id="sl-3"></div>
+  <div class="step pending" id="stp-4"><div class="step-num">4</div><span class="step-label">Needs</span></div>
+  <div class="step-line" id="sl-4"></div>
+  <div class="step pending" id="stp-5"><div class="step-num">5</div><span class="step-label">Confirm</span></div>
+</div>
+
+<!-- ═══ STEP 1: Branch + Event Type ═══ -->
+<div id="view-1">
+  <h2 style="font-size:17px;font-weight:800;margin-bottom:4px;">What type of event?</h2>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:14px;">Select your event type and branch to get started.</p>
+
+  <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Branch</div>
+  <div class="branch-bar">
+    <button class="branch-btn active" id="br-fourways" onclick="setBranch('fourways')">📍 Fourways Mall</button>
+    <button class="branch-btn" id="br-rosebank" onclick="setBranch('rosebank')">📍 Rosebank</button>
+  </div>
+
+  <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Event Type</div>
+  <div class="etype-grid" id="etype-grid">
+    <div class="etype-card" onclick="selectEtype(this,'Corporate Event')"><div class="etype-icon">🏢</div><div class="etype-name">Corporate Event</div></div>
+    <div class="etype-card" onclick="selectEtype(this,'Brand Activation')"><div class="etype-icon">🎯</div><div class="etype-name">Brand Activation</div></div>
+    <div class="etype-card" onclick="selectEtype(this,'Competition / Tournament')"><div class="etype-icon">🏆</div><div class="etype-name">Competition / Tournament</div></div>
+    <div class="etype-card" onclick="selectEtype(this,'School / Sports Day')"><div class="etype-icon">🏫</div><div class="etype-name">School / Sports Day</div></div>
+    <div class="etype-card" onclick="selectEtype(this,'Concert / Performance')"><div class="etype-icon">🎤</div><div class="etype-name">Concert / Performance</div></div>
+    <div class="etype-card" onclick="selectEtype(this,'Filming / Shoot')"><div class="etype-icon">🎬</div><div class="etype-name">Filming / Shoot</div></div>
+    <div class="etype-card" onclick="selectEtype(this,'Community Event')"><div class="etype-icon">🤝</div><div class="etype-name">Community Event</div></div>
+    <div class="etype-card" onclick="selectEtype(this,'Private Function')"><div class="etype-icon">🎉</div><div class="etype-name">Private Function</div></div>
+  </div>
+
+  <div class="err" id="err-1"></div>
+  <button class="btn btn-pri btn-wide" id="btn-1" onclick="go(2)" disabled>Continue →</button>
+</div>
+
+<!-- ═══ STEP 2: Dates & Times ═══ -->
+<div id="view-2" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <h2 style="font-size:17px;font-weight:800;">When is your event?</h2>
+    <button class="btn-back" onclick="go(1)">← Back</button>
+  </div>
+  <div id="etype-pill" style="display:inline-flex;align-items:center;gap:6px;background:#111;color:var(--yellow);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:14px;"></div>
+
+  <div class="row">
+    <div class="fr"><label>Start Date *</label><input id="f-date" type="date"></div>
+    <div class="fr"><label>End Date (multi-day?)</label><input id="f-edate" type="date"></div>
+  </div>
+  <div class="row">
+    <div class="fr"><label>Start Time *</label><input id="f-stime" type="time"></div>
+    <div class="fr"><label>End Time *</label><input id="f-etime" type="time"></div>
+  </div>
+
+  <div class="err" id="err-2"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-sec" onclick="go(1)">← Back</button>
+    <button class="btn btn-pri" style="flex:1;" onclick="go(3)">Continue →</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 3: Your Details ═══ -->
+<div id="view-3" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <h2 style="font-size:17px;font-weight:800;">Your Details</h2>
+    <button class="btn-back" onclick="go(2)">← Back</button>
+  </div>
+
+  <div class="row">
+    <div class="fr"><label>First Name *</label><input id="f-fname" placeholder="e.g. Sipho"></div>
+    <div class="fr"><label>Last Name *</label><input id="f-lname" placeholder="e.g. Dlamini"></div>
+  </div>
+  <div class="fr"><label>Company / Organisation</label><input id="f-company" placeholder="e.g. Nike SA (leave blank if personal)"></div>
+  <div class="row">
+    <div class="fr"><label>WhatsApp / Phone *</label><input id="f-phone" type="tel" placeholder="e.g. 082 000 0000"></div>
+    <div class="fr"><label>Email Address *</label><input id="f-email" type="email" placeholder="e.g. sipho@company.co.za"></div>
+  </div>
+
+  <div class="err" id="err-3"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-sec" onclick="go(2)">← Back</button>
+    <button class="btn btn-pri" style="flex:1;" onclick="go(4)">Continue →</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 4: Requirements ═══ -->
+<div id="view-4" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <h2 style="font-size:17px;font-weight:800;">Event Requirements</h2>
+    <button class="btn-back" onclick="go(3)">← Back</button>
+  </div>
+
+  <div class="fr"><label>Expected Attendance *</label><input id="f-attendance" type="number" min="1" placeholder="e.g. 200"></div>
+
+  <div class="fr">
+    <label style="margin-bottom:8px;">Areas Needed</label>
+    <div class="chips" id="areas-chips">
+      <div class="chip" onclick="toggleChip(this)">🛹 Skatepark</div>
+      <div class="chip" onclick="toggleChip(this)">🎮 Esports Zone</div>
+      <div class="chip" onclick="toggleChip(this)">⚽ Soccer Cage</div>
+      <div class="chip" onclick="toggleChip(this)">💃 Dance Arena</div>
+      <div class="chip" onclick="toggleChip(this)">☕ Café Area</div>
+      <div class="chip" onclick="toggleChip(this)">🛍️ Retail Area</div>
+      <div class="chip" onclick="toggleChip(this)">🌇 Rooftop (Phase 2)</div>
+      <div class="chip" onclick="toggleChip(this)">🏟️ Entire Venue</div>
+    </div>
+  </div>
+
+  <div class="fr">
+    <label style="margin-bottom:8px;">Services Required</label>
+    <div class="chips" id="services-chips">
+      <div class="chip" onclick="toggleChip(this)">🔊 PA / Sound System</div>
+      <div class="chip" onclick="toggleChip(this)">💡 Lighting Rig</div>
+      <div class="chip" onclick="toggleChip(this)">🍕 Catering</div>
+      <div class="chip" onclick="toggleChip(this)">☕ Coffee Bar</div>
+      <div class="chip" onclick="toggleChip(this)">📸 Photo / Video</div>
+      <div class="chip" onclick="toggleChip(this)">🎤 MC / Host</div>
+      <div class="chip" onclick="toggleChip(this)">🛡️ Security</div>
+      <div class="chip" onclick="toggleChip(this)">🎨 Branding / Décor</div>
+    </div>
+  </div>
+
+  <div class="fr"><label>Additional Notes / Requirements</label><textarea id="f-notes" rows="3" placeholder="Layout needs, load-in times, parking, special requirements…"></textarea></div>
+
+  <div class="err" id="err-4"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-sec" onclick="go(3)">← Back</button>
+    <button class="btn btn-pri" style="flex:1;" onclick="go(5)">Review Enquiry →</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 5: Confirm + POPIA ═══ -->
+<div id="view-5" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <h2 style="font-size:17px;font-weight:800;">Confirm Enquiry</h2>
+    <button class="btn-back" onclick="go(4)">← Back</button>
+  </div>
+
+  <div class="summary" id="confirm-summary"></div>
+
+  <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:var(--r);padding:11px 14px;margin:12px 0;font-size:12px;color:#075985;line-height:1.65;">
+    💬 We'll review your enquiry and get back to you within <strong>1 business day</strong> to discuss availability and pricing.
+  </div>
+
+  <label class="popia-box">
+    <input type="checkbox" id="popia-cb" onchange="updateSubmitBtn()">
+    <span>I agree that my personal information (name, phone number and email address) may be used to process this venue hire enquiry and for 1-Up Urban Playground to contact me, in accordance with <strong>POPIA</strong>. &nbsp;<a href="javascript:void(0)" onclick="document.getElementById('privacy-modal').classList.add('open')" style="color:var(--or);font-weight:700;text-decoration:underline;">View Privacy Notice</a></span>
+  </label>
+
+  <div class="err" id="err-5"></div>
+  <button class="btn btn-green btn-wide" id="btn-submit" onclick="submitEnquiry()" disabled>✅ Submit Venue Hire Enquiry</button>
+</div>
+
+<!-- ═══ SUCCESS ═══ -->
+<div id="view-success" style="display:none;">
+  <div class="card success">
+    <div class="success-icon">🎉</div>
+    <h2>Enquiry Submitted!</h2>
+    <p>Thanks — your venue hire enquiry has been received by the 1-Up team.</p>
+    <p style="margin-top:6px;">Your reference number:</p>
+    <div class="ref-badge" id="ref-num"></div>
+    <p style="margin-top:10px;font-size:12px;">We'll be in touch within <strong>1 business day</strong> to confirm availability and discuss pricing.</p>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">
+      <a href="https://wa.me/27000000000" style="text-decoration:none;">
+        <button class="btn btn-pri btn-wide">💬 WhatsApp Us</button>
+      </a>
+      <button class="btn btn-sec btn-wide" onclick="resetForm()">Submit Another Enquiry</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /layout -->
+
+<!-- PRIVACY MODAL -->
+<div id="privacy-modal">
+  <div class="priv-sheet">
+    <div class="priv-head">
+      <div style="font-weight:800;font-size:16px;">🔒 Privacy Notice</div>
+      <button onclick="document.getElementById('privacy-modal').classList.remove('open')" style="background:var(--gray-light);border:1.5px solid var(--gray-mid);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;">✕ Close</button>
+    </div>
+    <div style="font-size:11px;color:var(--gray);margin-bottom:12px;">Effective date: May 2025</div>
+    <div style="background:var(--or-light);border-left:3px solid var(--or);border-radius:0 8px 8px 0;padding:11px 14px;margin-bottom:14px;font-size:13px;line-height:1.65;">
+      Your privacy matters to us. This notice explains what personal information we collect, why we collect it, and how we protect it — in compliance with the <strong>Protection of Personal Information Act, 4 of 2013 (POPIA)</strong>.
+    </div>
+    <div class="priv-body">
+      <p class="hd">1. Who We Are</p>
+      <p>1-Up Urban Playground is an entertainment venue operating in South Africa. We are the <strong>responsible party</strong> for personal information collected through this booking form.</p>
+
+      <p class="hd">2. What Information We Collect</p>
+      <p>When you submit a venue hire enquiry, we collect:</p>
+      <ul><li>Full name</li><li>Phone / WhatsApp number</li><li>Email address</li><li>Company or organisation (if applicable)</li><li>Event details (type, date, attendance)</li></ul>
+
+      <p class="hd">3. Why We Collect It</p>
+      <p>We use your information only to:</p>
+      <ul><li>Process and respond to your venue hire enquiry</li><li>Contact you regarding availability and pricing</li><li>Generate a quote or venue hire agreement</li><li>Respond to queries or feedback</li></ul>
+      <p>We will <strong>not</strong> use your information for unsolicited marketing or share it with third parties without your explicit consent.</p>
+
+      <p class="hd">4. How Long We Keep Your Information</p>
+      <ul><li><strong>Enquiry records:</strong> up to 12 months after your event date, then securely deleted.</li><li><strong>Financial records:</strong> up to 5 years as required by South African tax regulations.</li></ul>
+
+      <p class="hd">5. How We Protect Your Information</p>
+      <p>Your data is stored in a secured, access-controlled system. Access is restricted to authorised 1-Up Urban Playground staff only.</p>
+
+      <p class="hd">6. Sharing Your Information</p>
+      <p>We do not sell, rent, or share your personal information with any third party, except where required to deliver our service or by law.</p>
+
+      <p class="hd">7. Your Rights Under POPIA</p>
+      <p>You have the right to:</p>
+      <ul>
+        <li><strong>Access</strong> the personal information we hold about you</li>
+        <li><strong>Correct</strong> any inaccurate information</li>
+        <li><strong>Request deletion</strong> of your personal information</li>
+        <li><strong>Object</strong> to the processing of your personal information</li>
+        <li><strong>Lodge a complaint</strong> with the Information Regulator of South Africa</li>
+      </ul>
+      <div style="background:#f5f5f5;border:1.5px solid var(--gray-mid);border-radius:var(--r);padding:14px;margin-top:14px;font-size:12.5px;line-height:1.8;">
+        <strong>Contact us to exercise these rights:</strong><br>
+        📍 Fourways Mall: Shop CF02, 11 Ruby Close, Fourways<br>
+        📍 Rosebank Mall, Rosebank, Johannesburg<br><br>
+        <strong>Information Regulator (South Africa):</strong><br>
+        <a href="https://www.justice.gov.za/inforeg/" target="_blank" style="color:var(--or);">www.justice.gov.za/inforeg</a> &nbsp;·&nbsp;
+        <a href="mailto:inforeg@justice.gov.za" style="color:var(--or);">inforeg@justice.gov.za</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var branch='fourways';
+var selectedEtype='';
+var currentStep=1;
+
+// ─── Branch ───
+function setBranch(b){
+  branch=b;
+  document.getElementById('br-fourways').className='branch-btn'+(b==='fourways'?' active':'');
+  document.getElementById('br-rosebank').className='branch-btn'+(b==='rosebank'?' active':'');
+}
+
+// ─── Event type ───
+function selectEtype(el,name){
+  document.querySelectorAll('.etype-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEtype=name;
+  document.getElementById('btn-1').disabled=false;
+  document.getElementById('err-1').textContent='';
+}
+
+// ─── Chips ───
+function toggleChip(el){el.classList.toggle('selected');}
+function getChips(containerId){
+  return [...document.querySelectorAll('#'+containerId+' .chip.selected')].map(c=>c.textContent.trim());
+}
+
+// ─── Step navigation ───
+function go(n){
+  if(!validate(currentStep))return;
+  showStep(n);
+}
+
+function showStep(n){
+  [1,2,3,4,5].forEach(i=>{
+    document.getElementById('view-'+i).style.display=i===n?'':'none';
+  });
+  // Update step bar
+  [1,2,3,4,5].forEach(i=>{
+    const el=document.getElementById('stp-'+i);
+    el.className='step '+(i<n?'done':i===n?'active':'pending');
+    if(i<5){
+      const ln=document.getElementById('sl-'+i);
+      if(ln)ln.className='step-line'+(i<n?' done':'');
+    }
+  });
+  currentStep=n;
+  if(n===2){
+    // Prefill today if empty
+    if(!document.getElementById('f-date').value){
+      document.getElementById('f-date').value=todayStr();
+    }
+    document.getElementById('etype-pill').textContent=selectedEtype;
+  }
+  if(n===5)buildSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+// ─── Validation ───
+function validate(step){
+  const err=document.getElementById('err-'+step);
+  if(err)err.textContent='';
+  if(step===1){
+    if(!selectedEtype){document.getElementById('err-1').textContent='Please select an event type.';return false;}
+  }
+  if(step===2){
+    const d=document.getElementById('f-date').value;
+    const st=document.getElementById('f-stime').value;
+    const et=document.getElementById('f-etime').value;
+    if(!d){document.getElementById('err-2').textContent='Please select a start date.';return false;}
+    if(!st||!et){document.getElementById('err-2').textContent='Please enter start and end times.';return false;}
+  }
+  if(step===3){
+    const fn=document.getElementById('f-fname').value.trim();
+    const ln=document.getElementById('f-lname').value.trim();
+    const ph=document.getElementById('f-phone').value.trim();
+    const em=document.getElementById('f-email').value.trim();
+    if(!fn||!ln){document.getElementById('err-3').textContent='Please enter your first and last name.';return false;}
+    if(!ph){document.getElementById('err-3').textContent='Please enter a phone number.';return false;}
+    if(!em||!em.includes('@')){document.getElementById('err-3').textContent='Please enter a valid email address.';return false;}
+  }
+  if(step===4){
+    const att=document.getElementById('f-attendance').value;
+    if(!att||+att<1){document.getElementById('err-4').textContent='Please enter expected attendance.';return false;}
+  }
+  return true;
+}
+
+// ─── Submit button ───
+function updateSubmitBtn(){
+  document.getElementById('btn-submit').disabled=!document.getElementById('popia-cb').checked;
+}
+
+// ─── Build summary ───
+function buildSummary(){
+  const fn=document.getElementById('f-fname').value.trim();
+  const ln=document.getElementById('f-lname').value.trim();
+  const co=document.getElementById('f-company').value.trim();
+  const ph=document.getElementById('f-phone').value.trim();
+  const em=document.getElementById('f-email').value.trim();
+  const d=document.getElementById('f-date').value;
+  const ed=document.getElementById('f-edate').value;
+  const st=document.getElementById('f-stime').value;
+  const et=document.getElementById('f-etime').value;
+  const att=document.getElementById('f-attendance').value;
+  const notes=document.getElementById('f-notes').value.trim();
+  const areas=getChips('areas-chips');
+  const services=getChips('services-chips');
+  const branchLabel=branch==='fourways'?'Fourways Mall':'Rosebank';
+
+  function fmtDate(s){if(!s)return'';const dt=new Date(s+'T00:00:00');return dt.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'});}
+
+  let rows=[
+    ['Branch',branchLabel],
+    ['Event Type',selectedEtype],
+    ['Date',fmtDate(d)+(ed&&ed!==d?' → '+fmtDate(ed):'')],
+    ['Time',st+' – '+et],
+    ['Name',fn+' '+ln+(co?' ('+co+')':'')],
+    ['Phone',ph],
+    ['Email',em],
+    ['Attendance',att+' people'],
+  ];
+  if(areas.length)rows.push(['Areas',areas.join(', ')]);
+  if(services.length)rows.push(['Services',services.join(', ')]);
+  if(notes)rows.push(['Notes',notes]);
+
+  document.getElementById('confirm-summary').innerHTML=rows.map(r=>
+    `<div class="sum-row"><span class="lbl">${r[0]}</span><span class="val">${r[1]}</span></div>`
+  ).join('');
+}
+
+// ─── Submit ───
+function submitEnquiry(){
+  if(!document.getElementById('popia-cb').checked)return;
+  const fn=document.getElementById('f-fname').value.trim();
+  const ln=document.getElementById('f-lname').value.trim();
+  const co=document.getElementById('f-company').value.trim();
+  const name=(co?co+' / ':'')+fn+' '+ln;
+  const contact=fn+' '+ln;
+  const ph=document.getElementById('f-phone').value.trim();
+  const em=document.getElementById('f-email').value.trim();
+  const d=document.getElementById('f-date').value;
+  const ed=document.getElementById('f-edate').value;
+  const st=document.getElementById('f-stime').value;
+  const et=document.getElementById('f-etime').value;
+  const att=+document.getElementById('f-attendance').value||0;
+  const notes=document.getElementById('f-notes').value.trim();
+  const areas=getChips('areas-chips');
+  const services=getChips('services-chips');
+
+  const id=Date.now();
+  const ref='1UP-VH-'+String(id).slice(-6).toUpperCase();
+
+  const booking={
+    id,ref,
+    branch,
+    name,
+    contact,
+    phone:ph,
+    email:em,
+    etype:selectedEtype,
+    attendance:att,
+    date:d,
+    edate:ed||d,
+    stime:st,
+    etime:et,
+    areas,
+    services,
+    notes,
+    status:'enquiry',
+    price:'',
+    deposit:'',
+    submittedAt:new Date().toISOString()
+  };
+
+  // Save to same localStorage key as staff app
+  try{
+    const key='1up_venue_'+branch;
+    const existing=JSON.parse(localStorage.getItem(key)||'[]');
+    existing.push(booking);
+    localStorage.setItem(key,JSON.stringify(existing));
+  }catch(e){console.warn('localStorage unavailable',e);}
+
+  // Show success
+  [1,2,3,4,5].forEach(i=>document.getElementById('view-'+i).style.display='none');
+  document.getElementById('view-success').style.display='';
+  document.getElementById('ref-num').textContent=ref;
+  document.getElementById('step-bar').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── Reset ───
+function resetForm(){
+  selectedEtype='';branch='fourways';currentStep=1;
+  document.querySelectorAll('.etype-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+  ['f-date','f-edate','f-stime','f-etime','f-fname','f-lname','f-company','f-phone','f-email','f-attendance','f-notes'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('popia-cb').checked=false;
+  document.getElementById('btn-submit').disabled=true;
+  document.getElementById('btn-1').disabled=true;
+  document.getElementById('view-success').style.display='none';
+  document.getElementById('step-bar').style.display='';
+  setBranch('fourways');
+  showStep(1);
+}
+
+// Set min date to today
+document.getElementById('f-date').min=todayStr();
+document.getElementById('f-edate').min=todayStr();
+document.getElementById('f-date').addEventListener('change',function(){
+  document.getElementById('f-edate').min=this.value||todayStr();
+});
+</script>
+</body>
+</html>

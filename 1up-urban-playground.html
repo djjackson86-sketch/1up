@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Urban Playground — Fourways</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --orange: #FF5C1A;
+      --orange2: #FF7A3D;
+      --black: #080808;
+      --dark: #0f0f0f;
+      --card-dark: #141414;
+      --white: #FFFFFF;
+      --offwhite: #e0e0e0;
+      --gray: #555;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      padding: 22px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.4s, padding 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(8,8,8,0.95);
+      backdrop-filter: blur(12px);
+      padding: 14px 48px;
+      border-bottom: 1px solid rgba(255,92,26,0.15);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 38px;
+      height: 38px;
+    }
+    .nav-logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      line-height: 1;
+    }
+    .nav-logo-text span { color: var(--orange); }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--offwhite);
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--orange); }
+    .nav-cta {
+      background: var(--orange);
+      color: var(--black);
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 11px 24px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      text-decoration: none;
+    }
+    .nav-cta:hover { background: var(--orange2); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 600px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #hero-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8,8,8,0.2) 0%, rgba(8,8,8,0.6) 70%, var(--black) 100%);
+      z-index: 1;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px;
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 14vw, 14rem);
+      line-height: 0.88;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      opacity: 0;
+    }
+    .hero-title .line-orange { color: var(--orange); }
+    .hero-sub {
+      font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--offwhite);
+      margin-top: 28px;
+      opacity: 0;
+    }
+    .hero-actions {
+      margin-top: 44px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: all;
+    }
+    .btn-primary {
+      background: var(--orange);
+      color: var(--black);
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 16px 40px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--orange2); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 16px 40px;
+      border: 1px solid rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-outline:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      transform: translateY(-2px);
+    }
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--orange), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.3); }
+    }
+    .scroll-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+
+    /* ── TICKER ── */
+    #ticker {
+      background: var(--orange);
+      padding: 14px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .ticker-track {
+      display: inline-flex;
+      animation: tickerRoll 22s linear infinite;
+    }
+    .ticker-item {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.12em;
+      color: var(--black);
+      padding: 0 32px;
+    }
+    .ticker-dot {
+      color: rgba(0,0,0,0.3);
+      padding: 0 6px;
+    }
+    @keyframes tickerRoll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── SECTION COMMONS ── */
+    section { padding: 100px 0; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 20px;
+      display: block;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 6vw, 6rem);
+      line-height: 0.9;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── MANIFESTO ── */
+    #manifesto {
+      background: var(--dark);
+      overflow: hidden;
+    }
+    .manifesto-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .manifesto-left .big-statement {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 6vw, 6.5rem);
+      line-height: 0.92;
+      color: var(--white);
+    }
+    .manifesto-left .big-statement .accent { color: var(--orange); }
+    .manifesto-right {
+      padding-top: 20px;
+    }
+    .manifesto-right p {
+      font-size: 1.1rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: #aaa;
+      margin-bottom: 28px;
+    }
+    .manifesto-right p strong { color: var(--white); font-weight: 700; }
+    .manifesto-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 48px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .stat-item {
+      padding: 28px 0 0;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .stat-item:last-child { border-right: none; padding-left: 24px; }
+    .stat-item:nth-child(2) { padding-left: 24px; }
+    .stat-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      color: var(--orange);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-top: 6px;
+    }
+
+    /* ── ACTIVITIES ── */
+    #activities {
+      background: var(--black);
+    }
+    .activities-header {
+      text-align: center;
+      margin-bottom: 70px;
+    }
+    .activities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .activity-card {
+      position: relative;
+      height: 340px;
+      cursor: pointer;
+      perspective: 1200px;
+    }
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .activity-card:hover .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 36px;
+    }
+    .card-front {
+      background: var(--card-dark);
+      border: 1px solid rgba(255,255,255,0.04);
+      overflow: hidden;
+    }
+    .card-front::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-glow, transparent);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .activity-card:hover .card-front::before { opacity: 0.06; }
+    .card-icon {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      line-height: 1;
+      transition: transform 0.3s;
+    }
+    .activity-card:hover .card-icon { transform: scale(1.1); }
+    .card-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.4rem;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    .card-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-top: 10px;
+    }
+    .card-corner-accent {
+      position: absolute;
+      top: 0; left: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--card-glow, var(--orange));
+    }
+    .card-back {
+      background: var(--orange);
+      transform: rotateY(180deg);
+    }
+    .card-back .back-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      color: var(--black);
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .card-back .back-desc {
+      font-size: 0.92rem;
+      color: rgba(0,0,0,0.75);
+      text-align: center;
+      line-height: 1.6;
+    }
+    .card-back .back-cta {
+      margin-top: 20px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--black);
+      border-bottom: 2px solid var(--black);
+      padding-bottom: 2px;
+    }
+
+    /* ── FEATURED REEL ── */
+    #featured {
+      background: var(--black);
+      padding: 0;
+      overflow: hidden;
+    }
+    .featured-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 600px;
+    }
+    .featured-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 72px 80px 48px;
+      background: var(--dark);
+    }
+    .featured-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 6vw, 7rem);
+      line-height: 0.88;
+      margin: 16px 0 28px;
+    }
+    .featured-title .line-stroke {
+      -webkit-text-stroke: 1px var(--white);
+      color: transparent;
+    }
+    .featured-quote {
+      font-size: 1rem;
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.7;
+      color: #888;
+      border-left: 3px solid var(--orange);
+      padding-left: 20px;
+      margin-bottom: 36px;
+    }
+    .featured-media {
+      position: relative;
+      background: #000;
+      overflow: hidden;
+    }
+    .featured-media .ig-embed-wrapper {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .ig-embed-wrapper .instagram-media {
+      max-width: 100% !important;
+      min-width: unset !important;
+      width: 100% !important;
+    }
+
+    /* ── EVENTS ── */
+    #events {
+      background: var(--dark);
+    }
+    .events-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 60px;
+    }
+    .events-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr 1fr;
+      gap: 2px;
+    }
+    .event-card {
+      background: var(--card-dark);
+      padding: 36px;
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: border-color 0.3s, transform 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    .event-card:hover {
+      border-color: rgba(255,92,26,0.35);
+      transform: translateY(-4px);
+    }
+    .event-card.featured-event {
+      background: var(--orange);
+    }
+    .event-card.featured-event .event-date,
+    .event-card.featured-event .event-name,
+    .event-card.featured-event .event-desc,
+    .event-card.featured-event .event-tag { color: var(--black); }
+    .event-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 16px;
+    }
+    .event-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.4rem;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .event-date {
+      font-size: 0.8rem;
+      color: var(--gray);
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+    .event-desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #888;
+      flex: 1;
+    }
+    .event-card.featured-event .event-desc { color: rgba(0,0,0,0.7); }
+    .event-prize {
+      margin-top: 24px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem;
+      color: var(--black);
+      line-height: 1;
+    }
+    .event-prize small {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* ── INSTAGRAM FEED ── */
+    #feed {
+      background: var(--black);
+    }
+    .feed-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .feed-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .feed-embed-wrapper {
+      background: var(--card-dark);
+      border: 1px solid rgba(255,255,255,0.04);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 450px;
+    }
+    .feed-embed-wrapper .instagram-media {
+      max-width: 100% !important;
+      min-width: unset !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+
+    /* ── VISIT ── */
+    #visit {
+      background: var(--dark);
+      overflow: hidden;
+    }
+    .visit-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      min-height: 500px;
+    }
+    .visit-info {
+      padding: 80px 64px 80px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .visit-detail-block {
+      margin-top: 48px;
+    }
+    .visit-detail-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 12px;
+    }
+    .visit-detail-value {
+      font-size: 1.05rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--offwhite);
+    }
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.9rem;
+    }
+    .hours-row .day { color: var(--gray); }
+    .hours-row .time { color: var(--white); font-weight: 600; }
+    .visit-phone {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 36px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: var(--white);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .visit-phone:hover { color: var(--orange); }
+    .visit-phone .phone-icon { color: var(--orange); font-size: 1.5rem; }
+    .visit-map {
+      position: relative;
+      overflow: hidden;
+    }
+    .visit-map iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      min-height: 500px;
+      filter: saturate(0) invert(0.9);
+      opacity: 0.7;
+      transition: filter 0.4s, opacity 0.4s;
+    }
+    .visit-map:hover iframe {
+      filter: saturate(1) invert(0);
+      opacity: 1;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      padding: 60px 0 36px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-brand .footer-logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+    .footer-brand .footer-logo-text span { color: var(--orange); }
+    .footer-brand p {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--gray);
+      max-width: 280px;
+    }
+    .footer-socials {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .social-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1rem;
+      color: var(--offwhite);
+      transition: background 0.2s, color 0.2s;
+    }
+    .social-btn:hover { background: var(--orange); color: var(--black); }
+    .footer-col h4 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 20px;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.88rem;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-col ul li a:hover { color: var(--white); }
+    .footer-bottom {
+      padding-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-bottom p {
+      font-size: 0.78rem;
+      color: var(--gray);
+    }
+    .footer-bottom p a { color: var(--orange); text-decoration: none; }
+
+    /* ── REVEAL ANIMATIONS ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ── GLITCH ── */
+    .glitch {
+      position: relative;
+      display: inline-block;
+    }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+    }
+    .glitch::before {
+      color: var(--orange);
+      clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+      animation: glitchTop 4s infinite linear;
+      opacity: 0;
+    }
+    .glitch::after {
+      color: #00f;
+      clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+      animation: glitchBot 4s infinite linear;
+      opacity: 0;
+    }
+    @keyframes glitchTop {
+      0%, 85%, 100% { opacity: 0; transform: none; }
+      86% { opacity: 1; transform: translateX(-3px); }
+      88% { opacity: 1; transform: translateX(3px); }
+      90% { opacity: 0; }
+    }
+    @keyframes glitchBot {
+      0%, 88%, 100% { opacity: 0; transform: none; }
+      89% { opacity: 1; transform: translateX(3px); }
+      91% { opacity: 1; transform: translateX(-3px); }
+      93% { opacity: 0; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .activities-grid { grid-template-columns: repeat(2, 1fr); }
+      .events-grid { grid-template-columns: 1fr 1fr; }
+      .events-grid .featured-event { grid-column: span 2; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      nav { padding: 18px 24px; }
+      nav.scrolled { padding: 12px 24px; }
+      .nav-links, .nav-cta { display: none; }
+      .container { padding: 0 24px; }
+      .manifesto-inner { grid-template-columns: 1fr; gap: 40px; }
+      .activities-grid { grid-template-columns: 1fr; }
+      .featured-inner { grid-template-columns: 1fr; }
+      .featured-media { min-height: 480px; }
+      .events-grid { grid-template-columns: 1fr; }
+      .events-grid .featured-event { grid-column: span 1; }
+      .feed-grid { grid-template-columns: 1fr; }
+      .visit-inner { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── NAVIGATION ── -->
+  <nav id="main-nav">
+    <a href="#" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="30" fill="#FF5C1A"/>
+        <!-- Radial spike logo inspired by 1UP -->
+        <rect x="26" y="12" width="8" height="14" rx="1" fill="#080808"/>
+        <rect x="26" y="34" width="8" height="14" rx="1" fill="#080808"/>
+        <rect x="12" y="26" width="14" height="8" rx="1" fill="#080808"/>
+        <rect x="34" y="26" width="14" height="8" rx="1" fill="#080808"/>
+        <rect x="17" y="17" width="8" height="8" rx="1" transform="rotate(45 21 21)" fill="#080808"/>
+        <rect x="35" y="17" width="8" height="8" rx="1" transform="rotate(45 39 21)" fill="#080808"/>
+        <rect x="17" y="35" width="8" height="8" rx="1" transform="rotate(45 21 39)" fill="#080808"/>
+        <rect x="35" y="35" width="8" height="8" rx="1" transform="rotate(45 39 39)" fill="#080808"/>
+        <rect x="24" y="24" width="12" height="12" rx="2" fill="#080808"/>
+      </svg>
+      <div>
+        <div class="nav-logo-text"><span>1UP</span> PLAYGROUND</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#activities">Activities</a></li>
+      <li><a href="#events">Events</a></li>
+      <li><a href="#feed">Gallery</a></li>
+      <li><a href="#visit">Visit</a></li>
+    </ul>
+    <a href="#visit" class="nav-cta">Find Us</a>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section id="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow" id="hero-eyebrow">Fourways Mall · Johannesburg</p>
+      <h1 class="hero-title" id="hero-title">
+        <div class="glitch" data-text="THE URBAN">THE URBAN</div><br>
+        <span class="line-orange glitch" data-text="PLAYGROUND">PLAYGROUND</span>
+      </h1>
+      <p class="hero-sub" id="hero-sub">Creating unique experiences for the next gen</p>
+      <div class="hero-actions" id="hero-actions">
+        <a href="#activities" class="btn-primary">Explore the Space</a>
+        <a href="#visit" class="btn-outline">Get Directions</a>
+      </div>
+    </div>
+    <div class="hero-scroll-hint" id="hero-scroll">
+      <div class="scroll-line"></div>
+      <span class="scroll-label">Scroll</span>
+    </div>
+  </section>
+
+  <!-- ── TICKER ── -->
+  <div id="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <!-- Two identical sets for seamless loop -->
+      <span class="ticker-item">SKATEBOARDING</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">BMX</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">PARKOUR</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">STREET SOCCER</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">ESPORTS</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">URBAN DANCE</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">YOU CAN CODE</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">TEQBALL</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">STREET FASHION</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">BOBA CAFÉ</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">SKATEBOARDING</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">BMX</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">PARKOUR</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">STREET SOCCER</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">ESPORTS</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">URBAN DANCE</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">YOU CAN CODE</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">TEQBALL</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">STREET FASHION</span><span class="ticker-dot">◆</span>
+      <span class="ticker-item">BOBA CAFÉ</span><span class="ticker-dot">◆</span>
+    </div>
+  </div>
+
+  <!-- ── MANIFESTO ── -->
+  <section id="manifesto">
+    <div class="container">
+      <div class="manifesto-inner">
+        <div class="manifesto-left reveal">
+          <p class="big-statement">YOUR<br>ENVIRONMENT<br>SHAPES<br><span class="accent">YOUR FUTURE.</span></p>
+        </div>
+        <div class="manifesto-right reveal reveal-delay-2">
+          <span class="section-label">Our Mission</span>
+          <p>The Urban Playground is a <strong>world-first experiential hub</strong> where community, sport and creativity collide. A place to play, create and belong.</p>
+          <p>Skateboarding is now an Olympic sport — yet safe, indoor spaces for young people to learn and grow are rare. We changed that. <strong>1UP is that space.</strong></p>
+          <div class="manifesto-stats">
+            <div class="stat-item">
+              <div class="stat-number">6+</div>
+              <div class="stat-label">Urban Sports</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">7</div>
+              <div class="stat-label">Days a Week</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">5+</div>
+              <div class="stat-label">Years & Up</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ACTIVITIES ── -->
+  <section id="activities">
+    <div class="container">
+      <div class="activities-header reveal">
+        <span class="section-label">What We Offer</span>
+        <h2 class="section-title">FIND YOUR<br><span style="color:var(--orange)">GAME.</span></h2>
+        <p style="color:var(--gray);margin-top:16px;font-size:0.92rem;letter-spacing:0.05em;">Hover any card to explore</p>
+      </div>
+      <div class="activities-grid">
+
+        <div class="activity-card reveal" style="--card-glow:#FF5C1A">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-corner-accent" style="background:#FF5C1A"></div>
+              <div class="card-icon">🛹</div>
+              <div class="card-name">SKATE &amp; BMX</div>
+              <div class="card-tag">Indoor · All levels</div>
+            </div>
+            <div class="card-back">
+              <div class="back-title">SKATE &amp; BMX</div>
+              <div class="back-desc">Indoor skatepark and BMX ramps designed for all skill levels. From your first kickflip to advanced tricks — this is your arena.</div>
+              <div class="back-cta">Sessions available daily</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card reveal reveal-delay-1" style="--card-glow:#00BFFF">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-corner-accent" style="background:#00BFFF"></div>
+              <div class="card-icon">⚽</div>
+              <div class="card-name">STREET SOCCER</div>
+              <div class="card-tag">Cages · Leagues · Academy</div>
+            </div>
+            <div class="card-back" style="background:#00BFFF">
+              <div class="back-title">STREET SOCCER</div>
+              <div class="back-desc">Street-style soccer cages, social leagues, and a full academy. Teqball courts too. Every level, every age — just bring the energy.</div>
+              <div class="back-cta">Join a league</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card reveal reveal-delay-2" style="--card-glow:#A855F7">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-corner-accent" style="background:#A855F7"></div>
+              <div class="card-icon">🕺</div>
+              <div class="card-name">URBAN DANCE</div>
+              <div class="card-tag">Studio · Events · Battles</div>
+            </div>
+            <div class="card-back" style="background:#A855F7">
+              <div class="back-title">URBAN DANCE</div>
+              <div class="back-desc">Dedicated dance studio with regular sessions and events. Own your expression. The floor is yours — no judgement, just movement.</div>
+              <div class="back-cta">Own Your Expression</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card reveal reveal-delay-1" style="--card-glow:#00FF87">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-corner-accent" style="background:#00FF87"></div>
+              <div class="card-icon">🎮</div>
+              <div class="card-name">ESPORTS</div>
+              <div class="card-tag">Gaming · Tournaments · rAge Partner</div>
+            </div>
+            <div class="card-back" style="background:#00FF87">
+              <div class="back-title">ESPORTS</div>
+              <div class="back-desc">Purpose-built esports and gaming arena with modern hardware. Official rAge and NAG partner. Compete, train, and grind with the best.</div>
+              <div class="back-cta">Join a tournament</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card reveal reveal-delay-2" style="--card-glow:#FF5C1A">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-corner-accent" style="background:#FF5C1A"></div>
+              <div class="card-icon">🏃</div>
+              <div class="card-name">PARKOUR</div>
+              <div class="card-tag">Training zones · World Chase Tag</div>
+            </div>
+            <div class="card-back">
+              <div class="back-title">PARKOUR</div>
+              <div class="back-desc">Dedicated parkour training zones and a World Chase Tag partnership. Phase 2 adds rooftop 3v3 basketball courts and expanded obstacles.</div>
+              <div class="back-cta">Train with us</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card reveal reveal-delay-3" style="--card-glow:#FFD700">
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-corner-accent" style="background:#FFD700"></div>
+              <div class="card-icon">💻</div>
+              <div class="card-name">YOU CAN CODE</div>
+              <div class="card-tag">Digital skills · Game dev · After-school</div>
+            </div>
+            <div class="card-back" style="background:#FFD700">
+              <div class="back-title">YOU CAN CODE</div>
+              <div class="back-desc">Introduction to Code and Game Development courses for the next generation. After-school digital literacy programs. Your future starts here.</div>
+              <div class="back-cta">Enrol now</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURED POST ── -->
+  <section id="featured">
+    <div class="featured-inner">
+      <div class="featured-text container" style="max-width:none">
+        <span class="section-label reveal">Community</span>
+        <h2 class="featured-title reveal reveal-delay-1">
+          OWN YOUR<br>
+          <span class="line-stroke">EXPRESSION</span>
+        </h2>
+        <p class="featured-quote reveal reveal-delay-2">
+          "The Urban Playground is a culture-driven space where community, sport and creativity collide. A place to play, create and belong."
+        </p>
+        <a href="https://www.instagram.com/1up_4ways/" target="_blank" class="btn-primary reveal reveal-delay-3">Follow @1up_4ways</a>
+      </div>
+      <div class="featured-media">
+        <div class="ig-embed-wrapper">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-captioned
+            data-instgrm-permalink="https://www.instagram.com/p/DYb9hhHsSvr/?utm_source=ig_embed&utm_campaign=loading"
+            data-instgrm-version="14"
+            style="background:#FFF; border:0; border-radius:0; box-shadow:none; margin:0; max-width:100%; min-width:unset; padding:0; width:100%;">
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EVENTS ── -->
+  <section id="events">
+    <div class="container">
+      <div class="events-header reveal">
+        <div>
+          <span class="section-label">What's On</span>
+          <h2 class="section-title">EVENTS &amp;<br>BATTLES</h2>
+        </div>
+        <a href="https://www.instagram.com/1up_4ways/" target="_blank" class="btn-outline">View All Events</a>
+      </div>
+      <div class="events-grid">
+
+        <div class="event-card featured-event reveal">
+          <div class="event-tag">LIVE NOW · OPEN FOR APPLICATIONS</div>
+          <div class="event-name">ANIME ARC ONE<br>ARTIST BATTLE</div>
+          <div class="event-date">Starts Friday, 22 May 2026 · Weekly</div>
+          <div class="event-desc">1v1 Weekly Artist Duel. Double elimination bracket. Original art only — no AI, no fan art. Themes provided weekly. Step into the arena and create, challenge, survive.</div>
+          <div class="event-prize">R5,000<small>Cash Prize + Sponsor Prizes</small></div>
+        </div>
+
+        <div class="event-card reveal reveal-delay-1">
+          <div class="event-tag">Recurring</div>
+          <div class="event-name">URBAN SESSIONS</div>
+          <div class="event-date">Weekly · Ongoing</div>
+          <div class="event-desc">The Urban Sessions content series — real stories, real culture, real people from the 1UP community and beyond.</div>
+        </div>
+
+        <div class="event-card reveal reveal-delay-2">
+          <div class="event-tag">Annual</div>
+          <div class="event-name">URBAN FESTIVAL</div>
+          <div class="event-date">Annual Flagship Event</div>
+          <div class="event-desc">The biggest urban culture celebration of the year — sport, music, art, esports, and community all under one roof. Details dropping soon.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── INSTAGRAM FEED ── -->
+  <section id="feed">
+    <div class="container">
+      <div class="feed-header reveal">
+        <span class="section-label">Live from the Playground</span>
+        <h2 class="section-title">@1UP_<span style="color:var(--orange)">4WAYS</span></h2>
+        <p style="color:var(--gray);margin-top:14px;font-size:0.9rem">Real moments. Real people. Real culture.</p>
+      </div>
+      <div class="feed-grid">
+
+        <div class="feed-embed-wrapper reveal">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/p/DXrEMwPDXvd/?utm_source=ig_embed&utm_campaign=loading"
+            data-instgrm-version="14"
+            style="background:#FFF; border:0; border-radius:0; box-shadow:none; margin:0; max-width:100%; min-width:unset; padding:0; width:100%;">
+          </blockquote>
+        </div>
+
+        <div class="feed-embed-wrapper reveal reveal-delay-1">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/p/DYXAVUzFXlt/?utm_source=ig_embed&utm_campaign=loading"
+            data-instgrm-version="14"
+            style="background:#FFF; border:0; border-radius:0; box-shadow:none; margin:0; max-width:100%; min-width:unset; padding:0; width:100%;">
+          </blockquote>
+        </div>
+
+        <div class="feed-embed-wrapper reveal reveal-delay-2">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/reel/DQ4qalzDWfl/?utm_source=ig_embed&utm_campaign=loading"
+            data-instgrm-version="14"
+            style="background:#FFF; border:0; border-radius:0; box-shadow:none; margin:0; max-width:100%; min-width:unset; padding:0; width:100%;">
+          </blockquote>
+        </div>
+
+        <div class="feed-embed-wrapper reveal">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/reel/DNvKSGr2MXg/?utm_source=ig_embed&utm_campaign=loading"
+            data-instgrm-version="14"
+            style="background:#FFF; border:0; border-radius:0; box-shadow:none; margin:0; max-width:100%; min-width:unset; padding:0; width:100%;">
+          </blockquote>
+        </div>
+
+        <div class="feed-embed-wrapper reveal reveal-delay-1">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/reel/DO0YRt3DWz4/?utm_source=ig_embed&utm_campaign=loading"
+            data-instgrm-version="14"
+            style="background:#FFF; border:0; border-radius:0; box-shadow:none; margin:0; max-width:100%; min-width:unset; padding:0; width:100%;">
+          </blockquote>
+        </div>
+
+        <div class="feed-embed-wrapper reveal reveal-delay-2">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/p/DQbYP2_jeaS/?utm_source=ig_embed&utm_campaign=loading"
+            data-instgrm-version="14"
+            style="background:#FFF; border:0; border-radius:0; box-shadow:none; margin:0; max-width:100%; min-width:unset; padding:0; width:100%;">
+          </blockquote>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VISIT ── -->
+  <section id="visit">
+    <div class="visit-inner">
+      <div class="visit-info container" style="max-width:none">
+        <span class="section-label reveal">Come Play</span>
+        <h2 class="section-title reveal reveal-delay-1">FIND<br><span style="color:var(--orange)">US.</span></h2>
+        <div class="visit-detail-block reveal reveal-delay-2">
+          <div class="visit-detail-label">Location</div>
+          <div class="visit-detail-value">
+            The Urban Playground<br>
+            Fourways Mall, Shop CF02<br>
+            11 Ruby Close, Fourways<br>
+            Sandton, Johannesburg
+          </div>
+        </div>
+        <div class="visit-detail-block reveal reveal-delay-3">
+          <div class="visit-detail-label">Hours</div>
+          <div class="hours-row"><span class="day">Monday – Saturday</span><span class="time">9:00 AM – 8:00 PM</span></div>
+          <div class="hours-row"><span class="day">Sunday</span><span class="time">9:00 AM – 7:00 PM</span></div>
+          <div class="hours-row"><span class="day">Public Holidays</span><span class="time">9:00 AM – 7:00 PM</span></div>
+        </div>
+        <a href="tel:0684048069" class="visit-phone reveal reveal-delay-4">
+          <span class="phone-icon">📞</span> 068 404 8069
+        </a>
+      </div>
+      <div class="visit-map">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3583.2282099083513!2d28.00559657614538!3d-26.02183197745437!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1e957457b748dfff%3A0xfab3e43d0e84f7ca!2sFourways%20Mall!5e0!3m2!1sen!2sza!4v1716198000000!5m2!1sen!2sza"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Fourways Mall location">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="footer-logo-text"><span>1UP</span> THE URBAN PLAYGROUND</div>
+          <p>Creating unique experiences for the Next Gen in Fourways. A world-first experiential hub where community, sport and creativity collide.</p>
+          <div class="footer-socials">
+            <a href="https://www.instagram.com/1up_4ways/" target="_blank" class="social-btn" aria-label="Instagram">📸</a>
+            <a href="https://www.instagram.com/1up_za/" target="_blank" class="social-btn" aria-label="1UP ZA">🔥</a>
+            <a href="https://www.facebook.com/ilovefourways/" target="_blank" class="social-btn" aria-label="Facebook">📘</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Activities</h4>
+          <ul>
+            <li><a href="#activities">Skate &amp; BMX</a></li>
+            <li><a href="#activities">Street Soccer</a></li>
+            <li><a href="#activities">Urban Dance</a></li>
+            <li><a href="#activities">Esports</a></li>
+            <li><a href="#activities">Parkour</a></li>
+            <li><a href="#activities">You Can Code</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="https://www.instagram.com/1up_4ways/" target="_blank">@1up_4ways</a></li>
+            <li><a href="https://www.instagram.com/1up_za/" target="_blank">@1up_za</a></li>
+            <li><a href="https://www.instagram.com/urbansessions_za/" target="_blank">@urbansessions_za</a></li>
+            <li><a href="https://www.instagram.com/theurbancollectivehub/" target="_blank">@theurbancollectivehub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Visit</h4>
+          <ul>
+            <li><a href="#visit">Fourways Mall, Shop CF02</a></li>
+            <li><a href="tel:0684048069">068 404 8069</a></li>
+            <li><a href="#visit">Mon–Sat: 9am–8pm</a></li>
+            <li><a href="#visit">Sun: 9am–7pm</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 The Urban Playground. Fourways Mall, Johannesburg.</p>
+        <p>Built for <a href="https://www.instagram.com/1up_4ways/" target="_blank">@1up_4ways</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── SCRIPTS ── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script async src="//www.instagram.com/embed.js"></script>
+
+  <script>
+  // ── THREE.JS HERO ──────────────────────────────────────────────
+  (function() {
+    const canvas = document.getElementById('hero-canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Particle wave grid
+    const GRID = 65;
+    const GAP = 0.95;
+    const count = GRID * GRID;
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    for (let i = 0; i < GRID; i++) {
+      for (let j = 0; j < GRID; j++) {
+        const idx = i * GRID + j;
+        const x = (i - GRID / 2) * GAP;
+        const z = (j - GRID / 2) * GAP;
+        positions[idx * 3]     = x;
+        positions[idx * 3 + 1] = 0;
+        positions[idx * 3 + 2] = z;
+
+        const distFromCenter = Math.sqrt(x * x + z * z);
+        const isOrange = Math.random() > 0.88;
+        const brightness = Math.max(0.05, 0.25 - distFromCenter * 0.008);
+
+        if (isOrange) {
+          colors[idx * 3]     = 1.0;
+          colors[idx * 3 + 1] = 0.36;
+          colors[idx * 3 + 2] = 0.1;
+        } else {
+          colors[idx * 3]     = brightness;
+          colors[idx * 3 + 1] = brightness;
+          colors[idx * 3 + 2] = brightness;
+        }
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 0.09,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9,
+      sizeAttenuation: true
+    });
+
+    const mesh = new THREE.Points(geometry, material);
+    scene.add(mesh);
+
+    camera.position.set(0, 18, 12);
+    camera.lookAt(0, 0, 0);
+
+    let mouseX = 0, mouseY = 0;
+    let targetX = 0, targetY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    let frame = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      frame++;
+      const t = frame * 0.008;
+
+      // Animate wave
+      const pos = geometry.attributes.position.array;
+      for (let i = 0; i < GRID; i++) {
+        for (let j = 0; j < GRID; j++) {
+          const idx = i * GRID + j;
+          const wave = Math.sin(i * 0.35 + t) * Math.cos(j * 0.28 + t * 0.65) * 1.8;
+          pos[idx * 3 + 1] = wave;
+        }
+      }
+      geometry.attributes.position.needsUpdate = true;
+
+      // Smooth mouse parallax
+      targetX += (mouseX - targetX) * 0.04;
+      targetY += (mouseY - targetY) * 0.04;
+
+      camera.position.x = targetX * 3;
+      camera.position.y = 18 + targetY * -2;
+      camera.lookAt(0, 0, 0);
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  })();
+
+  // ── HERO ENTRANCE ANIMATION ────────────────────────────────────
+  (function() {
+    const eyebrow = document.getElementById('hero-eyebrow');
+    const title   = document.getElementById('hero-title');
+    const sub     = document.getElementById('hero-sub');
+    const actions = document.getElementById('hero-actions');
+    const scroll  = document.getElementById('hero-scroll');
+
+    function animateIn(el, delay, props) {
+      setTimeout(() => {
+        el.style.transition = 'opacity 1s ease, transform 1s ease';
+        el.style.opacity    = '1';
+        el.style.transform  = 'none';
+      }, delay);
+    }
+
+    animateIn(eyebrow, 400);
+    animateIn(title,   700);
+    animateIn(sub,     1000);
+    animateIn(actions, 1300);
+    animateIn(scroll,  1800);
+  })();
+
+  // ── SCROLL REVEAL ──────────────────────────────────────────────
+  (function() {
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => io.observe(el));
+  })();
+
+  // ── NAV SCROLL BEHAVIOUR ──────────────────────────────────────
+  (function() {
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 80);
+    });
+  })();
+
+  // ── ACTIVITY CARD TILT ────────────────────────────────────────
+  (function() {
+    document.querySelectorAll('.activity-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect  = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width  - 0.5;
+        const y = (e.clientY - rect.top)  / rect.height - 0.5;
+        const front = card.querySelector('.card-front');
+        if (front) {
+          front.style.transform = `rotateX(${-y * 6}deg) rotateY(${x * 6}deg)`;
+        }
+      });
+      card.addEventListener('mouseleave', () => {
+        const front = card.querySelector('.card-front');
+        if (front) front.style.transform = '';
+      });
+    });
+  })();
+
+  // ── INSTAGRAM RELOAD SAFETY ───────────────────────────────────
+  // Re-process embeds if loaded after embed.js
+  window.addEventListener('load', () => {
+    if (window.instgrm && window.instgrm.Embeds) {
+      window.instgrm.Embeds.process();
+    }
+  });
+  </script>
+
+</body>
+</html>
