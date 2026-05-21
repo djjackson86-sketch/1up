@@ -1824,8 +1824,8 @@ function renderStockTable(){
     const rp=d!=null?d.reorderPt:item.reorderPt;
     const oq=d!=null?d.orderQty:item.orderQty;
     const ts=d?.stockTakeTime||"";
-    const {singleName,unitTypes}=getUnitTypes(d,item);
-    const showCalc=unitTypes.length>0;
+    const {singleName}=getUnitTypes(d,item);
+    const showCalc=true; // calculator always available
     const s=stockStatus(qty,rp);
     const borderColor=s==="out"?"#dc2626":s==="low"?"#d97706":"#16a34a";
     const badge=s==="out"
