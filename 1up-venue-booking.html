@@ -92,6 +92,31 @@ input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 
 /* Error */
 .err{color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:8px;}
 
+/* Calendar (imported from Bubblebounce — adapted to 1up palette) */
+.cal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1.5px solid var(--gray-mid);}
+.cal-month{font-weight:800;font-size:15px;}
+.cal-nav{display:flex;gap:6px;}
+.cal-nav button{width:30px;height:30px;border-radius:7px;border:1.5px solid var(--gray-mid);background:var(--gray-light);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--dark);font-family:inherit;}
+.cal-nav button:hover{background:#eee;border-color:#aaa;}
+.cal-body{padding:12px 16px;}
+.cal-day-hdr{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:4px;}
+.cal-day-hdr span{font-size:10.5px;font-weight:700;color:var(--gray);padding:4px 0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;border-radius:9px;cursor:pointer;position:relative;transition:all .12s;}
+.cal-day.past{color:#ccc;opacity:.35;cursor:not-allowed;}
+.cal-day.avail{color:var(--dark);cursor:pointer;}
+.cal-day.avail:hover{background:var(--or-light);color:var(--or);}
+.cal-day.blocked{color:var(--red);cursor:not-allowed;background:var(--red-bg);text-decoration:line-through;}
+.cal-day.start,.cal-day.end{background:var(--or);color:#fff;font-weight:800;box-shadow:0 2px 8px rgba(232,93,4,.3);}
+.cal-day.range{background:var(--or-light);color:var(--or2);}
+.cal-day .dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;}
+.cal-day.blocked .dot{background:var(--red);}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--gray);padding:10px 18px;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.legend .d{width:10px;height:10px;border-radius:3px;display:inline-block;}
+.range-bar{padding:12px 18px;background:var(--or-light);border-top:1.5px solid var(--or-soft);display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--dark);font-weight:600;}
+.range-bar .r{flex:1;}
+
 /* POPIA box */
 .popia-box{display:flex;align-items:flex-start;gap:10px;background:#F5F5F5;border:1.5px solid var(--gray-mid);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;cursor:pointer;font-size:12.5px;color:#444;line-height:1.6;}
 .popia-box input[type=checkbox]{width:17px;height:17px;flex-shrink:0;margin-top:2px;accent-color:var(--or);cursor:pointer;}
@@ -173,14 +198,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 
   </div>
   <div id="etype-pill" style="display:inline-flex;align-items:center;gap:6px;background:#111;color:var(--yellow);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:14px;"></div>
 
-  <div class="row">
-    <div class="fr"><label>Start Date *</label><input id="f-date" type="date"></div>
-    <div class="fr"><label>End Date (multi-day?)</label><input id="f-edate" type="date"></div>
+  <!-- Calendar Card -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="cal-head">
+      <div class="cal-nav"><button onclick="calNav(-1)">‹</button></div>
+      <div class="cal-month" id="cal-month-lbl"></div>
+      <div class="cal-nav"><button onclick="calNav(1)">›</button></div>
+    </div>
+    <div class="cal-body">
+      <div class="cal-day-hdr"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="legend">
+      <span><span class="d" style="background:var(--or-light);border:1.5px solid var(--or-soft);"></span> Selected</span>
+      <span><span class="d" style="background:var(--red-bg);border:1.5px solid var(--red);"></span> Blocked</span>
+      <span><span class="d" style="background:var(--surf);border:1.5px solid var(--gray-mid);"></span> Available</span>
+    </div>
+    <div class="range-bar" id="range-bar" style="display:none;"></div>
   </div>
+
   <div class="row">
     <div class="fr"><label>Start Time *</label><input id="f-stime" type="time"></div>
     <div class="fr"><label>End Time *</label><input id="f-etime" type="time"></div>
   </div>
+
+  <!-- Hidden date fields — synced from calendar -->
+  <input id="f-date" type="hidden">
+  <input id="f-edate" type="hidden">
 
   <div class="err" id="err-2"></div>
   <div style="display:flex;gap:8px;">
@@ -403,10 +447,6 @@ function showStep(n){
   });
   currentStep=n;
   if(n===2){
-    // Prefill today if empty
-    if(!document.getElementById('f-date').value){
-      document.getElementById('f-date').value=todayStr();
-    }
     document.getElementById('etype-pill').textContent=selectedEtype;
   }
   if(n===5)buildSummary();
@@ -569,11 +609,150 @@ function resetForm(){
 }
 
 // Set min date to today
-document.getElementById('f-date').min=todayStr();
-document.getElementById('f-edate').min=todayStr();
-document.getElementById('f-date').addEventListener('change',function(){
-  document.getElementById('f-edate').min=this.value||todayStr();
-});
+function pad(n){return String(n).padStart(2,'0');}
+var calYear,calMonth,startDate,endDate,blockedDates=[];
+
+function loadBlockedDates(){
+  try{
+    var key='1up_venue_'+branch;
+    var rows=JSON.parse(localStorage.getItem(key)||'[]');
+    blockedDates=[];
+    rows.forEach(function(r){
+      if(r.status==='cancelled'||r.status==='done')return;
+      if(!r.date)return;
+      var s=new Date(r.date+'T00:00:00');
+      var e=r.edate?new Date(r.edate+'T00:00:00'):s;
+      for(var d=new Date(s);d<=e;d.setDate(d.getDate()+1)){
+        blockedDates.push(d.toISOString().slice(0,10));
+      }
+    });
+  }catch(e){blockedDates=[];}
+}
+
+function isBlocked(ds){
+  return blockedDates.indexOf(ds)!==-1;
+}
+
+function renderCalendar(){
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-lbl').textContent=months[calMonth]+' '+calYear;
+  var first=new Date(calYear,calMonth,1).getDay();
+  var offset=(first===0?6:first-1);
+  var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  var td=todayStr();
+  var grid=document.getElementById('cal-grid');
+  var html='';
+  for(var i=0;i<offset;i++)html+='<div></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var ds=calYear+'-'+pad(calMonth+1)+'-'+pad(d);
+    var isPast=ds<td;
+    var blocked=isBlocked(ds);
+    var isStart=startDate===ds;
+    var isEnd=endDate===ds;
+    var inRange=startDate&&endDate&&ds>startDate&&ds<endDate;
+    var cls='cal-day';
+    if(isPast)cls+=' past';
+    else if(isStart||isEnd)cls+=' start';
+    else if(inRange)cls+=' range';
+    else if(blocked)cls+=' blocked';
+    else cls+=' avail';
+    var dot=blocked?'<span class="dot"></span>':'';
+    var onclick=isPast||blocked?'':'onclick="pickDate(\\''+ds+'\\')"';
+    html+='<div class="'+cls+'" '+onclick+'>'+d+dot+'</div>';
+  }
+  grid.innerHTML=html;
+}
+
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+
+function pickDate(ds){
+  if(ds<todayStr())return;
+  if(!startDate||(startDate&&endDate)){startDate=ds;endDate=null;}
+  else{
+    if(ds<startDate){startDate=ds;endDate=null;}
+    else{
+      var ok=true;
+      var s=new Date(startDate+'T00:00:00');
+      var e=new Date(ds+'T00:00:00');
+      for(var d=new Date(s);d<=e;d.setDate(d.getDate()+1)){
+        var ds2=d.toISOString().slice(0,10);
+        if(isBlocked(ds2)){ok=false;break;}
+      }
+      if(!ok){document.getElementById('err-2').textContent='Some dates in this range are already booked.';renderCalendar();return;}
+      endDate=ds;
+    }
+  }
+  document.getElementById('err-2').textContent='';
+  syncDates();
+  updateRangeBar();
+  renderCalendar();
+}
+
+function updateRangeBar(){
+  var bar=document.getElementById('range-bar');
+  if(startDate&&endDate){
+    var days=Math.round((new Date(endDate+'T00:00:00')-new Date(startDate+'T00:00:00'))/86400000)+1;
+    bar.style.display='flex';
+    bar.innerHTML='<span style="font-size:18px">📅</span><span class="r"><strong>'+fmtDate2(startDate)+'</strong> → <strong>'+fmtDate2(endDate)+'</strong> · '+days+' day'+(days>1?'s':'')+'</span>';
+  }else if(startDate){
+    bar.style.display='flex';
+    bar.innerHTML='<span style="font-size:18px">📅</span><span class="r">Start: <strong>'+fmtDate2(startDate)+'</strong> — tap an end date above</span>';
+  }else{bar.style.display='none';}
+}
+
+function syncDates(){
+  document.getElementById('f-date').value=startDate||'';
+  document.getElementById('f-edate').value=endDate||startDate||'';
+}
+
+function fmtDate2(s){if(!s)return'';var d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
+
+// Update setBranch to reload blocked dates when branch changes
+var _origSetBranch=setBranch;
+setBranch=function(b){
+  _origSetBranch(b);
+  if(currentStep===2){loadBlockedDates();renderCalendar();updateRangeBar();}
+};
+
+// Init calendar when entering step 2
+var _origShowStep=showStep;
+showStep=function(n){
+  _origShowStep(n);
+  if(n===2){
+    var d=new Date();calYear=d.getFullYear();calMonth=d.getMonth();
+    if(!startDate){startDate=null;endDate=null;}
+    loadBlockedDates();
+    renderCalendar();
+    updateRangeBar();
+  }
+};
+
+// Update validation for step 2
+var _origValidate=validate;
+validate=function(step){
+  var err=document.getElementById('err-'+step);
+  if(err)err.textContent='';
+  if(step===1){
+    if(!selectedEtype){document.getElementById('err-1').textContent='Please select an event type.';return false;}
+    return true;
+  }
+  if(step===2){
+    if(!startDate){document.getElementById('err-2').textContent='Please select a date on the calendar.';return false;}
+    var st=document.getElementById('f-stime').value;
+    var et=document.getElementById('f-etime').value;
+    if(!st||!et){document.getElementById('err-2').textContent='Please enter start and end times.';return false;}
+    return true;
+  }
+  return _origValidate(step);
+};
+
+// Update resetForm
+var _origResetForm=resetForm;
+resetForm=function(){
+  startDate=null;endDate=null;
+  updateRangeBar();
+  _origResetForm();
+};
 </script>
 </body>
 </html>
