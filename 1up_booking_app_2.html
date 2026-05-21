@@ -152,7 +152,6 @@ textarea{resize:vertical;min-height:70px;}
   </div>
   <div class="nav-tabs">
     <div class="tab active" onclick="showTab('dashboard')">📊 Home</div>
-    <div class="tab" onclick="showTab('calendar')">📅 Calendar</div>
     <div class="tab" onclick="showTab('bookings')">📋 Bookings</div>
     <div class="tab" onclick="showTab('activities')">🎮 Activities</div>
     <div class="tab" onclick="showTab('venue-hire')">🏟️ Venue Hire</div>
@@ -175,14 +174,6 @@ textarea{resize:vertical;min-height:70px;}
     <div style="font-size:12px;color:#aaa;line-height:1.8;" id="branch-info-body">Shop CF02, 11 Ruby Close, Fourways · Hours: Weekdays 10am–7pm · Weekends 10am–9pm</div>
   </div>
   <div class="card">
-    <div style="font-weight:900;font-size:15px;margin-bottom:10px;">📅 Upcoming Bookings</div>
-    <div id="upcoming-list"><div style="color:var(--gray);font-size:13px;">No upcoming bookings</div></div>
-  </div>
-</div>
-
-<!-- CALENDAR -->
-<div class="page" id="page-calendar">
-  <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">‹</button>
       <div style="font-weight:900;font-size:16px;" id="cal-title"></div>
@@ -195,6 +186,10 @@ textarea{resize:vertical;min-height:70px;}
     </div>
     <div class="cal-grid" id="cal-headers"></div>
     <div class="cal-grid" id="cal-body" style="margin-top:4px;"></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:900;font-size:15px;margin-bottom:10px;">📅 Upcoming Bookings</div>
+    <div id="upcoming-list"><div style="color:var(--gray);font-size:13px;">No upcoming bookings</div></div>
   </div>
 </div>
 
@@ -845,7 +840,7 @@ function setBranch(b){
   document.getElementById("branch-info-body").textContent=b==="fourways"
     ?"Shop CF02, 11 Ruby Close, Fourways · Weekdays 10am–7pm · Weekends 10am–9pm"
     :"Rosebank Mall, Rosebank, Johannesburg · Mall trading hours apply";
-  renderDashboard();renderCalendar();renderBookings();
+  renderDashboard();renderBookings();
 }
 
 // ===== TAB =====
@@ -853,12 +848,11 @@ function showTab(t){
   if(t==="cust-booking"){document.getElementById("modal-cust-form").classList.add("open");return;}
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(tb=>tb.classList.remove("active"));
-  const tabs=["dashboard","calendar","bookings","activities","venue-hire","stock","customer-form","setup"];
+  const tabs=["dashboard","bookings","activities","venue-hire","stock","customer-form","setup"];
   const idx=tabs.indexOf(t);
   if(idx>=0){document.querySelectorAll(".tab")[idx].classList.add("active");}
   document.getElementById("page-"+t).classList.add("active");
   if(t==="dashboard")renderDashboard();
-  if(t==="calendar")renderCalendar();
   if(t==="bookings")renderBookings();
   if(t==="activities")renderActivities();
   if(t==="venue-hire"){loadVenue();renderVenueList();}
@@ -893,6 +887,7 @@ function renderDashboard(){
       ${statusBadge}
     </div>`;
   }).join("");
+  renderCalendar();
 }
 
 // ===== CALENDAR =====
@@ -1455,7 +1450,7 @@ function downloadInvoice(){
   const a=document.createElement("a");a.href=url;a.download=invNum.replace(/\s+/g,"-")+".html";a.click();URL.revokeObjectURL(url);
 }
 
-function resetAll(){if(!confirm("Reset ALL data for "+activeBranch+" branch?"))return;if(!confirm("Are you SURE? This cannot be undone."))return;bookings=[];saveAll();renderDashboard();renderBookings();renderCalendar();alert("Branch data reset.");}
+function resetAll(){if(!confirm("Reset ALL data for "+activeBranch+" branch?"))return;if(!confirm("Are you SURE? This cannot be undone."))return;bookings=[];saveAll();renderDashboard();renderBookings();alert("Branch data reset.");}
 
 
 // ===== VENUE HIRE =====
@@ -2043,7 +2038,6 @@ function showStockToast(msg){
 
 
 renderDashboard();
-renderCalendar();
 renderBookings();
 renderActivities();
 loadVenue();
