@@ -756,13 +756,10 @@ function renderCalendar(){
     var ds=calYear+'-'+pad(calMonth+1)+'-'+pad(d);
     var isPast=ds<td;
     var blocked=isBlocked(ds);
-    var isStart=startDate===ds;
-    var isEnd=endDate===ds;
-    var inRange=startDate&&endDate&&ds>startDate&&ds<endDate;
+    var isSel=startDate===ds;
     var cls='cal-day';
     if(isPast)cls+=' past';
-    else if(isStart||isEnd)cls+=' start';
-    else if(inRange)cls+=' range';
+    else if(isSel)cls+=' start';
     else if(blocked)cls+=' blocked';
     else cls+=' avail';
     var dot=blocked?'<span class="dot"></span>':'';
@@ -776,21 +773,8 @@ function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calM
 
 function pickDate(ds){
   if(ds<todayStr())return;
-  if(!startDate||(startDate&&endDate)){startDate=ds;endDate=null;}
-  else{
-    if(ds<startDate){startDate=ds;endDate=null;}
-    else{
-      var ok=true;
-      var s=new Date(startDate+'T00:00:00');
-      var e=new Date(ds+'T00:00:00');
-      for(var d=new Date(s);d<=e;d.setDate(d.getDate()+1)){
-        var ds2=d.toISOString().slice(0,10);
-        if(isBlocked(ds2)){ok=false;break;}
-      }
-      if(!ok){document.getElementById('err-2').textContent='Some dates in this range are already booked.';renderCalendar();return;}
-      endDate=ds;
-    }
-  }
+  if(isBlocked(ds)){document.getElementById('err-2').textContent='This date is already booked.';renderCalendar();return;}
+  startDate=ds;endDate=ds;
   document.getElementById('err-2').textContent='';
   syncDates();
   updateRangeBar();
@@ -800,12 +784,8 @@ function pickDate(ds){
 function updateRangeBar(){
   var bar=document.getElementById('range-bar');
   if(startDate&&endDate){
-    var days=Math.round((new Date(endDate+'T00:00:00')-new Date(startDate+'T00:00:00'))/86400000)+1;
     bar.style.display='flex';
-    bar.innerHTML='<span style="font-size:18px">📅</span><span class="r"><strong>'+fmtDate2(startDate)+'</strong> → <strong>'+fmtDate2(endDate)+'</strong> · '+days+' day'+(days>1?'s':'')+'</span>';
-  }else if(startDate){
-    bar.style.display='flex';
-    bar.innerHTML='<span style="font-size:18px">📅</span><span class="r">Start: <strong>'+fmtDate2(startDate)+'</strong> — tap an end date above</span>';
+    bar.innerHTML='<span style="font-size:18px">📅</span><span class="r"><strong>'+fmtDate2(startDate)+'</strong></span>';
   }else{bar.style.display='none';}
 }
 
