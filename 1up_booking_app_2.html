@@ -65,7 +65,13 @@ textarea{resize:vertical;min-height:70px;}
 .book-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;align-items:flex-end;}
 .modal-bg.open{display:flex;}
+.modal-bg.top{display:none;align-items:flex-start;}
+.modal-bg.top.open{display:flex;}
 .modal{background:#fff;border-radius:18px 18px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:18px 16px 32px;}
+.modal-sm{border-radius:14px 14px 0 0;padding:12px 12px 22px;max-height:78vh;}
+.modal-sm .modal-title{font-size:15px;}
+.modal-sm input,.modal-sm select{font-size:12px;padding:8px 10px;}
+.modal-sm .btn{font-size:12px;padding:8px 14px;}
 .modal-title{font-weight:900;font-size:18px;}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
 .stat-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;text-align:center;}
@@ -2097,10 +2103,10 @@ function openStockCalc(id,sc){
       <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">${u.name}</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <input id="calc-u-qty-${i}" type="number" min="0" placeholder="0" oninput="calcUpdate()"
-          style="flex:1;padding:12px 8px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:22px;font-weight:700;text-align:center;">
+          style="flex:1;padding:10px 8px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:18px;font-weight:700;text-align:center;">
         <span style="font-size:13px;color:var(--gray);">× ${u.size}</span>
         <span style="font-size:13px;color:var(--gray);">=</span>
-        <div id="calc-u-sub-${i}" style="font-size:20px;font-weight:800;min-width:42px;text-align:right;color:var(--dark);">0</div>
+        <div id="calc-u-sub-${i}" style="font-size:17px;font-weight:800;min-width:42px;text-align:right;color:var(--dark);">0</div>
       </div>
     </div>`).join("");
   document.getElementById("calc-singles-qty").value="";
@@ -2215,8 +2221,8 @@ function saveStockEdit(){
 </script>
 
 <!-- STOCK CALCULATOR MODAL -->
-<div class="modal-bg" id="modal-stock-calc">
-  <div class="modal">
+<div class="modal-bg top" id="modal-stock-calc">
+  <div class="modal modal-sm">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
       <div class="modal-title">🧮 Stock Calculator</div>
       <button class="btn btn-ghost btn-sm" onclick="closeStockCalc()">✕</button>
@@ -2231,16 +2237,16 @@ function saveStockEdit(){
       <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;" id="calc-singles-label">Singles</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <input id="calc-singles-qty" type="number" min="0" placeholder="0" oninput="calcUpdate()"
-          style="flex:1;padding:12px 8px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:22px;font-weight:700;text-align:center;">
+          style="flex:1;padding:10px 8px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:18px;font-weight:700;text-align:center;">
         <span style="font-size:13px;color:var(--gray);">× 1 =</span>
-        <div id="calc-singles-sub" style="font-size:20px;font-weight:800;min-width:42px;text-align:right;color:var(--dark);">0</div>
+        <div id="calc-singles-sub" style="font-size:17px;font-weight:800;min-width:42px;text-align:right;color:var(--dark);">0</div>
       </div>
     </div>
 
     <!-- Total -->
     <div style="background:#111;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <div style="color:#888;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Total Stock</div>
-      <div id="calc-total" style="color:var(--or);font-size:30px;font-weight:900;letter-spacing:-1px;">0</div>
+      <div id="calc-total" style="color:var(--or);font-size:24px;font-weight:900;letter-spacing:-1px;">0</div>
     </div>
 
     <div style="display:flex;gap:8px;">
