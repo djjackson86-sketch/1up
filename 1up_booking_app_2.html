@@ -1004,14 +1004,6 @@ function setBranch(b){
     ?"Shop CF02, 11 Ruby Close, Fourways · Weekdays 10am–7pm · Weekends 10am–9pm"
     :"Rosebank Mall, Rosebank, Johannesburg · Mall trading hours apply";
   renderDashboard();renderBookings();
-  // Refresh current tab if it's a branch-sensitive page
-  if(document.getElementById('page-stock').classList.contains('active')){renderStockTable();}
-  if(document.getElementById('page-activities').classList.contains('active')){renderActivities();}
-  // Refresh bookings sub-tabs if bookings page is active
-  if(document.getElementById('page-bookings').classList.contains('active')){
-    initBookingsCalendar();
-    loadVenue();renderVenueList();renderFormSubmissions();
-  }
 }
 
 // ===== TAB =====
@@ -1996,7 +1988,6 @@ function renderStockTable(){
       ?`<span style="background:var(--yellow-light);color:var(--yellow);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">LOW</span>`
       :`<span style="background:var(--green-light);color:var(--green);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;">OK</span>`;
     const tsDisp=ts?ts.slice(8,10)+"/"+ts.slice(5,7)+"<br>"+ts.slice(11,16):"—";
-    const restockBtn=(s==="low"||s==="out")?`<button onclick="quickRestock('${item.id}','${sc}',${oq})" style="padding:4px 9px;background:#111;color:var(--or);border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;">📦 +${oq}</button>`:'';
     return`<div id="srow-${item.id}" style="background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;border-left:4px solid ${borderColor};box-shadow:0 1px 4px rgba(0,0,0,0.08);">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px 8px;">
         <div style="flex:1;min-width:0;">
@@ -2004,7 +1995,6 @@ function renderStockTable(){
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
           <div id="sstatus-${item.id}">${badge}</div>
-          ${restockBtn}
           <button onclick="openStockEdit('${item.id}','${sc}')"
             style="padding:4px 10px;background:var(--gray-light);border:1.5px solid var(--gray-mid);border-radius:8px;cursor:pointer;font-size:12px;"
             title="Item setup">✏️</button>
@@ -2220,18 +2210,6 @@ function addStockItem(){
   document.getElementById("new-item-cost").value="";
   renderStockTable();
   showStockToast("✅ Item added!");
-}
-
-function quickRestock(id,sc,oq){
-  if(!stockData[sc][id])stockData[sc][id]={};
-  stockData[sc][id].qty=(stockData[sc][id].qty||0)+oq;
-  const now=new Date();
-  const ts=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0")
-    +" "+String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
-  stockData[sc][id].stockTakeTime=ts;
-  saveStockData();
-  renderStockTable();
-  showStockToast("📦 +"+oq+" restocked!");
 }
 
 function showStockToast(msg){
