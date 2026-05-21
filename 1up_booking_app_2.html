@@ -449,6 +449,26 @@ textarea{resize:vertical;min-height:70px;}
       📞 (contact Rosebank branch)
     </div>
   </div>
+  <div class="card" id="settings-card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:10px;">🕐 Venue Hours &amp; Party Duration</div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Used by the venue booking form to generate available time slots.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="form-group"><label>Opening Time</label><input id="set-open" type="time" value="09:00"></div>
+      <div class="form-group"><label>Closing Time</label><input id="set-close" type="time" value="18:00"></div>
+    </div>
+    <div class="form-group"><label>Party Duration (hours)</label>
+      <select id="set-duration">
+        <option value="2">2 hours</option>
+        <option value="3">3 hours</option>
+        <option value="4" selected>4 hours</option>
+        <option value="5">5 hours</option>
+        <option value="6">6 hours</option>
+        <option value="8">8 hours (full day)</option>
+      </select>
+    </div>
+    <button class="btn btn-o btn-sm" onclick="saveSettings()" style="margin-top:6px;">💾 Save Settings</button>
+    <span id="settings-saved" style="font-size:11px;color:var(--green);font-weight:700;margin-left:10px;display:none;">✓ Saved</span>
+  </div>
   <div class="card">
     <div style="font-weight:800;font-size:14px;margin-bottom:8px;color:var(--red);">⚠️ Reset App Data</div>
     <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Deletes ALL bookings for current branch. Export first!</p>
@@ -2035,6 +2055,21 @@ function showStockToast(msg){
   setTimeout(()=>{t.style.display="none";},2000);
 }
 
+
+// ===== VENUE SETTINGS (shared with venue booking form) =====
+function loadSettings(){
+  var s=lsGet("1up_settings",{open:"09:00",close:"18:00",duration:"4"});
+  document.getElementById("set-open").value=s.open||"09:00";
+  document.getElementById("set-close").value=s.close||"18:00";
+  document.getElementById("set-duration").value=s.duration||"4";
+}
+function saveSettings(){
+  var s={open:document.getElementById("set-open").value,close:document.getElementById("set-close").value,duration:document.getElementById("set-duration").value};
+  lsSet("1up_settings",s);
+  var el=document.getElementById("settings-saved");
+  el.style.display="inline";setTimeout(function(){el.style.display="none";},2000);
+}
+loadSettings();
 
 loadAll();
 loadVenue();

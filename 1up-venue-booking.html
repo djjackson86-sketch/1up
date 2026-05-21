@@ -228,13 +228,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 
   </div>
 
   <div class="row">
-    <div class="fr"><label>Start Time *</label><input id="f-stime" type="time"></div>
-    <div class="fr"><label>End Time *</label><input id="f-etime" type="time"></div>
+    <div class="fr"><label>Start Time *</label>
+      <select id="f-stime" onchange="onTimeSlotChange()"><option value="">Select time slot...</option></select>
+    </div>
+    <div class="fr" id="f-etime-wrap" style="display:flex;align-items:flex-end;padding-bottom:12px;">
+      <div style="font-size:13px;color:var(--gray);">Ends at: <strong id="f-etime-display" style="color:var(--dark);">–</strong></div>
+    </div>
   </div>
 
-  <!-- Hidden date fields — synced from calendar -->
+  <!-- Hidden fields -->
   <input id="f-date" type="hidden">
   <input id="f-edate" type="hidden">
+  <input id="f-etime" type="hidden">
 
   <div class="err" id="err-2"></div>
   <div style="display:flex;gap:8px;">
@@ -666,6 +671,56 @@ function resetForm(){
 function pad(n){return String(n).padStart(2,'0');}
 var calYear,calMonth,startDate,endDate,blockedDates=[];
 
+function pad2(n){return String(n).padStart(2,'0');}
+
+// ─── Time Slots (reads settings from main app's localStorage) ───
+function buildTimeSlots(){
+  var sel=document.getElementById('f-stime');
+  var s=loadVenueSettings();
+  var open=s.open||'09:00';
+  var close=s.close||'18:00';
+  var dur=parseInt(s.duration)||4;
+  var slots=[];
+  var oh=parseInt(open.split(':')[0]),om=parseInt(open.split(':')[1])||0;
+  var ch=parseInt(close.split(':')[0]),cm=parseInt(close.split(':')[1])||0;
+  var closeMins=ch*60+cm;
+  var m=oh*60+om;
+  while(m+dur*60<=closeMins){
+    var sh=Math.floor(m/60),sm=m%60;
+    var eh=Math.floor((m+dur*60)/60),em=(m+dur*60)%60;
+    var start=pad2(sh)+':'+pad2(sm);
+    var end=pad2(eh)+':'+pad2(em);
+    slots.push({start:start,end:end,label:start+' – '+end});
+    m+=30;
+  }
+  sel.innerHTML='<option value="">Select time slot...</option>'+slots.map(function(s){
+    return '<option value="'+s.start+'">'+s.label+'</option>';
+  }).join('');
+}
+function loadVenueSettings(){
+  try{
+    var raw=localStorage.getItem('1up_settings');
+    if(raw)return JSON.parse(raw);
+  }catch(e){}
+  return {open:'09:00',close:'18:00',duration:'4'};
+}
+function onTimeSlotChange(){
+  var st=document.getElementById('f-stime').value;
+  var s=loadVenueSettings();
+  var dur=parseInt(s.duration)||4;
+  if(!st){
+    document.getElementById('f-etime-display').textContent='–';
+    document.getElementById('f-etime').value='';
+    return;
+  }
+  var parts=st.split(':');
+  var sm=parseInt(parts[0])*60+parseInt(parts[1])+dur*60;
+  var eh=Math.floor(sm/60),em=sm%60;
+  var end=pad2(eh)+':'+pad2(em);
+  document.getElementById('f-etime-display').textContent=end;
+  document.getElementById('f-etime').value=end;
+}
+
 function loadBlockedDates(){
   try{
     var key='1up_venue_'+branch;
@@ -776,6 +831,7 @@ showStep=function(n){
     var d=new Date();calYear=d.getFullYear();calMonth=d.getMonth();
     if(!startDate){startDate=null;endDate=null;}
     loadBlockedDates();
+    buildTimeSlots();
     renderCalendar();
     updateRangeBar();
   }
