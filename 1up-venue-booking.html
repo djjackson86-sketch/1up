@@ -476,7 +476,7 @@ function getChips(containerId){
 
 // ─── Step navigation ───
 function go(n){
-  if(!validate(currentStep))return;
+  if(n>currentStep && !validate(currentStep))return;
   showStep(n);
 }
 
@@ -517,9 +517,6 @@ function todayStr(){
 function validate(step){
   const err=document.getElementById('err-'+step);
   if(err)err.textContent='';
-  if(step===1){
-    if(!selectedEtype){document.getElementById('err-1').textContent='Please select an event type.';return false;}
-  }
   if(step===2){
     const d=document.getElementById('f-date').value;
     const st=document.getElementById('f-stime').value;
