@@ -711,7 +711,7 @@ function renderCalendar(){
     else if(blocked)cls+=' blocked';
     else cls+=' avail';
     var dot=blocked?'<span class="dot"></span>':'';
-    var onclick=isPast||blocked?'':'onclick="pickDate(\\''+ds+'\\')"';
+    var onclick=isPast||blocked?'':'onclick="pickDate(\''+ds+'\')"';
     html+='<div class="'+cls+'" '+onclick+'>'+d+dot+'</div>';
   }
   grid.innerHTML=html;
