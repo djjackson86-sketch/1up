@@ -2369,7 +2369,10 @@ function genOrderSheet(){
     <tr><th rowspan="2">Item</th><th colspan="2">Current Stock</th><th colspan="2">Order Qty</th><th rowspan="2">Ordered ✓</th></tr>
   </thead>
   <tbody>${rows}</tbody></table>
-  <br><button class="no-print" onclick="window.print()" style="padding:8px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;">🖨 Print / Save PDF</button>
+  <br><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+  <button class="no-print" onclick="window.close()" style="padding:10px 20px;background:#f3f4f6;color:#111;border:2px solid #ddd;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">✕ Close</button>
+  <button class="no-print" onclick="window.print()" style="padding:10px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">🖨 Print / Save PDF</button>
+  </div>
   </body></html>`);
   w.document.close();
 }
@@ -2407,7 +2410,10 @@ function genStockTakeSheet(){
   <div class="sub">Branch: <strong>${branch}</strong> &nbsp;|&nbsp; Printed: ${dateStr}</div>
   <table><thead><tr><th>Item</th><th>Unit</th><th>Stock Count</th><th>Stock Take Time</th><th>Status</th></tr></thead>
   <tbody>${rows}</tbody></table>
-  <br><button class="no-print" onclick="window.print()" style="padding:8px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;">🖨 Print / Save PDF</button>
+  <br><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+  <button class="no-print" onclick="window.close()" style="padding:10px 20px;background:#f3f4f6;color:#111;border:2px solid #ddd;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">✕ Close</button>
+  <button class="no-print" onclick="window.print()" style="padding:10px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">🖨 Print / Save PDF</button>
+  </div>
   </body></html>`);
   w.document.close();
 }
