@@ -2615,9 +2615,15 @@ const DEMO_MEMBERS=[
 ];
 
 function initMembers(){
-  if(!localStorage.getItem("1up_members")){
-    localStorage.setItem("1up_members",JSON.stringify(DEMO_MEMBERS));
-  }
+  var existing=[];
+  try{var raw=localStorage.getItem("1up_members");if(raw)existing=JSON.parse(raw);}catch(e){}
+  var changed=!localStorage.getItem("1up_members");
+  DEMO_MEMBERS.forEach(function(dm){
+    var idx=existing.findIndex(function(x){return x.id===dm.id;});
+    if(idx===-1){existing.push(dm);changed=true;}
+    else if(!existing[idx].password){existing[idx].password=dm.password;changed=true;}
+  });
+  if(changed)localStorage.setItem("1up_members",JSON.stringify(existing));
 }
 function getMembers(){return JSON.parse(localStorage.getItem("1up_members")||"[]");}
 function saveMembers(arr){localStorage.setItem("1up_members",JSON.stringify(arr));}

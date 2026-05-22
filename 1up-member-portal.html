@@ -204,9 +204,17 @@ var DEMO_MEMBERS=[
 ];
 
 function getMembers(){
-  var raw=localStorage.getItem("1up_members");
-  if(!raw){localStorage.setItem("1up_members",JSON.stringify(DEMO_MEMBERS));return DEMO_MEMBERS;}
-  return JSON.parse(raw);
+  var existing=[];
+  try{var raw=localStorage.getItem("1up_members");if(raw)existing=JSON.parse(raw);}catch(e){}
+  // Always ensure demo members exist with passwords (fixes stale localStorage)
+  var changed=false;
+  DEMO_MEMBERS.forEach(function(dm){
+    var idx=existing.findIndex(function(x){return x.id===dm.id;});
+    if(idx===-1){existing.push(dm);changed=true;}
+    else if(!existing[idx].password){existing[idx].password=dm.password;changed=true;}
+  });
+  if(changed||!localStorage.getItem("1up_members"))localStorage.setItem("1up_members",JSON.stringify(existing));
+  return existing;
 }
 
 function fillDemo(id, pass){
