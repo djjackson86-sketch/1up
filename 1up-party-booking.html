@@ -53,9 +53,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .btn-o:active{background:var(--or2);}
 .consent-box{background:var(--gray-light);border-radius:10px;padding:14px;margin-bottom:12px;}
 .consent-box p{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:8px;}
-.check-row{display:flex;align-items:flex-start;gap:10px;margin-top:8px;cursor:pointer;}
-.check-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--or-dark);}
-.check-row span{font-size:12px;line-height:1.5;color:var(--dark);}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-top:10px;}
+.check-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--or-dark);cursor:pointer;}
+.check-row label{font-size:12px;line-height:1.5;color:var(--dark);cursor:pointer;user-select:none;}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:999;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 .success-wrap{display:none;max-width:500px;margin:30px auto;padding:0 14px;text-align:center;}
@@ -192,14 +192,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="sec-label">🔒 Consent</div>
     <div class="consent-box">
       <p>By submitting this form you agree to 1-UP Urban Playground collecting your personal information to process this booking. In accordance with <strong>POPIA</strong>, your data will only be used to manage your party booking and will not be shared with third parties.</p>
-      <label class="check-row">
+      <div class="check-row">
         <input type="checkbox" id="chk-popia">
-        <span>I consent to 1-UP collecting and using my personal information for this booking. *</span>
-      </label>
-      <label class="check-row">
+        <label for="chk-popia">I consent to 1-UP collecting and using my personal information for this booking. *</label>
+      </div>
+      <div class="check-row">
         <input type="checkbox" id="chk-terms">
-        <span>I understand this is a booking request. A 1-UP team member will confirm availability and contact me to finalise. *</span>
-      </label>
+        <label for="chk-terms">I understand this is a booking request. A 1-UP team member will confirm availability and contact me to finalise. *</label>
+      </div>
     </div>
 
     <button class="btn btn-o" onclick="submitBooking()">🎉 Submit Party Booking</button>
@@ -285,7 +285,7 @@ function submitBooking(){
   var branch =document.getElementById("f-branch").value;
   var ref    =generateRef();
   var booking={
-    id:Date.now(),ref:ref,source:"public",bookingType:"party",status:"new",branch:branch,
+    id:Date.now(),ref:ref,source:"public",bookingType:"party",status:"pending",branch:branch,
     name:name,phone:phone,email:email,kidname:kidname,
     age:document.getElementById("f-age").value,
     kids:document.getElementById("f-kids").value,

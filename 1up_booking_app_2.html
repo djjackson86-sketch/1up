@@ -202,6 +202,7 @@ textarea{resize:vertical;min-height:70px;}
 .kcard{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.09);padding:11px;margin-bottom:8px;border-left:4px solid var(--gray-mid);}
 .kcard-party{border-left-color:var(--or-dark);}
 .kcard-event{border-left-color:var(--teal);}
+.kcard-cancelled{border-left-color:var(--red);opacity:.75;}
 .kbadge{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:0.3px;}
 .kbadge-party{background:var(--or-light);color:var(--or-dark);}
 .kbadge-event{background:var(--teal-light);color:var(--teal);}
@@ -310,17 +311,6 @@ textarea{resize:vertical;min-height:70px;}
 
   <!-- Kanban Board -->
   <div class="kanban-board" id="kanban-board">
-    <!-- NEW column -->
-    <div class="kanban-col">
-      <div class="kanban-col-hdr col-new">
-        <div>
-          <div style="font-weight:800;font-size:13px;color:var(--or-dark);">🆕 New</div>
-          <div style="font-size:10px;color:var(--gray);" id="kanban-new-count">0 bookings</div>
-        </div>
-        <span class="badge badge-new" id="kanban-new-badge">0</span>
-      </div>
-      <div class="kanban-col-cards" id="kanban-col-new"></div>
-    </div>
     <!-- PENDING column -->
     <div class="kanban-col">
       <div class="kanban-col-hdr col-pending">
@@ -347,7 +337,7 @@ textarea{resize:vertical;min-height:70px;}
     <div class="kanban-col">
       <div class="kanban-col-hdr col-done">
         <div>
-          <div style="font-weight:800;font-size:13px;color:var(--teal);">✔️ Done / Past</div>
+          <div style="font-weight:800;font-size:13px;color:var(--teal);">✔️ Done / Past / Cancelled</div>
           <div style="font-size:10px;color:var(--gray);" id="kanban-done-count">0 bookings</div>
         </div>
         <span class="badge badge-done2" id="kanban-done-badge">0</span>
@@ -526,7 +516,6 @@ textarea{resize:vertical;min-height:70px;}
     <div class="form-group">
       <label>Status</label>
       <select id="vf-status">
-        <option value="enquiry">📨 Enquiry</option>
         <option value="pending">⏳ Pending / Quote Sent</option>
         <option value="confirmed">✅ Confirmed</option>
         <option value="done">✔️ Done</option>
@@ -795,7 +784,6 @@ textarea{resize:vertical;min-height:70px;}
     </div>
     <div class="form-group"><label>Status</label>
       <select id="f-status">
-        <option value="new">🆕 New (Form Submission)</option>
         <option value="pending">⏳ Pending</option>
         <option value="confirmed">✅ Confirmed</option>
         <option value="done">✔️ Done</option>
@@ -1032,39 +1020,111 @@ function showTab(t){
   if(t==="members"){showMemberSub("members");renderMembersList();}
 }
 
+// ===== CONFLICT DETECTION =====
+function normalizeArea(s){
+  // Strip leading emoji+space, lowercase
+  return String(s).replace(/^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}︀-️\u{1F300}-\u{1F9FF}]+\s*/u,"").toLowerCase().trim();
+}
+function getBookingAreas(b,bkType){
+  if(bkType==="event"){
+    return (b.areas||[]).map(normalizeArea).filter(Boolean);
+  }
+  var pkg=(b.package||"").toLowerCase();
+  if(pkg.includes("full"))    return ["skatepark","esports zone","soccer cage","dance arena","café area","cafe area","retail area"];
+  if(pkg.includes("combo"))   return ["skatepark","esports zone","soccer cage","dance arena"];
+  if(pkg.includes("skate"))   return ["skatepark"];
+  if(pkg.includes("esport"))  return ["esports zone"];
+  if(pkg.includes("soccer"))  return ["soccer cage"];
+  if(pkg.includes("dance"))   return ["dance arena"];
+  return [];
+}
+function getBookingTime(b,bkType){
+  var date=b.date||b.startDate||"";
+  var endDate=b.endDate||date;
+  var st="00:00",et="23:59";
+  if(bkType==="party"&&b.timeslot){
+    var parts=b.timeslot.split(/\s*[–\-]\s*/);
+    if(parts[0])st=parts[0].trim();
+    if(parts[1])et=parts[1].trim();
+  } else {
+    if(b.startTime)st=b.startTime;
+    if(b.endTime)et=b.endTime;
+  }
+  return{s:date+"T"+st,e:endDate+"T"+et};
+}
+function bookingHasConflict(b,bkType){
+  if(!b||b.status==="cancelled")return false;
+  var areasB=getBookingAreas(b,bkType);
+  if(!areasB.length)return false;
+  var timeB=getBookingTime(b,bkType);
+  var branch=b.branch||activeBranch;
+  var others=[
+    ...bookings.filter(function(x){return+x.id!==+b.id&&x.status!=="cancelled"&&(x.branch||activeBranch)===branch;}).map(function(x){return{bk:x,t:"party"};})  ,
+    ...venueBookings.filter(function(x){return+x.id!==+b.id&&x.status!=="cancelled"&&(x.branch||activeBranch)===branch;}).map(function(x){return{bk:x,t:"event"};})
+  ];
+  return others.some(function(o){
+    var areasO=getBookingAreas(o.bk,o.t);
+    if(!areasO.length)return false;
+    var timeO=getBookingTime(o.bk,o.t);
+    if(timeB.s>=timeO.e||timeO.s>=timeB.e)return false; // no time overlap
+    var shared=areasB.some(function(a){return areasO.indexOf(a)>-1;});
+    return shared;
+  });
+}
+
+// ===== 3-MONTH PURGE =====
+function purgeOldBookings(){
+  var cutoff=new Date();
+  cutoff.setMonth(cutoff.getMonth()-3);
+  var cutStr=cutoff.toISOString().slice(0,10);
+  // Only purge done/cancelled bookings older than 3 months
+  var bBefore=bookings.length;
+  bookings=bookings.filter(function(b){
+    if(b.status!=="done"&&b.status!=="cancelled")return true;
+    return(b.date||"")>=cutStr;
+  });
+  var vBefore=venueBookings.length;
+  venueBookings=venueBookings.filter(function(v){
+    if(v.status!=="done"&&v.status!=="cancelled")return true;
+    return(v.date||v.startDate||"")>=cutStr;
+  });
+  if(bookings.length!==bBefore)saveAll();
+  if(venueBookings.length!==vBefore)saveVenueAll();
+}
+
 // ===== KANBAN PIPELINE =====
 function renderKanban(){
+  purgeOldBookings();
   var q=(document.getElementById("kanban-search")||{}).value||"";
   var ql=q.toLowerCase();
-  // Party bookings (exclude cancelled)
-  var parties=bookings.filter(function(b){return b.status!=="cancelled";});
-  // Event bookings (exclude cancelled)
-  var events=venueBookings.filter(function(v){return v.status!=="cancelled";});
+  var today=new Date().toISOString().slice(0,10);
+  // All parties and events (include cancelled for done column)
+  var allParties=bookings.slice();
+  var allEvents=venueBookings.slice();
   // Search filter
   if(q){
-    parties=parties.filter(function(b){
+    allParties=allParties.filter(function(b){
       return (b.name||"").toLowerCase().includes(ql)||(b.package||"").toLowerCase().includes(ql)||
              (b.date||"").includes(ql)||(b.phone||"").includes(ql)||(b.kidname||"").toLowerCase().includes(ql);
     });
-    events=events.filter(function(v){
+    allEvents=allEvents.filter(function(v){
       return (v.name||"").toLowerCase().includes(ql)||(v.etype||"").toLowerCase().includes(ql)||
              (v.date||"").includes(ql)||(v.phone||"").includes(ql);
     });
   }
-  // Classify into columns
-  var newP=parties.filter(function(b){return b.status==="new";});
-  var pendP=parties.filter(function(b){return b.status==="pending";});
-  var today=new Date().toISOString().slice(0,10);
-  var confP=parties.filter(function(b){return b.status==="confirmed"&&(b.date||"")>=today;});
-  var doneP=parties.filter(function(b){return b.status==="done"||(b.status==="confirmed"&&(b.date||"")<today);});
-  var newE=events.filter(function(v){return v.status==="enquiry"||v.status==="new";});
-  var pendE=events.filter(function(v){return v.status==="pending";});
-  var confE=events.filter(function(v){return v.status==="confirmed"&&(v.date||v.startDate||"")>=today;});
-  var doneE=events.filter(function(v){return v.status==="done"||(v.status==="confirmed"&&(v.date||v.startDate||"")<today);});
-  var totN=newP.length+newE.length,totP=pendP.length+pendE.length;
+  // Classify — "new"/"enquiry" treated as pending (legacy support)
+  var pendP=allParties.filter(function(b){return b.status==="pending"||b.status==="new";});
+  var confP=allParties.filter(function(b){return b.status==="confirmed"&&(b.date||"")>=today;});
+  var doneP=allParties.filter(function(b){
+    return b.status==="done"||b.status==="cancelled"||(b.status==="confirmed"&&(b.date||"")<today);
+  });
+  var pendE=allEvents.filter(function(v){return v.status==="pending"||v.status==="new"||v.status==="enquiry";});
+  var confE=allEvents.filter(function(v){return v.status==="confirmed"&&(v.date||v.startDate||"")>=today;});
+  var doneE=allEvents.filter(function(v){
+    return v.status==="done"||v.status==="cancelled"||(v.status==="confirmed"&&(v.date||v.startDate||"")<today);
+  });
+  var totP=pendP.length+pendE.length;
   var totC=confP.length+confE.length,totD=doneP.length+doneE.length;
-  document.getElementById("kanban-new-badge").textContent=totN;
-  document.getElementById("kanban-new-count").textContent=totN+" booking"+(totN!==1?"s":"");
   document.getElementById("kanban-pending-badge").textContent=totP;
   document.getElementById("kanban-pending-count").textContent=totP+" booking"+(totP!==1?"s":"");
   document.getElementById("kanban-confirmed-badge").textContent=totC;
@@ -1072,17 +1132,14 @@ function renderKanban(){
   document.getElementById("kanban-done-badge").textContent=totD;
   document.getElementById("kanban-done-count").textContent=totD+" booking"+(totD!==1?"s":"");
   var sd=function(a,b){return(a.date||"").localeCompare(b.date||"");};
-  var sdDesc=function(a,b){return(b.date||"").localeCompare(a.date||"");};
+  var sdDesc=function(a,b){return(b.date||b.startDate||"").localeCompare(a.date||a.startDate||"");};
   var empty='<div style="padding:16px;text-align:center;color:var(--gray);font-size:12px;border:2px dashed var(--gray-mid);border-radius:10px;">Empty</div>';
-  var nc=[...newP.sort(sd).map(function(b){return kanbanCard(b,"party","new");}),
-          ...newE.sort(sd).map(function(v){return kanbanCard(v,"event","new");})].join("");
   var pc=[...pendP.sort(sd).map(function(b){return kanbanCard(b,"party","pending");}),
           ...pendE.sort(sd).map(function(v){return kanbanCard(v,"event","pending");})].join("");
   var cc=[...confP.sort(sd).map(function(b){return kanbanCard(b,"party","confirmed");}),
           ...confE.sort(sd).map(function(v){return kanbanCard(v,"event","confirmed");})].join("");
   var dc=[...doneP.sort(sdDesc).map(function(b){return kanbanCard(b,"party","done");}),
           ...doneE.sort(sdDesc).map(function(v){return kanbanCard(v,"event","done");})].join("");
-  document.getElementById("kanban-col-new").innerHTML=nc||empty;
   document.getElementById("kanban-col-pending").innerHTML=pc||empty;
   document.getElementById("kanban-col-confirmed").innerHTML=cc||empty;
   document.getElementById("kanban-col-done").innerHTML=dc||empty;
@@ -1090,46 +1147,46 @@ function renderKanban(){
 
 function kanbanCard(b,bkType,col){
   var isParty=bkType==="party";
+  var isCancelled=b.status==="cancelled";
   var src=b.source==="public"?"public":"staff";
   var br=(b.branch||activeBranch||"fourways")==="rosebank"?"Rosebank":"Fourways";
   var brColor=br==="Rosebank"?"#00E5FF":"var(--or)";
   var typeBadge=isParty?'<span class="kbadge kbadge-party">🎉 Party</span>':'<span class="kbadge kbadge-event">🏟️ Event</span>';
   var srcBadge=src==="public"?'<span class="kbadge kbadge-public">🌐 Public</span>':'<span class="kbadge kbadge-staff">👤 Staff</span>';
   var name=esc(b.name||"Unknown");
-  var dateStr=b.date?formatDate(b.date):"No date";
-  var timeStr=isParty?(b.timeslot||""):(b.stime?(b.stime+(b.etime?"–"+b.etime:"")):"");
-  var detail=isParty?(b.package||"No package"):(esc(b.etype||"Event")+(b.attendance?" · "+b.attendance+" pax":""));
-  // Conflict: party on same day as an event
-  var conflict=isParty&&venueBookings.some(function(v){
-    return v.status!=="cancelled"&&v.date&&b.date&&b.date>=v.date&&b.date<=(v.edate||v.date);
-  });
-  var conflictHtml=conflict?'<div style="font-size:10px;font-weight:700;color:var(--red);margin-top:3px;">⚠️ Date conflict with event</div>':"";
+  var dateStr=b.date?formatDate(b.date):b.startDate?formatDate(b.startDate):"No date";
+  var timeStr=isParty?(b.timeslot||""):(b.startTime?(b.startTime+(b.endTime?" – "+b.endTime:"")):"");
+  var detail=isParty?(b.package||"No package"):(esc(b.etype||b.eventType||"Event")+(b.attendance?" · "+b.attendance+" pax":""));
+  // Area+time conflict detection
+  var conflict=!isCancelled&&bookingHasConflict(b,bkType);
+  var conflictHtml=conflict?'<div style="font-size:10px;font-weight:700;color:var(--red);margin-top:4px;padding:4px 6px;background:#fee2e2;border-radius:6px;">⚠️ Area conflict — cannot confirm until resolved</div>':"";
   // Move buttons
   var moveHtml="";
-  if(col==="new"){
-    moveHtml='<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+'\''+bkType+'\',\'pending\')">⏳ Pending →</button>';
-  } else if(col==="pending"){
-    var backSt=isParty?"new":"enquiry";
-    moveHtml='<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\''+backSt+'\')">← Back</button>'+
-             '<button class="btn btn-green btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'confirmed\')">✅ Confirm</button>';
+  if(col==="pending"){
+    var confirmBtn=conflict
+      ?'<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;opacity:.45;cursor:not-allowed;" disabled title="Resolve conflict first">✅ Confirm</button>'
+      :'<button class="btn btn-green btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'confirmed\')">✅ Confirm</button>';
+    var cancelBtn='<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'cancelled\')">❌ Cancel</button>';
+    moveHtml=confirmBtn+cancelBtn;
   } else if(col==="confirmed"){
     moveHtml='<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'pending\')">← Pending</button>'+
              '<button class="btn btn-teal btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'done\')">✔️ Done</button>';
-  } else {
-    moveHtml='<button class="btn btn-green btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'confirmed\')">← Confirmed</button>';
+  } else if(col==="done"&&!isCancelled){
+    moveHtml='<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'confirmed\')">← Confirmed</button>';
   }
-  var editBtn=isParty?'<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openBook('+b.id+')">✏️</button>':
-                      '<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openVenue('+b.id+')">✏️</button>';
-  var invBtn=isParty?'<button class="btn btn-purple btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openInvoice('+b.id+')">🧾</button>':"";
+  var editBtn=isCancelled?"":isParty?'<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openBook('+b.id+')">✏️</button>':
+                                     '<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openVenue('+b.id+')">✏️</button>';
+  var invBtn=isParty&&!isCancelled?'<button class="btn btn-purple btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openInvoice('+b.id+')">🧾</button>':"";
   var delBtn=isParty?'<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delBook('+b.id+')">🗑</button>':
                      '<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delVenue('+b.id+')">🗑</button>';
-  return '<div class="kcard kcard-'+bkType+'">'+
+  var cancelledBadge=isCancelled?'<span style="font-size:10px;font-weight:700;background:var(--red-light);color:var(--red);padding:2px 7px;border-radius:10px;">❌ Cancelled</span>':"";
+  return '<div class="kcard kcard-'+bkType+(isCancelled?' kcard-cancelled':'')+'">'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+typeBadge+
-      '<div style="display:flex;gap:4px;align-items:center;">'+srcBadge+
+      '<div style="display:flex;gap:4px;align-items:center;">'+cancelledBadge+srcBadge+
         '<span style="font-size:10px;font-weight:700;background:#111;color:'+brColor+';padding:2px 6px;border-radius:10px;">'+br+'</span>'+
       '</div>'+
     '</div>'+
-    '<div class="kcard-name">'+name+'</div>'+
+    '<div class="kcard-name" style="'+(isCancelled?'text-decoration:line-through;color:var(--gray);':'')+'">'+name+'</div>'+
     '<div class="kcard-meta">📅 '+dateStr+(timeStr?' · '+timeStr:"")+'</div>'+
     '<div class="kcard-meta">📦 '+detail+'</div>'+
     (isParty&&b.kidname?'<div class="kcard-meta">🎂 '+esc(b.kidname)+' turns '+(b.age||"?")+'</div>':"")+
@@ -1140,6 +1197,14 @@ function kanbanCard(b,bkType,col){
 }
 
 function moveKanban(id,bkType,newStatus){
+  // Hard block: cannot confirm a booking with an area conflict
+  if(newStatus==="confirmed"){
+    var bk=bkType==="party"?bookings.find(function(x){return+x.id===+id;}):venueBookings.find(function(x){return+x.id===+id;});
+    if(bk&&bookingHasConflict(bk,bkType)){
+      showKanbanToast("⚠️ Area conflict — cancel one booking before confirming.");
+      return;
+    }
+  }
   if(bkType==="party"){
     var b=bookings.find(function(x){return+x.id===+id;});
     if(!b)return;
@@ -1158,7 +1223,7 @@ function showKanbanToast(msg){
   var t=document.getElementById("kanban-toast");
   if(!t)return;
   t.textContent=msg;t.style.opacity="1";
-  setTimeout(function(){t.style.opacity="0";},2200);
+  setTimeout(function(){t.style.opacity="0";},3000);
 }
 
 // ===== WHATSAPP TEMPLATES =====
