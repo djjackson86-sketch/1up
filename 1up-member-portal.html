@@ -241,9 +241,10 @@ function portalLogin(){
   if(!m){errEl.textContent="Invalid ID or password. Please try again.";errEl.style.display="block";return;}
   errEl.style.display="none";
   portalMember=m;
-  renderPortalDash();
+  // Switch views FIRST — before any rendering that could throw
   document.getElementById("view-login").style.display="none";
   document.getElementById("view-dash").style.display="";
+  try{renderPortalDash();}catch(e){console.error("renderPortalDash error:",e);}
 }
 
 function portalLogout(){
@@ -362,10 +363,15 @@ function formatDT(ts){
 // ---- QR Code Generator ----
 function drawPortalQR(text){
   var canvas=document.getElementById("portal-qr-canvas");
-  QRCode.toCanvas(canvas,text,{
-    width:180,margin:2,
-    color:{dark:"#111111",light:"#ffffff"}
-  },function(err){if(err)console.error("QR error:",err);});
+  if(!canvas)return;
+  if(typeof QRCode==="undefined"){
+    // Library not loaded yet — retry after short delay
+    setTimeout(function(){drawPortalQR(text);},500);
+    return;
+  }
+  try{
+    QRCode.toCanvas(canvas,text,{width:180,margin:2,color:{dark:"#111111",light:"#ffffff"}},function(err){if(err)console.error("QR:",err);});
+  }catch(e){console.error("QR draw failed:",e);}
 }
 </script>
 </body>
