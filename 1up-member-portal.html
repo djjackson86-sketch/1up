@@ -69,7 +69,6 @@
   .status-expired{background:var(--red-light);color:var(--red);}
   .status-suspended{background:var(--red-light);color:var(--red);}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -143,7 +142,7 @@
   <div class="qr-card">
     <div class="qr-card-title">📱 Your Membership Card</div>
     <div class="qr-canvas-wrap">
-      <div id="portal-qr-canvas"></div>
+      <img id="portal-qr-canvas" width="180" height="180" alt="Member QR" style="display:block;border-radius:8px;">
     </div>
     <div class="qr-member-id" id="p-qr-label">MEMBER:000000</div>
     <div class="qr-hint">Show this QR at reception to check in</div>
@@ -362,13 +361,9 @@ function formatDT(ts){
 
 // ---- QR Code Generator ----
 function drawPortalQR(text){
-  var el=document.getElementById("portal-qr-canvas");
-  if(!el)return;
-  if(typeof QRCode==="undefined"){setTimeout(function(){drawPortalQR(text);},400);return;}
-  try{
-    el.innerHTML="";
-    new QRCode(el,{text:text,width:180,height:180,colorDark:"#111111",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.L});
-  }catch(e){console.error("QR:",e);}
+  var img=document.getElementById("portal-qr-canvas");
+  if(!img)return;
+  img.src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=6&data="+encodeURIComponent(text);
 }
 </script>
 </body>
