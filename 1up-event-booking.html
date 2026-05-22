@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>1-UP Urban Playground — Event Enquiry</title>
+<style>
+:root{
+  --or:#E8FF00;--or2:#c8dc00;--or-light:#fafee0;--or-dark:#8a9800;
+  --teal:#00C4B4;--teal-light:#e0faf8;
+  --green:#16a34a;--green-light:#dcfce7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --yellow:#d97706;--yellow-light:#fef9c4;
+  --gray:#6b7280;--gray-light:#f3f4f6;--gray-mid:#e5e7eb;
+  --dark:#111827;--white:#ffffff;
+  --radius:12px;--shadow:0 2px 12px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0f0;color:var(--dark);min-height:100vh;padding-bottom:40px;}
+.nav{background:#111111;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+.nav-top{display:flex;align-items:center;gap:12px;padding:13px 16px;}
+.nav-logo{width:38px;height:38px;background:var(--or);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#111;flex-shrink:0;}
+.nav-title{color:var(--or);font-weight:900;font-size:18px;letter-spacing:0.5px;}
+.nav-title span{color:#fff;}
+.nav-sub{font-size:11px;color:#888;font-weight:600;margin-top:1px;}
+.form-wrap{max-width:500px;margin:0 auto;padding:16px 14px;}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;margin-bottom:14px;}
+.form-group{margin-bottom:12px;}
+label{display:block;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark);outline:none;transition:border 0.15s;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--or);}
+input.err,select.err{border-color:var(--red);}
+textarea{resize:vertical;min-height:70px;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.extras-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.extra-btn{padding:6px 10px;border-radius:20px;border:1.5px solid var(--gray-mid);background:#fff;font-size:12px;cursor:pointer;transition:all 0.15s;font-family:inherit;}
+.extra-btn:hover{border-color:var(--teal);}
+.extra-btn.selected{background:var(--teal-light);border-color:var(--teal);color:#00796b;font-weight:700;}
+.sec-label{font-size:11px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.6px;margin:18px 0 10px;padding-bottom:6px;border-bottom:1.5px solid var(--gray-mid);}
+.sec-label:first-child{margin-top:0;}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border-radius:8px;border:none;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.15s;font-family:inherit;width:100%;}
+.btn-teal{background:var(--teal);color:#fff;}
+.btn-teal:active{background:#00a89a;}
+.consent-box{background:var(--gray-light);border-radius:10px;padding:14px;margin-bottom:12px;}
+.consent-box p{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:8px;}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-top:8px;cursor:pointer;}
+.check-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--teal);}
+.check-row span{font-size:12px;line-height:1.5;color:var(--dark);}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:999;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.success-wrap{display:none;max-width:500px;margin:30px auto;padding:0 14px;text-align:center;}
+.success-wrap.show{display:block;}
+.suc-icon{font-size:60px;margin-bottom:14px;}
+.suc-title{font-size:22px;font-weight:900;margin-bottom:6px;}
+.suc-sub{color:var(--gray);font-size:13px;line-height:1.6;margin-bottom:20px;}
+.suc-ref{background:#111;border-radius:12px;padding:16px;margin-bottom:20px;}
+.suc-ref-lbl{font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.suc-ref-num{font-size:24px;font-weight:900;color:var(--or);letter-spacing:2px;}
+@media(max-width:360px){.grid-2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-top">
+    <div class="nav-logo">1UP</div>
+    <div>
+      <div class="nav-title">🏟️ <span>Event</span> Enquiry</div>
+      <div class="nav-sub">1-UP Urban Playground</div>
+    </div>
+  </div>
+</div>
+
+<div class="form-wrap" id="form-wrap">
+  <div class="card">
+
+    <div class="sec-label">📍 Branch</div>
+    <div class="form-group">
+      <label>Select Branch *</label>
+      <select id="vf-branch">
+        <option value="fourways">Fourways Mall</option>
+        <option value="rosebank">Rosebank</option>
+      </select>
+    </div>
+
+    <div class="sec-label">👤 Contact Details</div>
+    <div class="form-group"><label>Organiser / Company Name *</label><input id="vf-name" placeholder="e.g. Nike SA / Thandeka Dube"></div>
+    <div class="form-group"><label>Contact Person</label><input id="vf-contact" placeholder="e.g. Sipho Khumalo"></div>
+    <div class="form-group"><label>WhatsApp / Phone *</label><input id="vf-phone" type="tel" placeholder="e.g. 082 555 1234"></div>
+    <div class="form-group"><label>Email</label><input id="vf-email" type="email" placeholder="e.g. events@company.co.za"></div>
+
+    <div class="sec-label">🏟️ Event Details</div>
+    <div class="form-group">
+      <label>Event Type</label>
+      <select id="vf-etype">
+        <option value="">Select event type...</option>
+        <option>Corporate Event</option>
+        <option>Brand Activation</option>
+        <option>School / Sports Day</option>
+        <option>Competition / Tournament</option>
+        <option>Filming / Shoot</option>
+        <option>Concert / Performance</option>
+        <option>Community Event</option>
+        <option>Private Function</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Expected Attendance</label><input id="vf-attendance" type="number" placeholder="e.g. 200" min="1"></div>
+
+    <div class="sec-label">📅 Dates &amp; Times</div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label>Start Date *</label><input id="vf-date" type="date"></div>
+      <div class="form-group"><label>End Date</label><input id="vf-edate" type="date"></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label>Start Time</label><input id="vf-stime" type="time" placeholder="e.g. 08:00"></div>
+      <div class="form-group"><label>End Time</label><input id="vf-etime" type="time" placeholder="e.g. 20:00"></div>
+    </div>
+
+    <div class="sec-label">🎛️ Venue Requirements</div>
+    <div class="form-group">
+      <label>Areas Required</label>
+      <div class="extras-grid" id="vf-areas-grid">
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🛹 Skatepark</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎮 Esports Zone</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">⚽ Soccer Cage</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">💃 Dance Arena</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">☕ Café Area</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🛍️ Retail Area</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🌇 Rooftop (Phase 2)</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🏟️ Entire Venue</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Services Needed</label>
+      <div class="extras-grid" id="vf-services-grid">
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🔊 PA / Sound System</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">💡 Lighting Rig</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🍕 Catering</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">☕ Coffee Bar</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">📸 Photo / Video</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎤 MC / Host</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🛡️ Security</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎨 Branding / Décor</button>
+      </div>
+    </div>
+
+    <div class="sec-label">📝 Notes</div>
+    <div class="form-group">
+      <label>Notes / Requirements</label>
+      <textarea id="vf-notes" placeholder="Layout needs, load-in times, special requirements, parking, etc..."></textarea>
+    </div>
+
+    <div class="sec-label">🔒 Consent</div>
+    <div class="consent-box">
+      <p>By submitting this form you agree to 1-UP Urban Playground collecting your personal information to process this enquiry. In accordance with <strong>POPIA</strong>, your data will only be used to manage your venue enquiry and will not be shared with third parties.</p>
+      <label class="check-row">
+        <input type="checkbox" id="chk-popia">
+        <span>I consent to 1-UP collecting and using my personal information for this enquiry. *</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" id="chk-terms">
+        <span>I understand this is an enquiry only. A 1-UP representative will contact me to confirm availability and finalise details. *</span>
+      </label>
+    </div>
+
+    <button class="btn btn-teal" onclick="submitEnquiry()">🏟️ Submit Event Enquiry</button>
+
+  </div>
+</div>
+
+<div class="success-wrap" id="success-wrap">
+  <div class="suc-icon">🏟️</div>
+  <div class="suc-title">Enquiry Sent!</div>
+  <div class="suc-sub">Thank you! We've received your event enquiry and will be in touch within 24 hours to discuss availability and details.</div>
+  <div class="suc-ref">
+    <div class="suc-ref-lbl">Your Reference Number</div>
+    <div class="suc-ref-num" id="suc-ref">—</div>
+  </div>
+  <p style="font-size:12px;color:var(--gray);line-height:1.6;">Keep this reference for any follow-up queries.<br>📞 Our event coordinator will call you shortly.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function getChips(id){
+  var btns=document.querySelectorAll("#"+id+" .extra-btn.selected");
+  var vals=[];
+  btns.forEach(function(b){vals.push(b.textContent.trim());});
+  return vals;
+}
+
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(function(){t.classList.remove("show");},2800);
+}
+
+function generateRef(){
+  var c="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",r="";
+  for(var i=0;i<6;i++)r+=c.charAt(Math.floor(Math.random()*c.length));
+  return"1UP-E-"+r;
+}
+
+function submitEnquiry(){
+  var name  =(document.getElementById("vf-name").value||"").trim();
+  var phone =(document.getElementById("vf-phone").value||"").trim();
+  var date  =document.getElementById("vf-date").value;
+  var popia =document.getElementById("chk-popia").checked;
+  var terms =document.getElementById("chk-terms").checked;
+
+  ["vf-name","vf-phone","vf-date"].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.remove("err");
+  });
+  var ok=true;
+  if(!name) {document.getElementById("vf-name").classList.add("err");ok=false;}
+  if(!phone){document.getElementById("vf-phone").classList.add("err");ok=false;}
+  if(!date) {document.getElementById("vf-date").classList.add("err");ok=false;}
+  if(!ok){showToast("Please fill in all required fields.");return;}
+  if(!popia||!terms){showToast("Please accept the consent & terms.");return;}
+
+  var branch=document.getElementById("vf-branch").value;
+  var ref   =generateRef();
+  var enquiry={
+    id:Date.now(),ref:ref,source:"public",bookingType:"event",status:"enquiry",branch:branch,
+    name:name,
+    contact:(document.getElementById("vf-contact").value||"").trim(),
+    phone:phone,
+    email:(document.getElementById("vf-email").value||"").trim(),
+    eventType:document.getElementById("vf-etype").value,
+    attendance:(document.getElementById("vf-attendance").value||"").trim(),
+    date:date,
+    startDate:date,
+    endDate:document.getElementById("vf-edate").value,
+    startTime:document.getElementById("vf-stime").value,
+    endTime:document.getElementById("vf-etime").value,
+    areas:getChips("vf-areas-grid"),
+    services:getChips("vf-services-grid"),
+    notes:(document.getElementById("vf-notes").value||"").trim(),
+    submittedAt:new Date().toISOString()
+  };
+
+  var key="1up_venue_"+branch,existing=[];
+  try{var raw=localStorage.getItem(key);if(raw)existing=JSON.parse(raw);}catch(e){}
+  existing.push(enquiry);
+  try{localStorage.setItem(key,JSON.stringify(existing));}catch(e){showToast("Storage error. Please try again.");return;}
+
+  document.getElementById("form-wrap").style.display="none";
+  document.getElementById("suc-ref").textContent=ref;
+  document.getElementById("success-wrap").classList.add("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+(function(){
+  var today=new Date().toISOString().slice(0,10);
+  var sd=document.getElementById("vf-date");
+  var ed=document.getElementById("vf-edate");
+  if(sd){sd.min=today;sd.addEventListener("change",function(){if(ed){ed.min=sd.value||today;if(ed.value&&ed.value<sd.value)ed.value=sd.value;}});}
+})();
+</script>
+</body>
+</html>

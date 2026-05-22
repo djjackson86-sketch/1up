@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>1-UP Urban Playground — Kids Party Booking</title>
+<style>
+:root{
+  --or:#E8FF00;--or2:#c8dc00;--or-light:#fafee0;--or-dark:#8a9800;
+  --teal:#00C4B4;--teal-light:#e0faf8;
+  --green:#16a34a;--green-light:#dcfce7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --yellow:#d97706;--yellow-light:#fef9c4;
+  --gray:#6b7280;--gray-light:#f3f4f6;--gray-mid:#e5e7eb;
+  --dark:#111827;--white:#ffffff;
+  --radius:12px;--shadow:0 2px 12px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f0f0;color:var(--dark);min-height:100vh;padding-bottom:40px;}
+.nav{background:#111111;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.4);}
+.nav-top{display:flex;align-items:center;gap:12px;padding:13px 16px;}
+.nav-logo{width:38px;height:38px;background:var(--or);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#111;flex-shrink:0;}
+.nav-title{color:var(--or);font-weight:900;font-size:18px;letter-spacing:0.5px;}
+.nav-title span{color:#fff;}
+.nav-sub{font-size:11px;color:#888;font-weight:600;margin-top:1px;}
+.form-wrap{max-width:500px;margin:0 auto;padding:16px 14px;}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;margin-bottom:14px;}
+.form-group{margin-bottom:12px;}
+label{display:block;font-size:12px;font-weight:700;color:var(--gray);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark);outline:none;transition:border 0.15s;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--or);}
+input.err,select.err{border-color:var(--red);}
+textarea{resize:vertical;min-height:70px;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.extras-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.extra-btn{padding:6px 10px;border-radius:20px;border:1.5px solid var(--gray-mid);background:#fff;font-size:12px;cursor:pointer;transition:all 0.15s;font-family:inherit;}
+.extra-btn:hover{border-color:var(--or);}
+.extra-btn.selected{background:var(--or-light);border-color:var(--or);color:var(--or-dark);font-weight:700;}
+.meal-card{border:1.5px solid var(--gray-mid);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;background:#fff;transition:all 0.15s;}
+.meal-card:hover{border-color:var(--or);}
+.meal-card.selected{border-color:var(--or);background:var(--or-light);}
+.meal-card .mc-icon{font-size:20px;margin-bottom:3px;}
+.meal-card .mc-name{font-size:11px;font-weight:700;color:var(--dark);}
+.meal-card .mc-sub{font-size:10px;color:var(--gray);}
+.meal-card.selected .mc-name{color:var(--or-dark);}
+.guests-bar{background:var(--gray-light);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--gray);}
+.sec-label{font-size:11px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.6px;margin:18px 0 10px;padding-bottom:6px;border-bottom:1.5px solid var(--gray-mid);}
+.sec-label:first-child{margin-top:0;}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border-radius:8px;border:none;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.15s;font-family:inherit;width:100%;}
+.btn-o{background:var(--or);color:#111;}
+.btn-o:active{background:var(--or2);}
+.consent-box{background:var(--gray-light);border-radius:10px;padding:14px;margin-bottom:12px;}
+.consent-box p{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:8px;}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-top:8px;cursor:pointer;}
+.check-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--or-dark);}
+.check-row span{font-size:12px;line-height:1.5;color:var(--dark);}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:999;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.success-wrap{display:none;max-width:500px;margin:30px auto;padding:0 14px;text-align:center;}
+.success-wrap.show{display:block;}
+.suc-icon{font-size:60px;margin-bottom:14px;}
+.suc-title{font-size:22px;font-weight:900;margin-bottom:6px;}
+.suc-sub{color:var(--gray);font-size:13px;line-height:1.6;margin-bottom:20px;}
+.suc-ref{background:#111;border-radius:12px;padding:16px;margin-bottom:20px;}
+.suc-ref-lbl{font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.suc-ref-num{font-size:24px;font-weight:900;color:var(--or);letter-spacing:2px;}
+@media(max-width:360px){.grid-3{grid-template-columns:1fr 1fr;}.grid-2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-top">
+    <div class="nav-logo">1UP</div>
+    <div>
+      <div class="nav-title">🎉 <span>Kids Party</span> Booking</div>
+      <div class="nav-sub">1-UP Urban Playground</div>
+    </div>
+  </div>
+</div>
+
+<div class="form-wrap" id="form-wrap">
+  <div class="card">
+
+    <div class="sec-label">📍 Branch</div>
+    <div class="form-group">
+      <label>Select Branch *</label>
+      <select id="f-branch">
+        <option value="fourways">Fourways Mall</option>
+        <option value="rosebank">Rosebank</option>
+      </select>
+    </div>
+
+    <div class="sec-label">👤 Parent / Guardian Details</div>
+    <div class="form-group"><label>Parent / Guardian Name *</label><input id="f-name" placeholder="e.g. Thandeka Mokoena"></div>
+    <div class="form-group"><label>WhatsApp Number *</label><input id="f-phone" type="tel" placeholder="e.g. 082 555 1234"></div>
+    <div class="form-group"><label>Email *</label><input id="f-email" type="email" placeholder="e.g. parent@email.com"></div>
+
+    <div class="sec-label">🎂 Birthday Child</div>
+    <div class="form-group"><label>Birthday Child's Name *</label><input id="f-kidname" placeholder="e.g. Kai"></div>
+    <div class="grid-3" style="margin-bottom:0;">
+      <div class="form-group"><label>Age Turning</label><input id="f-age" type="number" min="1" max="25" placeholder="e.g. 10"></div>
+      <div class="form-group"><label>No. of Kids</label><input id="f-kids" type="number" min="0" placeholder="e.g. 12" oninput="updateTotal()"></div>
+      <div class="form-group"><label>No. of Adults</label><input id="f-adults" type="number" min="0" placeholder="e.g. 5" oninput="updateTotal()"></div>
+    </div>
+    <div class="guests-bar">Total guests: <strong id="f-guests-total" style="color:var(--dark);">0</strong></div>
+
+    <div class="sec-label">🍔 Kids Meal Choice</div>
+    <div class="grid-3" style="margin-bottom:12px;">
+      <div class="meal-card" id="meal-mini-burger" onclick="selectMeal('mini-burger',this)">
+        <div class="mc-icon">🍔</div>
+        <div class="mc-name">Mini Burger</div>
+        <div class="mc-sub">& Chips</div>
+      </div>
+      <div class="meal-card" id="meal-hotdog" onclick="selectMeal('hotdog',this)">
+        <div class="mc-icon">🌭</div>
+        <div class="mc-name">Hotdog</div>
+        <div class="mc-sub">& Chips</div>
+      </div>
+      <div class="meal-card" id="meal-nuggets" onclick="selectMeal('nuggets',this)">
+        <div class="mc-icon">🍗</div>
+        <div class="mc-name">Nuggets</div>
+        <div class="mc-sub">& Chips</div>
+      </div>
+    </div>
+    <input type="hidden" id="f-kidsmeal" value="">
+
+    <div class="sec-label">📦 Party Package</div>
+    <div class="form-group">
+      <label>Party Package *</label>
+      <select id="f-package">
+        <option value="">Select package...</option>
+        <option value="Skate Party">🛹 Skate Party — From R1,800</option>
+        <option value="Esports Party">🎮 Esports Party — From R2,200</option>
+        <option value="Street Soccer Party">⚽ Street Soccer Party — From R1,600</option>
+        <option value="Dance Party">💃 Dance Party — From R1,800</option>
+        <option value="Combo Package (Any 2)">⚡ Combo Package (Any 2) — From R3,200</option>
+        <option value="Full Venue Party">🏟️ Full Venue Party — From R5,500</option>
+      </select>
+    </div>
+
+    <div class="sec-label">📅 Date &amp; Time</div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="form-group"><label>Date *</label><input id="f-date" type="date"></div>
+      <div class="form-group">
+        <label>Time Slot *</label>
+        <select id="f-timeslot">
+          <option value="">Select time...</option>
+          <option>10:00 – 12:00</option>
+          <option>12:00 – 14:00</option>
+          <option>14:00 – 16:00</option>
+          <option>16:00 – 18:00</option>
+          <option>18:00 – 20:00</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sec-label">🎁 Add-ons &amp; Extras</div>
+    <div class="form-group">
+      <label>Extras (select all that apply)</label>
+      <div class="extras-grid" id="extras-grid">
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎂 Birthday Cake</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎈 Balloon Décor</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">📸 Photo Backdrop</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🍕 Pizza &amp; Slush</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🧋 Boba Drinks</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎵 DJ / Sound System</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎨 Face Painting</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🏆 Trophy / Medal</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎁 Goodie Bags</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Catering</label>
+      <select id="f-catering">
+        <option value="None">No catering</option>
+        <option>Pizza &amp; slush (kids)</option>
+        <option>Boba drinks &amp; snacks</option>
+        <option>Full kids' party buffet</option>
+      </select>
+    </div>
+
+    <div class="sec-label">📝 Notes</div>
+    <div class="form-group">
+      <label>Notes / Special Requests</label>
+      <textarea id="f-notes" placeholder="Allergy info, theme ideas, special requests..."></textarea>
+    </div>
+
+    <div class="sec-label">🔒 Consent</div>
+    <div class="consent-box">
+      <p>By submitting this form you agree to 1-UP Urban Playground collecting your personal information to process this booking. In accordance with <strong>POPIA</strong>, your data will only be used to manage your party booking and will not be shared with third parties.</p>
+      <label class="check-row">
+        <input type="checkbox" id="chk-popia">
+        <span>I consent to 1-UP collecting and using my personal information for this booking. *</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" id="chk-terms">
+        <span>I understand this is a booking request. A 1-UP team member will confirm availability and contact me to finalise. *</span>
+      </label>
+    </div>
+
+    <button class="btn btn-o" onclick="submitBooking()">🎉 Submit Party Booking</button>
+
+  </div>
+</div>
+
+<div class="success-wrap" id="success-wrap">
+  <div class="suc-icon">🎉</div>
+  <div class="suc-title">Booking Submitted!</div>
+  <div class="suc-sub">Thank you! Your party booking request has been received. We'll contact you within 24 hours to confirm your slot and send a quote.</div>
+  <div class="suc-ref">
+    <div class="suc-ref-lbl">Your Reference Number</div>
+    <div class="suc-ref-num" id="suc-ref">—</div>
+  </div>
+  <p style="font-size:12px;color:var(--gray);line-height:1.6;">Keep this reference for any follow-up queries.<br>📞 Our team will call or WhatsApp you shortly.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var selectedMeal="";
+
+function updateTotal(){
+  var k=parseInt(document.getElementById("f-kids").value)||0;
+  var a=parseInt(document.getElementById("f-adults").value)||0;
+  document.getElementById("f-guests-total").textContent=k+a;
+}
+
+function selectMeal(val,el){
+  selectedMeal=val;
+  document.getElementById("f-kidsmeal").value=val;
+  ["mini-burger","hotdog","nuggets"].forEach(function(id){
+    var c=document.getElementById("meal-"+id);
+    if(c)c.classList.toggle("selected",id===val);
+  });
+}
+
+function getExtras(){
+  var btns=document.querySelectorAll("#extras-grid .extra-btn.selected");
+  var vals=[];
+  btns.forEach(function(b){vals.push(b.textContent.trim());});
+  return vals;
+}
+
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(function(){t.classList.remove("show");},2800);
+}
+
+function generateRef(){
+  var c="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",r="";
+  for(var i=0;i<6;i++)r+=c.charAt(Math.floor(Math.random()*c.length));
+  return"1UP-P-"+r;
+}
+
+function submitBooking(){
+  var name   =(document.getElementById("f-name").value||"").trim();
+  var phone  =(document.getElementById("f-phone").value||"").trim();
+  var email  =(document.getElementById("f-email").value||"").trim();
+  var kidname=(document.getElementById("f-kidname").value||"").trim();
+  var pkg    =document.getElementById("f-package").value;
+  var date   =document.getElementById("f-date").value;
+  var slot   =document.getElementById("f-timeslot").value;
+  var popia  =document.getElementById("chk-popia").checked;
+  var terms  =document.getElementById("chk-terms").checked;
+
+  ["f-name","f-phone","f-email","f-kidname","f-package","f-date","f-timeslot"].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.remove("err");
+  });
+  var ok=true;
+  if(!name)  {document.getElementById("f-name").classList.add("err");ok=false;}
+  if(!phone) {document.getElementById("f-phone").classList.add("err");ok=false;}
+  if(!email||!email.includes("@")){document.getElementById("f-email").classList.add("err");ok=false;}
+  if(!kidname){document.getElementById("f-kidname").classList.add("err");ok=false;}
+  if(!pkg)   {document.getElementById("f-package").classList.add("err");ok=false;}
+  if(!date)  {document.getElementById("f-date").classList.add("err");ok=false;}
+  if(!slot)  {document.getElementById("f-timeslot").classList.add("err");ok=false;}
+  if(!ok){showToast("Please fill in all required fields.");return;}
+  if(!popia||!terms){showToast("Please accept the consent & terms.");return;}
+
+  var branch =document.getElementById("f-branch").value;
+  var ref    =generateRef();
+  var booking={
+    id:Date.now(),ref:ref,source:"public",bookingType:"party",status:"new",branch:branch,
+    name:name,phone:phone,email:email,kidname:kidname,
+    age:document.getElementById("f-age").value,
+    kids:document.getElementById("f-kids").value,
+    adults:document.getElementById("f-adults").value,
+    guests:(parseInt(document.getElementById("f-kids").value)||0)+(parseInt(document.getElementById("f-adults").value)||0),
+    kidsmeal:selectedMeal,package:pkg,date:date,timeslot:slot,
+    extras:getExtras(),catering:document.getElementById("f-catering").value,
+    notes:(document.getElementById("f-notes").value||"").trim(),
+    submittedAt:new Date().toISOString()
+  };
+
+  var key="1up_bk_"+branch,existing=[];
+  try{var raw=localStorage.getItem(key);if(raw)existing=JSON.parse(raw);}catch(e){}
+  existing.push(booking);
+  try{localStorage.setItem(key,JSON.stringify(existing));}catch(e){showToast("Storage error. Please try again.");return;}
+
+  document.getElementById("form-wrap").style.display="none";
+  document.getElementById("suc-ref").textContent=ref;
+  document.getElementById("success-wrap").classList.add("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+(function(){
+  var today=new Date().toISOString().slice(0,10);
+  var d=document.getElementById("f-date");
+  if(d)d.min=today;
+})();
+</script>
+</body>
+</html>

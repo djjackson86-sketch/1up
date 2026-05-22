@@ -27,6 +27,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nav-branch-btn{padding:4px 14px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:#222;color:#888;transition:all 0.15s;white-space:nowrap;}
 .nav-branch-btn.active-fw{background:var(--or);color:#111;}
 .nav-branch-btn.active-rb{background:#00E5FF;color:#111;}
+.nav-scan-bar{display:flex;align-items:center;justify-content:center;gap:8px;background:#1a1800;border-top:1px solid #2a2800;padding:7px 16px;cursor:pointer;color:var(--or);font-size:12px;font-weight:800;letter-spacing:0.5px;transition:background 0.15s;user-select:none;}
+.nav-scan-bar:hover{background:#252200;}
+.nav-scan-bar:active{background:#302800;}
+.nav-scan-bar .nsb-icon{font-size:16px;line-height:1;}
+.nav-scan-bar .nsb-pulse{width:8px;height:8px;border-radius:50%;background:var(--or);margin-left:auto;animation:nsbpulse 1.8s ease-in-out infinite;}
+@keyframes nsbpulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
 .nav-tabs{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #ffffff20;}
 .tab{padding:10px 2px 8px;text-align:center;font-size:11px;font-weight:700;color:#ffffff60;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.5px;}
 .tab.active{color:var(--or);border-bottom-color:var(--or);}
@@ -183,6 +189,30 @@ textarea{resize:vertical;min-height:70px;}
 .status-active{color:var(--green);}
 .status-expired{color:var(--red);}
 .status-suspended{color:var(--yellow);}
+/* ===== KANBAN ===== */
+.kanban-board{display:flex;flex-direction:column;gap:14px;}
+.kanban-col{width:100%;}
+.kanban-col-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;border:1.5px solid transparent;margin-bottom:10px;}
+.kanban-col-cards{display:grid;grid-template-columns:1fr;gap:8px;}
+.kanban-col-hdr.col-new{background:var(--or-light);border-color:var(--or);}
+.kanban-col-hdr.col-pending{background:var(--yellow-light);border-color:var(--yellow);}
+.kanban-col-hdr.col-confirmed{background:var(--green-light);border-color:var(--green);}
+.kanban-col-hdr.col-done{background:var(--teal-light);border-color:var(--teal);}
+.badge-done2{background:var(--teal-light);color:var(--teal);}
+.kcard{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.09);padding:11px;margin-bottom:8px;border-left:4px solid var(--gray-mid);}
+.kcard-party{border-left-color:var(--or-dark);}
+.kcard-event{border-left-color:var(--teal);}
+.kbadge{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:0.3px;}
+.kbadge-party{background:var(--or-light);color:var(--or-dark);}
+.kbadge-event{background:var(--teal-light);color:var(--teal);}
+.kbadge-staff{background:#111;color:var(--or);}
+.kbadge-public{background:var(--purple-light);color:var(--purple);}
+.kcard-name{font-weight:800;font-size:14px;margin:5px 0 3px;line-height:1.2;}
+.kcard-meta{font-size:11px;color:var(--gray);line-height:1.7;}
+.kcard-actions{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
+/* WA share bar */
+.wa-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.wa-bar .btn{flex:1;min-width:0;}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
@@ -196,13 +226,18 @@ textarea{resize:vertical;min-height:70px;}
       <button class="nav-branch-btn" id="btn-rb" onclick="setBranch('rosebank')">Rosebank</button>
     </div>
   </div>
+  <div class="nav-scan-bar" onclick="openScanner()">
+    <span class="nsb-icon">📷</span>
+    <span>Scan Member QR</span>
+    <div class="nsb-pulse"></div>
+  </div>
   <div class="nav-tabs" style="grid-template-columns:repeat(6,1fr);">
     <div class="tab active" onclick="showTab('dashboard')">📊 Home</div>
     <div class="tab" onclick="showTab('bookings')">📋 Bookings</div>
     <div class="tab" onclick="showTab('activities')">🎮 Activities</div>
     <div class="tab" onclick="showTab('stock')">🍬 Stock</div>
-    <div class="tab" onclick="showTab('setup')">⚙️ Setup</div>
     <div class="tab" onclick="showTab('members')">🔐 Members</div>
+    <div class="tab" onclick="showTab('setup')">⚙️ Setup</div>
   </div>
 </div>
 
@@ -218,105 +253,111 @@ textarea{resize:vertical;min-height:70px;}
     <div style="font-weight:900;font-size:14px;color:var(--or);margin-bottom:6px;" id="branch-info-title">📍 Fourways Mall</div>
     <div style="font-size:12px;color:#aaa;line-height:1.8;" id="branch-info-body">Shop CF02, 11 Ruby Close, Fourways · Hours: Weekdays 10am–7pm · Weekends 10am–9pm</div>
   </div>
-  <!-- SCAN MEMBER QR -->
-  <div class="scan-hero" onclick="openScanner()">
-    <div class="scan-hero-icon">📷</div>
-    <div class="scan-hero-text">Scan Member QR</div>
-    <div class="scan-hero-sub">Tap to open camera & validate membership</div>
-  </div>
   <div class="card">
     <div style="font-weight:900;font-size:15px;margin-bottom:10px;">📅 Upcoming Bookings</div>
     <div id="upcoming-list"><div style="color:var(--gray);font-size:13px;">No upcoming bookings</div></div>
   </div>
 </div>
 
-<!-- BOOKINGS HUB -->
+<!-- BOOKINGS REDESIGNED -->
 <div class="page" id="page-bookings">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+
+  <!-- Page header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
     <div style="font-weight:900;font-size:17px;">📋 Bookings</div>
     <div style="display:flex;gap:6px;">
-      <button class="btn btn-green btn-sm" onclick="openExport()">📥 Export</button>
-      <button class="btn btn-o btn-sm" id="bhub-new-btn" onclick="openBook()">+ New</button>
+      <button class="btn btn-o btn-sm" onclick="openBook()">🎉 Party</button>
+      <button class="btn btn-teal btn-sm" onclick="openVenue()">🏟️ Event</button>
     </div>
   </div>
 
-  <!-- Sub-tabs -->
-  <div class="booking-subtabs">
-    <button class="booking-subtab active" id="bsub-parties" onclick="showBookingSub('parties')">🎉 Party Bookings</button>
-    <button class="booking-subtab" id="bsub-venue" onclick="showBookingSub('venue')">🏟️ Venue Hire</button>
-    <button class="booking-subtab" id="bsub-forms" onclick="showBookingSub('forms')">📩 Customer Form</button>
+  <!-- Calendar (branch-aware) -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">‹</button>
+      <div style="font-weight:900;font-size:15px;" id="cal-title"></div>
+      <button class="btn btn-ghost btn-sm" onclick="calNav(1)">›</button>
+    </div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><span class="cal-dot"></span> Kids Party</div>
+      <div class="cal-legend-item"><span class="cal-dot-venue"></span> Event / Venue</div>
+      <div class="cal-legend-item"><span class="cal-dot-stock"></span> Low stock</div>
+    </div>
+    <div class="cal-grid" id="cal-headers"></div>
+    <div class="cal-grid" id="cal-body" style="margin-top:4px;"></div>
   </div>
 
-  <!-- Party Bookings sub-view -->
-  <div id="booking-sub-parties">
-    <!-- Calendar -->
-    <div class="card" style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">‹</button>
-        <div style="font-weight:900;font-size:15px;" id="cal-title"></div>
-        <button class="btn btn-ghost btn-sm" onclick="calNav(1)">›</button>
+  <!-- WhatsApp share row -->
+  <div class="wa-bar">
+    <button class="btn btn-green btn-sm" onclick="sendWhatsApp('party')" style="font-size:11px;">📤 Party Link</button>
+    <button class="btn btn-teal btn-sm" onclick="sendWhatsApp('event')" style="font-size:11px;">📤 Event Link</button>
+    <button class="btn btn-ghost btn-sm" onclick="openWATemplates()" style="font-size:11px;">⚙️ Templates</button>
+    <button class="btn btn-ghost btn-sm" onclick="openExport()" style="font-size:11px;">📥 Export</button>
+  </div>
+
+  <!-- Pipeline header + search -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+    <div style="font-weight:800;font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;">Booking Pipeline</div>
+    <div style="display:flex;gap:8px;font-size:10px;font-weight:700;">
+      <span style="color:var(--or-dark);">🎉 Party</span>
+      <span style="color:var(--teal);">🏟️ Event</span>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <input type="search" id="kanban-search" placeholder="🔍 Search name, date, package..." oninput="renderKanban()"
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:10px;font-size:14px;box-sizing:border-box;">
+  </div>
+
+  <!-- Kanban Board -->
+  <div class="kanban-board" id="kanban-board">
+    <!-- NEW column -->
+    <div class="kanban-col">
+      <div class="kanban-col-hdr col-new">
+        <div>
+          <div style="font-weight:800;font-size:13px;color:var(--or-dark);">🆕 New</div>
+          <div style="font-size:10px;color:var(--gray);" id="kanban-new-count">0 bookings</div>
+        </div>
+        <span class="badge badge-new" id="kanban-new-badge">0</span>
       </div>
-      <div class="cal-legend">
-        <div class="cal-legend-item"><span class="cal-dot"></span> Party booking</div>
-        <div class="cal-legend-item"><span class="cal-dot-venue"></span> Venue hire (blocked)</div>
-        <div class="cal-legend-item"><span class="cal-dot-stock"></span> Low stock warning</div>
+      <div class="kanban-col-cards" id="kanban-col-new"></div>
+    </div>
+    <!-- PENDING column -->
+    <div class="kanban-col">
+      <div class="kanban-col-hdr col-pending">
+        <div>
+          <div style="font-weight:800;font-size:13px;color:var(--yellow);">⏳ Pending</div>
+          <div style="font-size:10px;color:var(--gray);" id="kanban-pending-count">0 bookings</div>
+        </div>
+        <span class="badge badge-pending" id="kanban-pending-badge">0</span>
       </div>
-      <div class="cal-grid" id="cal-headers"></div>
-      <div class="cal-grid" id="cal-body" style="margin-top:4px;"></div>
+      <div class="kanban-col-cards" id="kanban-col-pending"></div>
     </div>
-
-    <!-- Filters -->
-    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-      <button class="btn btn-sm" id="filter-all" onclick="setFilter('all')" style="background:#111;color:var(--or);">All</button>
-      <button class="btn btn-sm btn-ghost" id="filter-new" onclick="setFilter('new')">🆕 New</button>
-      <button class="btn btn-sm btn-ghost" id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
-      <button class="btn btn-sm btn-ghost" id="filter-confirmed" onclick="setFilter('confirmed')">✅ Confirmed</button>
-      <button class="btn btn-sm btn-ghost" id="filter-fourways" onclick="setFilter('fourways')">Fourways</button>
-      <button class="btn btn-sm btn-ghost" id="filter-rosebank" onclick="setFilter('rosebank')">Rosebank</button>
-    </div>
-
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" placeholder="Search name, package, date, phone..." oninput="renderBookings(this.value)">
-    </div>
-    <div id="book-list"></div>
-  </div>
-
-  <!-- Venue Hire sub-view -->
-  <div id="booking-sub-venue" style="display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="font-weight:800;font-size:15px;">🏟️ Venue Hire</div>
-      <button class="btn btn-o btn-sm" onclick="openVenue()">+ New Hire</button>
-    </div>
-    <div class="card" style="background:#111;color:#fff;margin-bottom:12px;">
-      <div style="font-size:13px;color:#aaa;line-height:1.8;">Full-day venue hire for corporate events, competitions, activations, filming, school events and more.</div>
-    </div>
-    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-      <button class="btn btn-sm" id="vfilter-all" onclick="setVFilter('all')" style="background:#111;color:var(--or);">All</button>
-      <button class="btn btn-sm btn-ghost" id="vfilter-upcoming" onclick="setVFilter('upcoming')">Upcoming</button>
-      <button class="btn btn-sm btn-ghost" id="vfilter-confirmed" onclick="setVFilter('confirmed')">✅ Confirmed</button>
-      <button class="btn btn-sm btn-ghost" id="vfilter-pending" onclick="setVFilter('pending')">⏳ Pending</button>
-    </div>
-    <div id="venue-list"></div>
-  </div>
-
-  <!-- Customer Form sub-view -->
-  <div id="booking-sub-forms" style="display:none;">
-    <div class="card" style="background:#111;color:#fff;">
-      <div style="font-weight:900;font-size:15px;margin-bottom:6px;color:var(--or);">🏟️ Venue Hire Booking Form</div>
-      <p style="font-size:13px;color:#aaa;line-height:1.6;margin-bottom:14px;">Send customers the link below. When they submit, their enquiry appears instantly in your <strong style="color:#fff;">Venue Hire</strong> sub-tab.</p>
-      <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
-        <div style="font-size:11px;font-weight:700;color:var(--or);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Customer Form Link</div>
-        <div style="font-size:12px;font-weight:600;color:#ccc;word-break:break-all;" id="form-link-display">1up-venue-booking.html (same folder as this app)</div>
+    <!-- CONFIRMED column -->
+    <div class="kanban-col">
+      <div class="kanban-col-hdr col-confirmed">
+        <div>
+          <div style="font-weight:800;font-size:13px;color:var(--green);">✅ Confirmed</div>
+          <div style="font-size:10px;color:var(--gray);" id="kanban-confirmed-count">0 bookings</div>
+        </div>
+        <span class="badge badge-confirmed" id="kanban-confirmed-badge">0</span>
       </div>
-      <button class="btn btn-o" style="width:100%;margin-bottom:8px;" onclick="window.open('1up-venue-booking.html','_blank')">👁️ Open / Preview Form</button>
+      <div class="kanban-col-cards" id="kanban-col-confirmed"></div>
     </div>
-    <div class="card">
-      <div style="font-weight:800;font-size:14px;margin-bottom:4px;">📋 Recent Venue Hire Enquiries</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Submitted via the customer form — also visible in Venue Hire sub-tab.</p>
-      <div id="form-submissions-list"><div style="color:var(--gray);font-size:13px;">No submissions yet.</div></div>
+    <!-- DONE column -->
+    <div class="kanban-col">
+      <div class="kanban-col-hdr col-done">
+        <div>
+          <div style="font-weight:800;font-size:13px;color:var(--teal);">✔️ Done / Past</div>
+          <div style="font-size:10px;color:var(--gray);" id="kanban-done-count">0 bookings</div>
+        </div>
+        <span class="badge badge-done2" id="kanban-done-badge">0</span>
+      </div>
+      <div class="kanban-col-cards" id="kanban-col-done"></div>
     </div>
   </div>
+
+  <!-- Kanban toast -->
+  <div id="kanban-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:999;pointer-events:none;white-space:nowrap;"></div>
 </div>
 
 <!-- VENUE HIRE (page kept for compatibility, hidden) -->
@@ -551,73 +592,42 @@ textarea{resize:vertical;min-height:70px;}
 
 <!-- MEMBERS PAGE -->
 <div class="page" id="page-members">
-  <div style="font-weight:900;font-size:17px;margin-bottom:12px;">🔐 Member Portal</div>
-
-  <!-- LOGIN VIEW -->
-  <div id="member-login-view" class="member-login">
-    <div class="member-login-card">
-      <div class="member-login-logo">1-UP <span>Members</span></div>
-      <div class="member-login-sub">Enter your member credentials to access your digital membership card.</div>
-      <div class="form-group">
-        <label>Member ID</label>
-        <input id="mem-login-id" type="text" placeholder="e.g. 928374" style="text-align:center;font-size:18px;font-weight:700;letter-spacing:2px;">
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input id="mem-login-pass" type="password" placeholder="Enter password" style="text-align:center;" onkeydown="if(event.key==='Enter')memberLogin();">
-      </div>
-      <button class="btn btn-o" style="width:100%;" onclick="memberLogin()">🔓 Sign In</button>
-      <div id="mem-login-error" style="color:var(--red);font-size:12px;font-weight:700;margin-top:10px;display:none;"></div>
-      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--gray-mid);">
-        <div style="font-size:11px;color:var(--gray);font-weight:600;margin-bottom:8px;">🔑 Demo Credentials</div>
-        <div style="font-size:11px;color:var(--gray);line-height:2;">
-          <strong>928374</strong> / pass123 — Sipho K.<br>
-          <strong>551092</strong> / hello1up — Thandeka D.<br>
-          <strong>773661</strong> / skate99 — James vdM<br>
-          <strong>992118</strong> / dance2026 — Priya N.
-        </div>
-      </div>
-    </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="font-weight:900;font-size:17px;">🧑‍🤝‍🧑 Members</div>
+    <button class="btn btn-o btn-sm" id="btn-add-member" onclick="openAddMember()" style="font-size:12px;padding:6px 14px;">➕ Add</button>
   </div>
 
-  <!-- DASHBOARD VIEW (hidden initially) -->
-  <div id="member-dash-view" class="member-dash" style="display:none;">
-    <!-- QR Card -->
-    <div class="member-qr-card" style="margin-bottom:12px;">
-      <div style="font-weight:900;font-size:16px;color:var(--dark);">📱 Membership Card</div>
-      <div class="member-qr-img" id="member-qr-container"></div>
-      <div style="font-size:13px;font-weight:700;color:var(--or-dark);margin-top:4px;" id="member-qr-label">MEMBER:928374</div>
-      <p style="font-size:11px;color:var(--gray);margin-top:4px;">Show this QR at reception to check in.</p>
-    </div>
-    <!-- Info Grid -->
-    <div class="member-info-grid">
-      <div class="member-info-item">
-        <div class="member-info-label">Name</div>
-        <div class="member-info-val" id="mdash-name">—</div>
-      </div>
-      <div class="member-info-item">
-        <div class="member-info-label">Member ID</div>
-        <div class="member-info-val" id="mdash-id">—</div>
-      </div>
-      <div class="member-info-item">
-        <div class="member-info-label">Status</div>
-        <div class="member-info-val" id="mdash-status" style="color:var(--green);">—</div>
-      </div>
-      <div class="member-info-item">
-        <div class="member-info-label">Type</div>
-        <div class="member-info-val" id="mdash-type">—</div>
-      </div>
-      <div class="member-info-item">
-        <div class="member-info-label">Expiry Date</div>
-        <div class="member-info-val" id="mdash-expiry">—</div>
-      </div>
-      <div class="member-info-item">
-        <div class="member-info-label">Check-ins</div>
-        <div class="member-info-val" id="mdash-checkins">—</div>
-      </div>
-    </div>
-    <button class="btn btn-ghost" style="width:100%;margin-top:14px;" onclick="memberLogout()">🚪 Sign Out</button>
+  <!-- Sub-tabs -->
+  <div class="booking-subtabs" style="margin-bottom:14px;">
+    <button class="booking-subtab active" id="msub-btn-members" onclick="showMemberSub('members')">🧑‍🤝‍🧑 Members</button>
+    <button class="booking-subtab" id="msub-btn-logins" onclick="showMemberSub('logins')">🕐 Recent Logins</button>
   </div>
+
+  <!-- ── SUB: MEMBERS ── -->
+  <div id="msub-members">
+    <!-- Portal link share row -->
+    <div style="background:#111;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;">
+      <div style="font-size:11px;color:#999;line-height:1.5;">Member Portal link<br><span style="color:var(--or);font-weight:700;font-size:11px;">Share with members to access their QR card</span></div>
+      <button class="btn btn-sm" style="background:var(--or);color:#111;font-size:11px;padding:5px 12px;flex-shrink:0;font-weight:700;" onclick="copyPortalLink()">🔗 Copy Link</button>
+    </div>
+    <!-- Search -->
+    <div style="margin-bottom:12px;">
+      <input id="member-search-input" type="search" placeholder="🔍 Search by name or member ID..."
+        oninput="searchMembers()"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:10px;font-size:14px;box-sizing:border-box;">
+    </div>
+    <!-- Member list -->
+    <div id="members-list"></div>
+  </div>
+
+  <!-- ── SUB: RECENT LOGINS ── -->
+  <div id="msub-logins" style="display:none;">
+    <div style="font-size:12px;color:var(--gray);margin-bottom:12px;">QR scan check-ins from the last 7 days · all branches</div>
+    <div id="recent-logins-list"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="member-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:999;pointer-events:none;white-space:nowrap;"></div>
 </div>
 
 <!-- EXPORT MODAL -->
@@ -1003,7 +1013,7 @@ function setBranch(b){
   document.getElementById("branch-info-body").textContent=b==="fourways"
     ?"Shop CF02, 11 Ruby Close, Fourways · Weekdays 10am–7pm · Weekends 10am–9pm"
     :"Rosebank Mall, Rosebank, Johannesburg · Mall trading hours apply";
-  renderDashboard();renderBookings();
+  renderDashboard();renderKanban();renderCalendar();
 }
 
 // ===== TAB =====
@@ -1016,27 +1026,172 @@ function showTab(t){
   if(idx>=0){document.querySelectorAll(".tab")[idx].classList.add("active");}
   document.getElementById("page-"+t).classList.add("active");
   if(t==="dashboard")renderDashboard();
-  if(t==="bookings"){initBookingsCalendar();renderBookings();loadVenue();renderVenueList();renderFormSubmissions();}
+  if(t==="bookings"){initBookingsCalendar();loadVenue();renderKanban();}
   if(t==="activities")renderActivities();
   if(t==="stock"){loadStock();renderStockTable();}
-  if(t==="members"){if(currentMember)renderMemberDashboard();}
+  if(t==="members"){showMemberSub("members");renderMembersList();}
 }
 
-// ===== BOOKINGS SUB-NAV =====
-var bookingsSubTab='parties';
-function showBookingSub(sub){
-  bookingsSubTab=sub;
-  document.querySelectorAll('.booking-subtab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('bsub-'+sub).classList.add('active');
-  document.getElementById('booking-sub-parties').style.display=sub==='parties'?'':'none';
-  document.getElementById('booking-sub-venue').style.display=sub==='venue'?'':'none';
-  document.getElementById('booking-sub-forms').style.display=sub==='forms'?'':'none';
-  // Update the +New button
-  var nb=document.getElementById('bhub-new-btn');
-  if(sub==='venue'){nb.textContent='+ New Hire';nb.onclick=function(){openVenue();};}
-  else{nb.textContent='+ New';nb.onclick=function(){openBook();};}
-  if(sub==='venue'){loadVenue();renderVenueList();}
-  if(sub==='forms')renderFormSubmissions();
+// ===== KANBAN PIPELINE =====
+function renderKanban(){
+  var q=(document.getElementById("kanban-search")||{}).value||"";
+  var ql=q.toLowerCase();
+  // Party bookings (exclude cancelled)
+  var parties=bookings.filter(function(b){return b.status!=="cancelled";});
+  // Event bookings (exclude cancelled)
+  var events=venueBookings.filter(function(v){return v.status!=="cancelled";});
+  // Search filter
+  if(q){
+    parties=parties.filter(function(b){
+      return (b.name||"").toLowerCase().includes(ql)||(b.package||"").toLowerCase().includes(ql)||
+             (b.date||"").includes(ql)||(b.phone||"").includes(ql)||(b.kidname||"").toLowerCase().includes(ql);
+    });
+    events=events.filter(function(v){
+      return (v.name||"").toLowerCase().includes(ql)||(v.etype||"").toLowerCase().includes(ql)||
+             (v.date||"").includes(ql)||(v.phone||"").includes(ql);
+    });
+  }
+  // Classify into columns
+  var newP=parties.filter(function(b){return b.status==="new";});
+  var pendP=parties.filter(function(b){return b.status==="pending";});
+  var today=new Date().toISOString().slice(0,10);
+  var confP=parties.filter(function(b){return b.status==="confirmed"&&(b.date||"")>=today;});
+  var doneP=parties.filter(function(b){return b.status==="done"||(b.status==="confirmed"&&(b.date||"")<today);});
+  var newE=events.filter(function(v){return v.status==="enquiry"||v.status==="new";});
+  var pendE=events.filter(function(v){return v.status==="pending";});
+  var confE=events.filter(function(v){return v.status==="confirmed"&&(v.date||v.startDate||"")>=today;});
+  var doneE=events.filter(function(v){return v.status==="done"||(v.status==="confirmed"&&(v.date||v.startDate||"")<today);});
+  var totN=newP.length+newE.length,totP=pendP.length+pendE.length;
+  var totC=confP.length+confE.length,totD=doneP.length+doneE.length;
+  document.getElementById("kanban-new-badge").textContent=totN;
+  document.getElementById("kanban-new-count").textContent=totN+" booking"+(totN!==1?"s":"");
+  document.getElementById("kanban-pending-badge").textContent=totP;
+  document.getElementById("kanban-pending-count").textContent=totP+" booking"+(totP!==1?"s":"");
+  document.getElementById("kanban-confirmed-badge").textContent=totC;
+  document.getElementById("kanban-confirmed-count").textContent=totC+" booking"+(totC!==1?"s":"");
+  document.getElementById("kanban-done-badge").textContent=totD;
+  document.getElementById("kanban-done-count").textContent=totD+" booking"+(totD!==1?"s":"");
+  var sd=function(a,b){return(a.date||"").localeCompare(b.date||"");};
+  var sdDesc=function(a,b){return(b.date||"").localeCompare(a.date||"");};
+  var empty='<div style="padding:16px;text-align:center;color:var(--gray);font-size:12px;border:2px dashed var(--gray-mid);border-radius:10px;">Empty</div>';
+  var nc=[...newP.sort(sd).map(function(b){return kanbanCard(b,"party","new");}),
+          ...newE.sort(sd).map(function(v){return kanbanCard(v,"event","new");})].join("");
+  var pc=[...pendP.sort(sd).map(function(b){return kanbanCard(b,"party","pending");}),
+          ...pendE.sort(sd).map(function(v){return kanbanCard(v,"event","pending");})].join("");
+  var cc=[...confP.sort(sd).map(function(b){return kanbanCard(b,"party","confirmed");}),
+          ...confE.sort(sd).map(function(v){return kanbanCard(v,"event","confirmed");})].join("");
+  var dc=[...doneP.sort(sdDesc).map(function(b){return kanbanCard(b,"party","done");}),
+          ...doneE.sort(sdDesc).map(function(v){return kanbanCard(v,"event","done");})].join("");
+  document.getElementById("kanban-col-new").innerHTML=nc||empty;
+  document.getElementById("kanban-col-pending").innerHTML=pc||empty;
+  document.getElementById("kanban-col-confirmed").innerHTML=cc||empty;
+  document.getElementById("kanban-col-done").innerHTML=dc||empty;
+}
+
+function kanbanCard(b,bkType,col){
+  var isParty=bkType==="party";
+  var src=b.source==="public"?"public":"staff";
+  var br=(b.branch||activeBranch||"fourways")==="rosebank"?"Rosebank":"Fourways";
+  var brColor=br==="Rosebank"?"#00E5FF":"var(--or)";
+  var typeBadge=isParty?'<span class="kbadge kbadge-party">🎉 Party</span>':'<span class="kbadge kbadge-event">🏟️ Event</span>';
+  var srcBadge=src==="public"?'<span class="kbadge kbadge-public">🌐 Public</span>':'<span class="kbadge kbadge-staff">👤 Staff</span>';
+  var name=esc(b.name||"Unknown");
+  var dateStr=b.date?formatDate(b.date):"No date";
+  var timeStr=isParty?(b.timeslot||""):(b.stime?(b.stime+(b.etime?"–"+b.etime:"")):"");
+  var detail=isParty?(b.package||"No package"):(esc(b.etype||"Event")+(b.attendance?" · "+b.attendance+" pax":""));
+  // Conflict: party on same day as an event
+  var conflict=isParty&&venueBookings.some(function(v){
+    return v.status!=="cancelled"&&v.date&&b.date&&b.date>=v.date&&b.date<=(v.edate||v.date);
+  });
+  var conflictHtml=conflict?'<div style="font-size:10px;font-weight:700;color:var(--red);margin-top:3px;">⚠️ Date conflict with event</div>':"";
+  // Move buttons
+  var moveHtml="";
+  if(col==="new"){
+    moveHtml='<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+'\''+bkType+'\',\'pending\')">⏳ Pending →</button>';
+  } else if(col==="pending"){
+    var backSt=isParty?"new":"enquiry";
+    moveHtml='<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\''+backSt+'\')">← Back</button>'+
+             '<button class="btn btn-green btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'confirmed\')">✅ Confirm</button>';
+  } else if(col==="confirmed"){
+    moveHtml='<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'pending\')">← Pending</button>'+
+             '<button class="btn btn-teal btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'done\')">✔️ Done</button>';
+  } else {
+    moveHtml='<button class="btn btn-green btn-sm" style="font-size:10px;padding:4px 8px;" onclick="moveKanban('+b.id+',\''+bkType+'\',\'confirmed\')">← Confirmed</button>';
+  }
+  var editBtn=isParty?'<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openBook('+b.id+')">✏️</button>':
+                      '<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openVenue('+b.id+')">✏️</button>';
+  var invBtn=isParty?'<button class="btn btn-purple btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openInvoice('+b.id+')">🧾</button>':"";
+  var delBtn=isParty?'<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delBook('+b.id+')">🗑</button>':
+                     '<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delVenue('+b.id+')">🗑</button>';
+  return '<div class="kcard kcard-'+bkType+'">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+typeBadge+
+      '<div style="display:flex;gap:4px;align-items:center;">'+srcBadge+
+        '<span style="font-size:10px;font-weight:700;background:#111;color:'+brColor+';padding:2px 6px;border-radius:10px;">'+br+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="kcard-name">'+name+'</div>'+
+    '<div class="kcard-meta">📅 '+dateStr+(timeStr?' · '+timeStr:"")+'</div>'+
+    '<div class="kcard-meta">📦 '+detail+'</div>'+
+    (isParty&&b.kidname?'<div class="kcard-meta">🎂 '+esc(b.kidname)+' turns '+(b.age||"?")+'</div>':"")+
+    (isParty&&(b.kids||b.adults)?'<div class="kcard-meta">👶 '+(b.kids||0)+' kids · 🧑 '+(b.adults||0)+' adults</div>':"")+
+    conflictHtml+
+    '<div class="kcard-actions">'+moveHtml+editBtn+invBtn+delBtn+'</div>'+
+  '</div>';
+}
+
+function moveKanban(id,bkType,newStatus){
+  if(bkType==="party"){
+    var b=bookings.find(function(x){return+x.id===+id;});
+    if(!b)return;
+    b.status=newStatus;
+    saveAll();renderDashboard();
+  } else {
+    var v=venueBookings.find(function(x){return+x.id===+id;});
+    if(!v)return;
+    v.status=newStatus;
+    saveVenueAll();
+  }
+  renderKanban();renderCalendar();
+}
+
+function showKanbanToast(msg){
+  var t=document.getElementById("kanban-toast");
+  if(!t)return;
+  t.textContent=msg;t.style.opacity="1";
+  setTimeout(function(){t.style.opacity="0";},2200);
+}
+
+// ===== WHATSAPP TEMPLATES =====
+function getWATemplates(){
+  return lsGet("1up_wa_templates",{
+    party:"Hi! 🎉 Book your Kids Party at 1-UP Urban Playground!\n\n👉 Click here to fill in your details:\n{URL}\n\nWe'll confirm your booking within 24 hours. Questions? Reply to this message! 🎮",
+    event:"Hi! 🏟️ Interested in hiring 1-UP Urban Playground for your event?\n\n👉 Submit your enquiry here:\n{URL}\n\nOur events team will get back to you with a quote within 24 hours. 🤝"
+  });
+}
+
+function sendWhatsApp(type){
+  var templates=getWATemplates();
+  var base=window.location.href.replace(/[^\/]*$/,"");
+  var url=base+(type==="party"?"1up-party-booking.html":"1up-event-booking.html");
+  var branchName=activeBranch==="rosebank"?"Rosebank":"Fourways";
+  var msg=(templates[type]||"").replace(/\{URL\}/g,url).replace(/\{BRANCH\}/g,branchName);
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+
+function openWATemplates(){
+  var t=getWATemplates();
+  document.getElementById("wat-party").value=t.party;
+  document.getElementById("wat-event").value=t.event;
+  document.getElementById("modal-wa-templates").classList.add("open");
+}
+function closeWATemplates(){document.getElementById("modal-wa-templates").classList.remove("open");}
+function saveWATemplates(){
+  lsSet("1up_wa_templates",{
+    party:document.getElementById("wat-party").value,
+    event:document.getElementById("wat-event").value
+  });
+  closeWATemplates();
+  showKanbanToast("✅ Templates saved!");
 }
 
 function initBookingsCalendar(){
@@ -1065,7 +1220,7 @@ function renderDashboard(){
     const statusBadge=b.status==="new"?'<span class="badge badge-new new-badge-pulse">NEW</span>':`<span class="badge badge-${b.status==="confirmed"?"confirmed":b.status==="done"?"done":"pending"}">${b.status}</span>`;
     return`<div class="upcoming-item">
       <div class="upcoming-date"><div class="upcoming-date-day">${d.getDate()}</div><div class="upcoming-date-mo">${d.toLocaleString("en",{month:"short"}).toUpperCase()}</div></div>
-      <div style="flex:1;"><div style="font-weight:700;font-size:13px;">${b.name||"?"}</div>
+      <div style="flex:1;"><div style="font-weight:700;font-size:13px;">${b.name||"?"}${b.source==="public"?'<span style="font-size:9px;font-weight:700;background:var(--purple-light);color:var(--purple);padding:1px 6px;border-radius:8px;margin-left:5px;">🌐 Public</span>':'<span style="font-size:9px;font-weight:700;background:#111;color:var(--or);padding:1px 6px;border-radius:8px;margin-left:5px;">👤 Staff</span>'}</div>
       <div style="font-size:12px;color:var(--gray);">${b.package||"No package"} · ${b.timeslot||""}</div>
       <div style="font-size:11px;color:var(--gray);">${b.kidname?b.kidname+" turns "+b.age:""}${(b.kids||b.adults)?` · 👶${b.kids||0} 🧑${b.adults||0}`:(b.guests?` · ${b.guests} guests`:"")}${b.kidsmeal?" · "+mealLabel(b.kidsmeal):""}</div></div>
       ${statusBadge}
@@ -1205,7 +1360,7 @@ function setFilter(f){
 }
 
 function renderBookings(q=""){
-  const list=document.getElementById("book-list");
+  const list=document.getElementById("book-list");if(!list)return;
   let filtered=bookings.filter(b=>{
     if(currentFilterStr==="new")return b.status==="new";
     if(currentFilterStr==="pending")return b.status==="pending";
@@ -1247,8 +1402,8 @@ function renderBookings(q=""){
   }).join("");
 }
 
-function delBook(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>+b.id!==+id);saveAll();renderDashboard();renderBookings();}
-function quickStatus(id,s){const b=bookings.find(x=>+x.id===+id);if(!b)return;b.status=s;saveAll();renderDashboard();renderBookings();}
+function delBook(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>+b.id!==+id);saveAll();renderDashboard();renderKanban();renderCalendar();}
+function quickStatus(id,s){const b=bookings.find(x=>+x.id===+id);if(!b)return;b.status=s;saveAll();renderDashboard();renderKanban();renderCalendar();}
 
 // ===== ACTIVITIES =====
 function renderActivities(){
@@ -1265,7 +1420,7 @@ function renderActivities(){
 // ===== FORM SUBMISSIONS =====
 function renderFormSubmissions(){
   const newBk=bookings.filter(b=>b.status==="new").sort((a,b)=>(b.id||0)-(a.id||0));
-  const el=document.getElementById("form-submissions-list");
+  const el=document.getElementById("form-submissions-list");if(!el)return;
   if(!newBk.length){el.innerHTML='<div style="color:var(--gray);font-size:13px;">No new form submissions yet.</div>';return;}
   el.innerHTML=newBk.map(b=>`
     <div style="background:var(--or-light);border:1.5px solid var(--or);border-radius:10px;padding:12px;margin-bottom:10px;">
@@ -1338,6 +1493,7 @@ function saveBook(){
     if(conflict&&!confirm(`⚠️ WARNING: "${conflict.name}" has a Venue Hire booking on this date (${formatDate(bkDate)}).\n\nThe venue may be fully blocked for that event.\n\nSave party booking anyway?`))return;
   }
   const bk={
+    source:'staff',bookingType:'party',
     id:editId||Date.now(),
     branch:document.getElementById("f-branch").value,
     name,
@@ -1357,7 +1513,7 @@ function saveBook(){
     notes:document.getElementById("f-notes").value.trim()
   };
   if(editId)bookings=bookings.map(b=>+b.id===+editId?bk:b);else bookings.push(bk);
-  saveAll();closeBook();renderDashboard();renderBookings();
+  saveAll();closeBook();renderDashboard();renderKanban();renderCalendar();
 }
 function closeBook(){document.getElementById("modal-book").classList.remove("open");editId=null;}
 
@@ -1733,6 +1889,7 @@ function saveVenue(){
   const areas=[...document.querySelectorAll("#vf-areas-grid .extra-btn.selected")].map(b=>b.textContent.trim());
   const services=[...document.querySelectorAll("#vf-services-grid .extra-btn.selected")].map(b=>b.textContent.trim());
   const v={
+    source:'staff',bookingType:'event',
     id:venueEditId||Date.now(),
     branch:document.getElementById("vf-branch").value,
     name,
@@ -1753,12 +1910,12 @@ function saveVenue(){
   };
   if(venueEditId)venueBookings=venueBookings.map(x=>+x.id===+venueEditId?v:x);
   else venueBookings.push(v);
-  saveVenueAll();closeVenue();renderVenueList();
+  saveVenueAll();closeVenue();renderKanban();renderCalendar();
 }
 
 function closeVenue(){document.getElementById("modal-venue").classList.remove("open");venueEditId=null;}
-function quickVStatus(id,s){const v=venueBookings.find(x=>+x.id===+id);if(!v)return;v.status=s;saveVenueAll();renderVenueList();}
-function delVenue(id){if(!confirm("Delete this venue hire booking?"))return;venueBookings=venueBookings.filter(x=>+x.id!==+id);saveVenueAll();renderVenueList();}
+function quickVStatus(id,s){const v=venueBookings.find(x=>+x.id===+id);if(!v)return;v.status=s;saveVenueAll();renderKanban();renderCalendar();}
+function delVenue(id){if(!confirm("Delete this venue hire booking?"))return;venueBookings=venueBookings.filter(x=>+x.id!==+id);saveVenueAll();renderKanban();renderCalendar();}
 
 function venueSmartFill(){
   const txt=document.getElementById("venue-smart").value.trim();
@@ -2378,14 +2535,13 @@ function saveStockEdit(){
 }
 
 // ===== MEMBER SYSTEM =====
-var currentMember=null;
 var html5QrScanner=null;
 
 const DEMO_MEMBERS=[
-  {id:"928374",memberId:"MEM-001",name:"Sipho Khumalo",status:"active",expiry:"2026-12-31",type:"Premium",password:"pass123",checkins:12},
-  {id:"551092",memberId:"MEM-002",name:"Thandeka Dube",status:"active",expiry:"2026-08-15",type:"Standard",password:"hello1up",checkins:8},
-  {id:"773661",memberId:"MEM-003",name:"James van der Merwe",status:"expired",expiry:"2026-01-31",type:"Premium",password:"skate99",checkins:3},
-  {id:"992118",memberId:"MEM-004",name:"Priya Naidoo",status:"suspended",expiry:"2026-07-20",type:"Standard",password:"dance2026",checkins:5},
+  {id:"928374",memberId:"MEM-001",name:"Sipho Khumalo",email:"sipho@example.com",phone:"082 111 2233",status:"active",expiry:"2026-12-31",memberType:"Premium Yearly",type:"Premium Yearly",password:"pass123",joinDate:"2025-01-10",photo:null,checkins:12,visits:[{ts:"2026-05-21T14:20:00",branch:"fourways"},{ts:"2026-05-14T11:05:00",branch:"fourways"},{ts:"2026-05-07T16:45:00",branch:"rosebank"}]},
+  {id:"551092",memberId:"MEM-002",name:"Thandeka Dube",email:"thandeka@example.com",phone:"071 555 6677",status:"active",expiry:"2026-08-15",memberType:"Standard Monthly",type:"Standard Monthly",password:"hello1up",joinDate:"2025-08-15",photo:null,checkins:8,visits:[{ts:"2026-05-20T10:30:00",branch:"rosebank"},{ts:"2026-05-13T09:15:00",branch:"rosebank"}]},
+  {id:"773661",memberId:"MEM-003",name:"James van der Merwe",email:"james@example.com",phone:"083 777 8899",status:"expired",expiry:"2026-01-31",memberType:"Premium Monthly",type:"Premium Monthly",password:"skate99",joinDate:"2025-02-01",photo:null,checkins:3,visits:[{ts:"2026-01-28T15:00:00",branch:"fourways"}]},
+  {id:"992118",memberId:"MEM-004",name:"Priya Naidoo",email:"priya@example.com",phone:"079 333 4455",status:"suspended",expiry:"2026-07-20",memberType:"Standard Yearly",type:"Standard Yearly",password:"dance2026",joinDate:"2025-07-20",photo:null,checkins:5,visits:[{ts:"2026-05-01T13:20:00",branch:"fourways"},{ts:"2026-04-15T14:10:00",branch:"rosebank"}]},
 ];
 
 function initMembers(){
@@ -2396,147 +2552,287 @@ function initMembers(){
 function getMembers(){return JSON.parse(localStorage.getItem("1up_members")||"[]");}
 function saveMembers(arr){localStorage.setItem("1up_members",JSON.stringify(arr));}
 
-function memberLogin(){
-  const id=(document.getElementById("mem-login-id").value||"").trim();
-  const pass=(document.getElementById("mem-login-pass").value||"").trim();
-  const errEl=document.getElementById("mem-login-error");
-  if(!id||!pass){errEl.textContent="Enter Member ID and password";errEl.style.display="block";return;}
-  const members=getMembers();
-  const m=members.find(x=>x.id===id&&x.password===pass);
-  if(!m){errEl.textContent="Invalid Member ID or password";errEl.style.display="block";return;}
-  errEl.style.display="none";
-  currentMember=m;
-  renderMemberDashboard();
-  document.getElementById("member-login-view").style.display="none";
-  document.getElementById("member-dash-view").style.display="block";
+// ---- STAFF MEMBER LIST ----
+var _memberSearch="";
+var _editingMemberId=null;
+var _editPhotoData=null;
+var _photoStream=null;
+
+function renderMembersList(){
+  var members=getMembers();
+  var q=(_memberSearch||"").toLowerCase();
+  if(q) members=members.filter(function(m){
+    return m.name.toLowerCase().includes(q)||(m.memberId||"").toLowerCase().includes(q)||(m.id||"").includes(q);
+  });
+  var el=document.getElementById("members-list");
+  if(!el)return;
+  if(!members.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--gray);font-size:13px;">'+(q?"No members match \""+esc(q)+"\".":"No members yet — tap ➕ Add to create one.")+'</div>';
+    return;
+  }
+  el.innerHTML=members.map(function(m){
+    var statusColor=m.status==="active"?"var(--green)":m.status==="suspended"?"var(--red)":"var(--gray)";
+    var lastVisit=m.visits&&m.visits.length?m.visits[0]:null;
+    var lastVisitText=lastVisit?formatDT(lastVisit.ts)+" · "+esc(lastVisit.branch||""):"Never";
+    var photoHtml=m.photo
+      ?'<img src="'+m.photo+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--gray-mid);">'
+      :'<div style="width:48px;height:48px;border-radius:50%;background:var(--gray-mid);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👤</div>';
+    var borderColor=m.status==="active"?"var(--green)":m.status==="suspended"?"var(--red)":"var(--gray-mid)";
+    return '<div class="book-card" style="border-left-color:'+borderColor+';display:flex;align-items:center;gap:12px;padding:10px 12px;">'+
+      '<div style="flex-shrink:0;">'+photoHtml+'</div>'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="font-weight:800;font-size:14px;line-height:1.2;">'+esc(m.name)+'</div>'+
+        '<div style="font-size:11px;color:var(--gray);margin-top:1px;">'+esc(m.memberId||"")+'</div>'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;">'+
+          '<span style="font-size:10px;font-weight:700;color:'+statusColor+';text-transform:uppercase;background:'+(m.status==="active"?"var(--green-light)":m.status==="suspended"?"var(--red-light)":"var(--gray-light)")+';padding:2px 7px;border-radius:12px;">'+esc(m.status)+'</span>'+
+          '<span style="font-size:10px;color:var(--gray);">'+esc(m.memberType||m.type||"—")+'</span>'+
+          '<span style="font-size:10px;color:var(--gray);">Exp '+formatDate(m.expiry)+'</span>'+
+        '</div>'+
+        '<div style="font-size:10px;color:var(--gray);margin-top:3px;">🕐 '+esc(lastVisitText)+'</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'+
+        '<button class="btn btn-ghost btn-sm" onclick="openEditMember(\''+esc(m.id)+'\')" style="font-size:11px;padding:5px 9px;">✏️</button>'+
+        '<button class="btn btn-red btn-sm" onclick="deleteMember(\''+esc(m.id)+'\')" style="font-size:11px;padding:5px 9px;">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join("");
 }
 
-function memberLogout(){
-  currentMember=null;
-  document.getElementById("member-login-view").style.display="";
-  document.getElementById("member-dash-view").style.display="none";
-  document.getElementById("mem-login-id").value="";
-  document.getElementById("mem-login-pass").value="";
-  document.getElementById("mem-login-error").style.display="none";
+function formatDT(ts){
+  if(!ts)return"—";
+  try{
+    var d=new Date(ts);
+    return d.toLocaleDateString("en-ZA",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){return ts;}
 }
 
-function renderMemberDashboard(){
-  if(!currentMember)return;
-  document.getElementById("mdash-name").textContent=currentMember.name;
-  document.getElementById("mdash-id").textContent=currentMember.id;
-  document.getElementById("mdash-type").textContent=currentMember.type;
-  document.getElementById("mdash-expiry").textContent=formatDate(currentMember.expiry);
-  document.getElementById("mdash-checkins").textContent=currentMember.checkins;
-  const stEl=document.getElementById("mdash-status");
-  stEl.textContent=currentMember.status.toUpperCase();
-  stEl.className="member-info-val status-"+currentMember.status;
-  const qrData="MEMBER:"+currentMember.id;
-  document.getElementById("member-qr-label").textContent=qrData;
-  drawQR(qrData);
+function searchMembers(){
+  _memberSearch=(document.getElementById("member-search-input")||{}).value||"";
+  renderMembersList();
 }
 
-function drawQR(text){
-  const container=document.getElementById("member-qr-container");
-  container.innerHTML="";
-  const size=180;
-  const canvas=document.createElement("canvas");
-  canvas.width=size;canvas.height=size;
-  const ctx=canvas.getContext("2d");
-  const qr=buildQRMatrix(text);
-  const moduleSize=Math.floor(size/qr.length);
-  const offset=Math.floor((size-qr.length*moduleSize)/2);
-  ctx.fillStyle="#fff";ctx.fillRect(0,0,size,size);
-  ctx.fillStyle="#111";
-  for(let r=0;r<qr.length;r++){
-    for(let c=0;c<qr[r].length;c++){
-      if(qr[r][c])ctx.fillRect(offset+c*moduleSize,offset+r*moduleSize,moduleSize,moduleSize);
-    }
-  }
-  canvas.style.border="4px solid #111";canvas.style.borderRadius="12px";canvas.style.padding="8px";canvas.style.background="#fff";
-  container.appendChild(canvas);
+// ---- MEMBER SUB-TABS ----
+function showMemberSub(tab){
+  document.getElementById("msub-members").style.display = tab==="members" ? "" : "none";
+  document.getElementById("msub-logins").style.display  = tab==="logins"  ? "" : "none";
+  document.getElementById("msub-btn-members").className = "booking-subtab" + (tab==="members" ? " active" : "");
+  document.getElementById("msub-btn-logins").className  = "booking-subtab" + (tab==="logins"  ? " active" : "");
+  document.getElementById("btn-add-member").style.display = tab==="members" ? "" : "none";
+  if(tab==="logins") renderRecentLogins();
 }
 
-function buildQRMatrix(text){
-  const bytes=new TextEncoder().encode(text);
-  if(bytes.length>17)console.warn("QR text too long for version 2");
-  const dataBits=[];
-  dataBits.push(0,1,0,0);
-  const len=Math.min(bytes.length,17);
-  for(let i=7;i>=0;i--)dataBits.push((len>>i)&1);
-  for(let i=0;i<len;i++){
-    for(let j=7;j>=0;j--)dataBits.push((bytes[i]>>j)&1);
-  }
-  for(let i=0;i<4;i++)dataBits.push(0);
-  while(dataBits.length%8!==0)dataBits.push(0);
-  const padBytes=[0xEC,0x11];
-  let pi=0;
-  while(dataBits.length<352){
-    const b=padBytes[pi%2];
-    for(let j=7;j>=0;j--)dataBits.push((b>>j)&1);
-    pi++;
-  }
-  const dataBytes=[];
-  for(let i=0;i<dataBits.length;i+=8){
-    let b=0;for(let j=0;j<8;j++)b=(b<<1)|(dataBits[i+j]||0);
-    dataBytes.push(b);
-  }
-  const N=25;
-  const matrix=Array.from({length:N},()=>Array(N).fill(null));
-  placeFinder(matrix,0,0);placeFinder(matrix,0,N-7);placeFinder(matrix,N-7,0);
-  for(let i=8;i<N-8;i++){matrix[6][i]=i%2===0;matrix[i][6]=i%2===0;}
-  placeAlignment(matrix,18,18);
-  for(let i=0;i<9;i++){matrix[i][8]=null;matrix[8][i]=null;}
-  matrix[N-8][8]=true;
-  const dataBitsFull=dataBits.slice(0,352);
-  let di=0,up=true;
-  for(let c=N-1;c>=0;c--){
-    if(c===6)c--;
-    const cols=c<=6?[c,c-1]:[c,c-1];
-    if(up){
-      for(let r=N-1;r>=0;r--){
-        for(const cc of cols){
-          if(cc<0||matrix[r][cc]!==null)continue;
-          matrix[r][cc]=di<dataBitsFull.length?dataBitsFull[di]:false;di++;
-        }
+function renderRecentLogins(){
+  var el = document.getElementById("recent-logins-list");
+  if(!el) return;
+  var members = getMembers();
+  var cutoff = Date.now() - 7*24*60*60*1000; // 7 days ago
+  // Collect all visits from all members within the last 7 days
+  var rows = [];
+  members.forEach(function(m){
+    (m.visits||[]).forEach(function(v){
+      var t = new Date(v.ts).getTime();
+      if(t >= cutoff){
+        rows.push({
+          name: m.name,
+          memberId: m.memberId||m.id,
+          status: m.status,
+          memberType: m.memberType||m.type||"",
+          photo: m.photo||null,
+          ts: v.ts,
+          branch: v.branch||"",
+          t: t
+        });
       }
-    } else {
-      for(let r=0;r<N;r++){
-        for(const cc of cols){
-          if(cc<0||matrix[r][cc]!==null)continue;
-          matrix[r][cc]=di<dataBitsFull.length?dataBitsFull[di]:false;di++;
-        }
-      }
-    }
-    up=!up;
+    });
+  });
+  // Sort newest first
+  rows.sort(function(a,b){ return b.t - a.t; });
+  if(!rows.length){
+    el.innerHTML='<div style="text-align:center;padding:30px 16px;color:var(--gray);font-size:13px;">No QR scan check-ins in the last 7 days.</div>';
+    return;
   }
-  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(matrix[r][c]===null)matrix[r][c]=false;
-  return matrix;
-}
-function placeFinder(m,r,c){
-  for(let dr=0;dr<7;dr++){
-    for(let dc=0;dc<7;dc++){
-      const v=(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4));
-      if(r+dr<m.length&&c+dc<m[0].length)m[r+dr][c+dc]=v;
+  var html = "";
+  var prevDay = "";
+  rows.forEach(function(r){
+    var d = new Date(r.t);
+    var dayKey = d.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"short"});
+    if(dayKey !== prevDay){
+      html += '<div style="font-size:11px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;padding:10px 0 6px;'+(prevDay?'border-top:1px solid var(--gray-mid);margin-top:4px;':'')+'">'+dayKey+'</div>';
+      prevDay = dayKey;
     }
-  }
+    var timeStr = d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
+    var branchLabel = r.branch==="rosebank" ? "Rosebank" : r.branch==="fourways" ? "Fourways" : r.branch||"—";
+    var branchColor = r.branch==="rosebank" ? "#00E5FF" : "var(--or)";
+    var statusColor = r.status==="active" ? "var(--green)" : "var(--red)";
+    var photoHtml = r.photo
+      ? '<img src="'+r.photo+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--gray-mid);flex-shrink:0;">'
+      : '<div style="width:38px;height:38px;border-radius:50%;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👤</div>';
+    html += '<div style="background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">'
+      + photoHtml
+      + '<div style="flex:1;min-width:0;">'
+      +   '<div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(r.name)+'</div>'
+      +   '<div style="font-size:11px;color:var(--gray);margin-top:1px;">'+esc(r.memberId)+' · <span style="color:'+statusColor+';font-weight:700;">'+r.status+'</span></div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;">'
+      +   '<div style="font-weight:800;font-size:14px;">'+timeStr+'</div>'
+      +   '<div style="font-size:10px;font-weight:700;color:'+branchColor+';background:#111;border-radius:8px;padding:2px 7px;margin-top:3px;display:inline-block;">'+branchLabel+'</div>'
+      + '</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
 }
-function placeAlignment(m,row,col){
-  for(let dr=-2;dr<=2;dr++){
-    for(let dc=-2;dc<=2;dc++){
-      const v=(dr===-2||dr===2||dc===-2||dc===2||(dr===0&&dc===0));
-      const r=row+dr,c=col+dc;
-      if(r>=0&&r<m.length&&c>=0&&c<m[0].length)m[r][c]=v;
-    }
+
+function deleteMember(id){
+  if(!confirm("Delete this member permanently?"))return;
+  saveMembers(getMembers().filter(function(m){return m.id!==id;}));
+  renderMembersList();
+  showMemberToast("🗑 Member deleted");
+}
+
+function showMemberToast(msg){
+  var t=document.getElementById("member-toast");
+  if(!t)return;
+  t.textContent=msg;t.style.opacity="1";
+  setTimeout(function(){t.style.opacity="0";},2200);
+}
+
+function copyPortalLink(){
+  var url=window.location.href.replace(/[^/]*$/,"1up-member-portal.html");
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){showMemberToast("🔗 Link copied!");});
+  } else {
+    prompt("Copy this link:",url);
   }
 }
 
+// ---- ADD / EDIT MEMBER MODAL ----
+function openAddMember(){
+  _editingMemberId=null; _editPhotoData=null;
+  document.getElementById("mem-edit-title").textContent="➕ Add Member";
+  document.getElementById("mem-edit-name").value="";
+  document.getElementById("mem-edit-email").value="";
+  document.getElementById("mem-edit-phone").value="";
+  document.getElementById("mem-edit-memberid").value=genMemberId();
+  document.getElementById("mem-edit-password").value="";
+  document.getElementById("mem-edit-type").value="Standard Monthly";
+  document.getElementById("mem-edit-status").value="active";
+  document.getElementById("mem-edit-expiry").value=defaultExpiry("Standard Monthly");
+  document.getElementById("mem-edit-joindate").value=new Date().toISOString().slice(0,10);
+  document.getElementById("mem-edit-photo-preview").innerHTML='<div style="font-size:36px;line-height:1;">👤</div>';
+  document.getElementById("mem-photo-capture").style.display="none";
+  document.getElementById("modal-member-edit").classList.add("open");
+}
+
+function openEditMember(id){
+  var m=getMembers().find(function(x){return x.id===id;});
+  if(!m)return;
+  _editingMemberId=id; _editPhotoData=m.photo||null;
+  document.getElementById("mem-edit-title").textContent="✏️ Edit Member";
+  document.getElementById("mem-edit-name").value=m.name||"";
+  document.getElementById("mem-edit-email").value=m.email||"";
+  document.getElementById("mem-edit-phone").value=m.phone||"";
+  document.getElementById("mem-edit-memberid").value=m.memberId||"";
+  document.getElementById("mem-edit-password").value="";
+  document.getElementById("mem-edit-type").value=m.memberType||m.type||"Standard Monthly";
+  document.getElementById("mem-edit-status").value=m.status||"active";
+  document.getElementById("mem-edit-expiry").value=m.expiry||"";
+  document.getElementById("mem-edit-joindate").value=m.joinDate||"";
+  document.getElementById("mem-edit-photo-preview").innerHTML=m.photo
+    ?'<img src="'+m.photo+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">'
+    :'<div style="font-size:36px;line-height:1;">👤</div>';
+  document.getElementById("mem-photo-capture").style.display="none";
+  document.getElementById("modal-member-edit").classList.add("open");
+}
+
+function closeMemEdit(){
+  document.getElementById("modal-member-edit").classList.remove("open");
+  stopPhotoStream();
+}
+
+function saveMemberEdit(){
+  var name=(document.getElementById("mem-edit-name").value||"").trim();
+  var email=(document.getElementById("mem-edit-email").value||"").trim();
+  var phone=(document.getElementById("mem-edit-phone").value||"").trim();
+  var memberId=(document.getElementById("mem-edit-memberid").value||"").trim();
+  var pw=(document.getElementById("mem-edit-password").value||"").trim();
+  var memberType=document.getElementById("mem-edit-type").value;
+  var status=document.getElementById("mem-edit-status").value;
+  var expiry=document.getElementById("mem-edit-expiry").value;
+  var joinDate=document.getElementById("mem-edit-joindate").value;
+  if(!name){alert("Full name is required.");return;}
+  if(!memberId){alert("Member ID is required.");return;}
+  var members=getMembers();
+  if(_editingMemberId){
+    var m=members.find(function(x){return x.id===_editingMemberId;});
+    if(!m)return;
+    m.name=name;m.email=email;m.phone=phone;m.memberId=memberId;
+    m.memberType=memberType;m.type=memberType;m.status=status;m.expiry=expiry;m.joinDate=joinDate;
+    if(pw)m.password=pw;
+    if(_editPhotoData)m.photo=_editPhotoData;
+  } else {
+    var newId=String(Math.floor(100000+Math.random()*900000));
+    members.push({id:newId,memberId:memberId,name:name,email:email,phone:phone,
+      status:status,expiry:expiry,memberType:memberType,type:memberType,
+      password:pw||("1up"+newId.slice(-3)),joinDate:joinDate,
+      photo:_editPhotoData||null,checkins:0,visits:[]});
+  }
+  saveMembers(members);
+  closeMemEdit();
+  renderMembersList();
+  showMemberToast(_editingMemberId?"✅ Member updated":"✅ Member added");
+}
+
+function genMemberId(){
+  var nums=getMembers().map(function(m){return parseInt((m.memberId||"").replace(/\D/g,""))||0;});
+  var next=(nums.length?Math.max.apply(null,nums):0)+1;
+  return "MEM-"+String(next).padStart(3,"0");
+}
+
+function defaultExpiry(type){
+  var d=new Date();
+  if(type&&type.includes("Yearly"))d.setFullYear(d.getFullYear()+1);
+  else d.setMonth(d.getMonth()+1);
+  return d.toISOString().slice(0,10);
+}
+
+function onMemTypeChange(){
+  var type=document.getElementById("mem-edit-type").value;
+  document.getElementById("mem-edit-expiry").value=defaultExpiry(type);
+}
+
+// ---- PHOTO CAPTURE ----
+function startPhotoCapture(){
+  var section=document.getElementById("mem-photo-capture");
+  var video=document.getElementById("mem-photo-video");
+  section.style.display="block";
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false}).then(function(stream){
+    _photoStream=stream;video.srcObject=stream;video.play();
+  }).catch(function(e){
+    alert("Camera not available: "+e.message);section.style.display="none";
+  });
+}
+
+function snapPhoto(){
+  var video=document.getElementById("mem-photo-video");
+  var canvas=document.createElement("canvas");
+  canvas.width=video.videoWidth||320;canvas.height=video.videoHeight||240;
+  canvas.getContext("2d").drawImage(video,0,0);
+  _editPhotoData=canvas.toDataURL("image/jpeg",0.7);
+  document.getElementById("mem-edit-photo-preview").innerHTML='<img src="'+_editPhotoData+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">';
+  stopPhotoStream();document.getElementById("mem-photo-capture").style.display="none";
+}
+
+function stopPhotoStream(){
+  if(_photoStream){_photoStream.getTracks().forEach(function(t){t.stop();});_photoStream=null;}
+}
+
+// ---- QR SCANNER ----
 function openScanner(){
   document.getElementById("modal-scanner").classList.add("open");
   document.getElementById("scanner-status").textContent="Starting camera...";
   setTimeout(function(){
     if(typeof Html5Qrcode==="undefined"){
-      document.getElementById("scanner-status").textContent="⚠️ Camera library not loaded. Try refreshing.";
-      return;
+      document.getElementById("scanner-status").textContent="⚠️ Camera library not loaded. Try refreshing.";return;
     }
     html5QrScanner=new Html5Qrcode("scanner-viewport");
     html5QrScanner.start(
@@ -2553,68 +2849,88 @@ function openScanner(){
 }
 
 function closeScanner(){
-  if(html5QrScanner){
-    html5QrScanner.stop().catch(function(){});
-    html5QrScanner=null;
-  }
+  if(html5QrScanner){html5QrScanner.stop().catch(function(){});html5QrScanner=null;}
   document.getElementById("modal-scanner").classList.remove("open");
 }
 
 function processScanResult(text){
-  var memberId=text.trim();
-  if(memberId.toUpperCase().startsWith("MEMBER:")){
-    memberId=memberId.substring(7).trim();
-  }
+  var id=text.trim();
+  if(id.toUpperCase().startsWith("MEMBER:"))id=id.substring(7).trim();
   closeScanner();
-  var result=validateMember(memberId);
-  showScanResult(result);
+  showScanResult(validateMember(id));
 }
 
 function validateMember(id){
   var members=getMembers();
   var m=members.find(function(x){return x.id===id;});
-  if(!m){
-    return {valid:false,reason:"Member not found",name:"Unknown",id:id};
-  }
+  if(!m)return{valid:false,reason:"Member not found",name:"Unknown",id:id};
   var today=new Date().toISOString().slice(0,10);
-  if(m.status==="suspended"){
-    return {valid:false,reason:"Membership suspended",name:m.name,id:m.id,member:m};
+  // Check if last visit was < 30 min ago (before logging new one)
+  var recentVisit=false;
+  if(m.visits&&m.visits.length){
+    var minsSince=(Date.now()-new Date(m.visits[0].ts).getTime())/60000;
+    if(minsSince<30)recentVisit=true;
   }
-  if(m.status==="expired"||m.expiry<today){
-    return {valid:false,reason:"Membership expired on "+formatDate(m.expiry),name:m.name,id:m.id,member:m};
-  }
+  if(m.status==="suspended")return{valid:false,reason:"Membership suspended",name:m.name,id:m.id,member:m,recentVisit:recentVisit};
+  if(m.status==="expired"||m.expiry<today)return{valid:false,reason:"Membership expired on "+formatDate(m.expiry),name:m.name,id:m.id,member:m,recentVisit:recentVisit};
+  // Log visit
+  if(!m.visits)m.visits=[];
+  m.visits.unshift({ts:new Date().toISOString(),branch:currentBranch||"fourways"});
+  if(m.visits.length>5)m.visits=m.visits.slice(0,5);
   m.checkins=(m.checkins||0)+1;
   saveMembers(members);
-  return {valid:true,name:m.name,id:m.id,member:m};
+  return{valid:true,name:m.name,id:m.id,member:m,recentVisit:recentVisit};
 }
 
 function showScanResult(result){
   var body=document.getElementById("scan-result-body");
   var title=document.getElementById("scan-result-title");
+  var m=result.member;
+  var borderCol=result.valid?"var(--green)":"var(--red)";
+  var photoHtml=m&&m.photo
+    ?'<img src="'+m.photo+'" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid '+borderCol+';">'
+    :'<div style="width:72px;height:72px;border-radius:50%;background:var(--gray-mid);display:flex;align-items:center;justify-content:center;font-size:30px;border:3px solid '+borderCol+';">👤</div>';
+  // Last visit line — if valid, visits[0] is the one just logged, so show visits[1]
+  var prevVisit=null;
+  if(m&&m.visits&&m.visits.length){
+    prevVisit=result.valid?m.visits[1]:m.visits[0];
+  }
+  var lvHtml=prevVisit
+    ?'<div style="font-size:11px;color:var(--gray);margin-top:6px;padding:6px 10px;background:var(--gray-light);border-radius:8px;">🕐 Last visit: '+formatDT(prevVisit.ts)+' · '+esc(prevVisit.branch||"")+'</div>'
+    :'<div style="font-size:11px;color:var(--gray);margin-top:6px;">🕐 No previous visits on record</div>';
+  var warnHtml=result.recentVisit&&result.valid
+    ?'<div style="background:var(--red-light);border:1.5px solid var(--red);border-radius:10px;padding:10px;margin-top:10px;text-align:center;">'+
+       '<div style="font-size:14px;font-weight:800;color:var(--red);">⚠️ Possible double entry</div>'+
+       '<div style="font-size:12px;color:var(--red);margin-top:2px;">This member scanned less than 30 minutes ago.</div>'+
+     '</div>':"";
   if(result.valid){
-    title.textContent="✅ Valid Member";
-    title.style.color="var(--green)";
-    body.innerHTML='<div class="scan-valid">'+
-      '<div class="scan-result-icon">✅</div>'+
-      '<div class="scan-result-name">'+esc(result.name)+'</div>'+
-      '<div class="scan-result-meta">'+
-        '<div><strong>Member ID:</strong> '+esc(result.id)+'</div>'+
-        '<div><strong>Status:</strong> <span style="color:var(--green);font-weight:700;">ACTIVE ✓</span></div>'+
-        '<div><strong>Type:</strong> '+(result.member?esc(result.member.type):"—")+'</div>'+
-        '<div><strong>Expires:</strong> '+(result.member?formatDate(result.member.expiry):"—")+'</div>'+
-        '<div><strong>Check-ins:</strong> '+(result.member?result.member.checkins:"—")+'</div>'+
-      '</div></div>';
+    title.textContent="✅ Valid Member";title.style.color="var(--green)";
+    body.innerHTML=
+      '<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">'+photoHtml+
+        '<div>'+
+          '<div style="font-size:18px;font-weight:900;line-height:1.2;">'+esc(result.name)+'</div>'+
+          '<div style="font-size:12px;color:var(--gray);">'+(m?esc(m.memberId||m.id):"")+'</div>'+
+          '<div style="font-size:11px;color:var(--green);font-weight:700;margin-top:3px;">✓ ACTIVE</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">'+
+        '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
+          '<div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Type</div>'+
+          '<div style="font-size:12px;font-weight:800;">'+(m?esc(m.memberType||m.type||"—"):"—")+'</div></div>'+
+        '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
+          '<div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Expires</div>'+
+          '<div style="font-size:12px;font-weight:800;">'+(m?formatDate(m.expiry):"—")+'</div></div>'+
+      '</div>'+lvHtml+warnHtml;
   } else {
-    title.textContent="❌ Invalid";
-    title.style.color="var(--red)";
-    body.innerHTML='<div class="scan-invalid">'+
-      '<div class="scan-result-icon">❌</div>'+
-      '<div class="scan-result-name">'+(result.name!=="Unknown"?esc(result.name):"Member Not Found")+'</div>'+
-      '<div class="scan-result-meta">'+
-        '<div><strong>ID:</strong> '+esc(result.id)+'</div>'+
-        '<div style="color:var(--red);font-weight:700;margin-top:4px;">'+esc(result.reason)+'</div>'+
-        (result.member?'<div style="margin-top:4px;"><strong>Expiry:</strong> '+formatDate(result.member.expiry)+'</div>':'')+
-      '</div></div>';
+    title.textContent="❌ Access Denied";title.style.color="var(--red)";
+    body.innerHTML=
+      '<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">'+photoHtml+
+        '<div>'+
+          '<div style="font-size:18px;font-weight:900;line-height:1.2;">'+(result.name!=="Unknown"?esc(result.name):"Not Found")+'</div>'+
+          '<div style="font-size:12px;color:var(--gray);">'+(m?esc(m.memberId||m.id):esc(result.id))+'</div>'+
+          '<div style="font-size:12px;color:var(--red);font-weight:700;margin-top:3px;">'+esc(result.reason)+'</div>'+
+        '</div>'+
+      '</div>'+lvHtml;
   }
   document.getElementById("modal-scan-result").classList.add("open");
 }
@@ -2716,6 +3032,88 @@ initMembers();
     <div style="display:flex;gap:8px;">
       <button class="btn btn-o" style="flex:1;" onclick="saveStockEdit()">💾 Save</button>
       <button class="btn btn-ghost" onclick="closeStockEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBER ADD/EDIT MODAL -->
+<div class="modal-bg" id="modal-member-edit">
+  <div class="modal" style="max-height:92vh;overflow-y:auto;padding-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:sticky;top:0;background:#fff;z-index:1;padding-bottom:10px;border-bottom:1px solid var(--gray-mid);">
+      <div class="modal-title" id="mem-edit-title">Add Member</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeMemEdit()">✕</button>
+    </div>
+    <!-- Photo -->
+    <div style="text-align:center;margin-bottom:16px;">
+      <div id="mem-edit-photo-preview" style="width:80px;height:80px;border-radius:50%;background:var(--gray-light);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--gray-mid);"></div>
+      <button class="btn btn-ghost btn-sm" onclick="startPhotoCapture()" style="font-size:11px;">📷 Take Photo</button>
+    </div>
+    <!-- Camera -->
+    <div id="mem-photo-capture" style="display:none;margin-bottom:14px;text-align:center;">
+      <video id="mem-photo-video" style="width:100%;max-width:240px;border-radius:12px;background:#000;" autoplay playsinline></video>
+      <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;">
+        <button class="btn btn-o btn-sm" onclick="snapPhoto()">📸 Snap</button>
+        <button class="btn btn-ghost btn-sm" onclick="stopPhotoStream();document.getElementById('mem-photo-capture').style.display='none'">Cancel</button>
+      </div>
+    </div>
+    <!-- Fields -->
+    <div class="form-group"><label>Full Name *</label><input id="mem-edit-name" type="text" placeholder="e.g. Sipho Khumalo"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group"><label>Member ID *</label><input id="mem-edit-memberid" type="text" placeholder="MEM-001"></div>
+      <div class="form-group"><label>Join Date</label><input id="mem-edit-joindate" type="date"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input id="mem-edit-email" type="email" placeholder="member@example.com"></div>
+    <div class="form-group"><label>Phone</label><input id="mem-edit-phone" type="tel" placeholder="082 000 1111"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group">
+        <label>Membership Type</label>
+        <select id="mem-edit-type" onchange="onMemTypeChange()">
+          <option>Standard Monthly</option>
+          <option>Standard Yearly</option>
+          <option>Premium Monthly</option>
+          <option>Premium Yearly</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="mem-edit-status">
+          <option value="active">Active</option>
+          <option value="suspended">Suspended</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Expiry Date</label><input id="mem-edit-expiry" type="date"></div>
+    <div class="form-group">
+      <label>Password <span style="font-size:10px;font-weight:400;color:var(--gray);">(leave blank to keep current)</span></label>
+      <input id="mem-edit-password" type="text" placeholder="New password...">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn btn-o" style="flex:1;" onclick="saveMemberEdit()">💾 Save Member</button>
+      <button class="btn btn-ghost" onclick="closeMemEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP TEMPLATES MODAL -->
+<div class="modal-bg" id="modal-wa-templates">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="modal-title">⚙️ WhatsApp Templates</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeWATemplates()">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:14px;line-height:1.6;">Customise the message sent when you share the booking links. Use <strong>{URL}</strong> for the form link and <strong>{BRANCH}</strong> for the branch name.</p>
+    <div class="form-group">
+      <label>🎉 Kids Party Message</label>
+      <textarea id="wat-party" rows="5" style="font-size:13px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label>🏟️ Event / Venue Message</label>
+      <textarea id="wat-event" rows="5" style="font-size:13px;"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-o" style="flex:1;" onclick="saveWATemplates()">💾 Save Templates</button>
+      <button class="btn btn-ghost" onclick="closeWATemplates()">Cancel</button>
     </div>
   </div>
 </div>

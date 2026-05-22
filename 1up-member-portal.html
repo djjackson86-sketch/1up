@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>1-UP Members Portal</title>
+<style>
+  :root{
+    --or:#E8FF00;--or2:#c8dc00;--or-dark:#8a9800;
+    --green:#16a34a;--green-light:#dcfce7;
+    --red:#dc2626;--red-light:#fee2e2;
+    --gray:#6b7280;--gray-light:#f3f4f6;--gray-mid:#e5e7eb;
+    --dark:#111827;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111;color:var(--dark);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0 0 40px;}
+  .portal-header{width:100%;background:#000;padding:16px 20px;text-align:center;border-bottom:3px solid var(--or);}
+  .portal-logo{font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.5px;}
+  .portal-logo span{color:var(--or);}
+  .portal-sub{font-size:12px;color:#888;margin-top:2px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+  .card{background:#fff;border-radius:18px;box-shadow:0 8px 32px rgba(0,0,0,0.25);padding:28px 22px;width:100%;max-width:400px;margin:20px 16px 0;}
+  label{display:block;font-size:11px;font-weight:700;color:var(--gray);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+  input{width:100%;padding:12px 14px;border:1.5px solid var(--gray-mid);border-radius:10px;font-size:16px;font-family:inherit;background:#fff;color:var(--dark);outline:none;transition:border 0.15s;-webkit-appearance:none;}
+  input:focus{border-color:var(--or);}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:13px 20px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all 0.15s;width:100%;}
+  .btn-or{background:var(--or);color:#111;}
+  .btn-or:active{background:var(--or2);}
+  .btn-ghost{background:var(--gray-light);color:var(--dark);}
+  .form-group{margin-bottom:14px;}
+  .error-msg{color:var(--red);font-size:12px;font-weight:700;margin-top:8px;display:none;text-align:center;}
+  /* QR */
+  .qr-card{background:#111;border-radius:18px;padding:24px;text-align:center;margin-bottom:14px;}
+  .qr-card-title{font-size:13px;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;}
+  .qr-canvas-wrap{background:#fff;border-radius:14px;display:inline-flex;padding:12px;border:4px solid var(--or);}
+  .qr-member-id{font-size:13px;font-weight:700;color:#999;margin-top:12px;letter-spacing:1px;}
+  .qr-hint{font-size:11px;color:#666;margin-top:6px;}
+  /* Info grid */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .info-cell{background:var(--gray-light);border-radius:12px;padding:12px;text-align:center;}
+  .info-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+  .info-val{font-size:13px;font-weight:800;color:var(--dark);line-height:1.3;}
+  .info-val.active{color:var(--green);}
+  .info-val.expired,.info-val.suspended{color:var(--red);}
+  /* Visits */
+  .visits-section{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;}
+  .visits-title{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+  .visit-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-mid);font-size:12px;}
+  .visit-row:last-child{border-bottom:none;}
+  .visit-date{font-weight:700;color:var(--dark);}
+  .visit-branch{color:var(--gray);font-size:11px;text-transform:capitalize;}
+  .no-visits{text-align:center;color:var(--gray);font-size:12px;padding:16px 0;}
+  /* Today schedule */
+  .sched-item{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid var(--gray-mid);}
+  .sched-item:last-child{border-bottom:none;}
+  .sched-time{font-weight:800;font-size:13px;color:var(--dark);white-space:nowrap;min-width:58px;}
+  .sched-info{flex:1;min-width:0;}
+  .sched-type{font-size:12px;font-weight:700;color:var(--dark);}
+  .sched-branch{font-size:10px;color:var(--gray);margin-top:2px;text-transform:capitalize;}
+  .sched-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0;}
+  .sched-party{background:#fff8e1;color:#a07800;border:1px solid #e8cc00;}
+  .sched-event{background:#e0faf8;color:#00796b;border:1px solid #00C4B4;}
+  .sched-empty{text-align:center;color:var(--gray);font-size:12px;padding:16px 0;}
+  /* Status badge */
+  .status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;}
+  .status-active{background:var(--green-light);color:var(--green);}
+  .status-expired{background:var(--red-light);color:var(--red);}
+  .status-suspended{background:var(--red-light);color:var(--red);}
+</style>
+</head>
+<body>
+
+<div class="portal-header">
+  <div class="portal-logo">1-UP <span>Members</span></div>
+  <div class="portal-sub">Digital Membership Card</div>
+</div>
+
+<!-- LOGIN CARD -->
+<div class="card" id="view-login">
+  <div style="text-align:center;margin-bottom:22px;">
+    <div style="font-size:48px;margin-bottom:6px;">🎮</div>
+    <div style="font-size:18px;font-weight:900;color:var(--dark);">Welcome Back</div>
+    <div style="font-size:12px;color:var(--gray);margin-top:4px;">Sign in to access your membership card &amp; QR code</div>
+  </div>
+  <div class="form-group">
+    <label>Member ID</label>
+    <input id="p-login-id" type="text" placeholder="e.g. 928374" inputmode="numeric" style="text-align:center;font-size:20px;font-weight:700;letter-spacing:3px;">
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input id="p-login-pass" type="password" placeholder="Enter your password" style="text-align:center;" onkeydown="if(event.key==='Enter')portalLogin();">
+  </div>
+  <button class="btn btn-or" onclick="portalLogin()">🔓 Sign In</button>
+  <div class="error-msg" id="p-login-error"></div>
+
+  <!-- DEMO CREDENTIALS -->
+  <div style="background:#f8f7e8;border:1.5px dashed #c8b800;border-radius:12px;padding:14px;margin-top:18px;">
+    <div style="font-size:10px;font-weight:800;color:#a09000;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;text-align:center;">🧪 Demo Accounts — Tap to Fill</div>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <div onclick="fillDemo('928374','pass123')" style="background:#fff;border:1px solid #e8e0a0;border-radius:8px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✅</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:800;color:#111;">Sipho Khumalo</div>
+          <div style="font-size:10px;color:#888;">ID: 928374 &nbsp;·&nbsp; Password: pass123 &nbsp;·&nbsp; <span style="color:#16a34a;font-weight:700;">Active</span></div>
+        </div>
+      </div>
+      <div onclick="fillDemo('551092','hello1up')" style="background:#fff;border:1px solid #e8e0a0;border-radius:8px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✅</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:800;color:#111;">Thandeka Dube</div>
+          <div style="font-size:10px;color:#888;">ID: 551092 &nbsp;·&nbsp; Password: hello1up &nbsp;·&nbsp; <span style="color:#16a34a;font-weight:700;">Active</span></div>
+        </div>
+      </div>
+      <div onclick="fillDemo('773661','skate99')" style="background:#fff;border:1px solid #e8e0a0;border-radius:8px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">⛔</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:800;color:#111;">James van der Merwe</div>
+          <div style="font-size:10px;color:#888;">ID: 773661 &nbsp;·&nbsp; Password: skate99 &nbsp;·&nbsp; <span style="color:#dc2626;font-weight:700;">Expired</span></div>
+        </div>
+      </div>
+      <div onclick="fillDemo('992118','dance2026')" style="background:#fff;border:1px solid #e8e0a0;border-radius:8px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🚫</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:800;color:#111;">Priya Naidoo</div>
+          <div style="font-size:10px;color:#888;">ID: 992118 &nbsp;·&nbsp; Password: dance2026 &nbsp;·&nbsp; <span style="color:#dc2626;font-weight:700;">Suspended</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--gray-mid);text-align:center;">
+    <div style="font-size:11px;color:var(--gray);">Don't have your credentials? Contact <strong>1-UP reception</strong> to get set up.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD CARD -->
+<div id="view-dash" style="display:none;width:100%;max-width:400px;margin:20px 16px 0;padding:0 0 20px;">
+
+  <!-- QR Card (dark) -->
+  <div class="qr-card">
+    <div class="qr-card-title">📱 Your Membership Card</div>
+    <div class="qr-canvas-wrap">
+      <canvas id="portal-qr-canvas" width="180" height="180"></canvas>
+    </div>
+    <div class="qr-member-id" id="p-qr-label">MEMBER:000000</div>
+    <div class="qr-hint">Show this QR at reception to check in</div>
+  </div>
+
+  <!-- Info grid (white card) -->
+  <div class="card" style="margin-top:0;margin-bottom:14px;padding:18px 16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <div style="font-size:17px;font-weight:900;" id="p-name">—</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:1px;" id="p-memberid">—</div>
+      </div>
+      <div id="p-status-badge" class="status-badge status-active">Active</div>
+    </div>
+    <div class="info-grid">
+      <div class="info-cell">
+        <div class="info-label">Membership</div>
+        <div class="info-val" id="p-type">—</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-label">Expires</div>
+        <div class="info-val" id="p-expiry">—</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-label">Joined</div>
+        <div class="info-val" id="p-joined">—</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-label">Total Visits</div>
+        <div class="info-val" id="p-checkins">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today's schedule -->
+  <div id="p-today-wrap" class="card" style="margin-top:0;margin-bottom:14px;padding:18px 16px;">
+    <div class="visits-title">📅 Today at 1-UP</div>
+    <div id="p-today-list"><div class="no-visits">Loading schedule…</div></div>
+  </div>
+
+  <!-- Last 5 visits (white card) -->
+  <div class="card" style="margin-top:0;margin-bottom:14px;padding:18px 16px;">
+    <div class="visits-title">🕐 Last 5 Visits</div>
+    <div id="p-visits-list"><div class="no-visits">No visits on record yet</div></div>
+  </div>
+
+  <!-- Sign out -->
+  <div style="padding:0 16px;">
+    <button class="btn btn-ghost" onclick="portalLogout()">🚪 Sign Out</button>
+  </div>
+</div>
+
+<script>
+var portalMember=null;
+
+function getMembers(){return JSON.parse(localStorage.getItem("1up_members")||"[]");}
+
+function fillDemo(id, pass){
+  document.getElementById("p-login-id").value = id;
+  document.getElementById("p-login-pass").value = pass;
+  document.getElementById("p-login-error").style.display = "none";
+}
+
+function portalLogin(){
+  var id=(document.getElementById("p-login-id").value||"").trim();
+  var pass=(document.getElementById("p-login-pass").value||"").trim();
+  var errEl=document.getElementById("p-login-error");
+  if(!id||!pass){errEl.textContent="Please enter your Member ID and password.";errEl.style.display="block";return;}
+  var members=getMembers();
+  var m=members.find(function(x){return x.id===id&&x.password===pass;});
+  if(!m){errEl.textContent="Invalid Member ID or password. Please try again.";errEl.style.display="block";return;}
+  errEl.style.display="none";
+  portalMember=m;
+  renderPortalDash();
+  document.getElementById("view-login").style.display="none";
+  document.getElementById("view-dash").style.display="";
+}
+
+function portalLogout(){
+  portalMember=null;
+  document.getElementById("p-login-id").value="";
+  document.getElementById("p-login-pass").value="";
+  document.getElementById("p-login-error").style.display="none";
+  document.getElementById("view-login").style.display="";
+  document.getElementById("view-dash").style.display="none";
+}
+
+function renderPortalDash(){
+  var m=portalMember;
+  if(!m)return;
+  // Basic info
+  document.getElementById("p-name").textContent=m.name||"—";
+  document.getElementById("p-memberid").textContent=m.memberId||m.id;
+  document.getElementById("p-type").textContent=m.memberType||m.type||"—";
+  document.getElementById("p-expiry").textContent=formatDate(m.expiry);
+  document.getElementById("p-joined").textContent=m.joinDate?formatDate(m.joinDate):"—";
+  document.getElementById("p-checkins").textContent=m.checkins||0;
+  // Status badge
+  var badge=document.getElementById("p-status-badge");
+  badge.textContent=m.status?m.status.charAt(0).toUpperCase()+m.status.slice(1):"—";
+  badge.className="status-badge status-"+(m.status||"expired");
+  // QR
+  var qrData="MEMBER:"+m.id;
+  document.getElementById("p-qr-label").textContent=qrData;
+  drawPortalQR(qrData);
+  // Visits
+  var visitList=document.getElementById("p-visits-list");
+  if(!m.visits||!m.visits.length){
+    visitList.innerHTML='<div class="no-visits">No visits on record yet</div>';
+  } else {
+    visitList.innerHTML=m.visits.slice(0,5).map(function(v,i){
+      return '<div class="visit-row">'+
+        '<div>'+
+          '<div class="visit-date">'+(i===0?'<span style="color:var(--green);margin-right:6px;">●</span>':'')+formatDT(v.ts)+'</div>'+
+          '<div class="visit-branch">'+(v.branch||"")+'</div>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--gray);">#'+(m.checkins-i)+'</div>'+
+      '</div>';
+    }).join("");
+  }
+  // Today's schedule
+  renderTodaySchedule();
+}
+
+function renderTodaySchedule(){
+  var el=document.getElementById("p-today-list");
+  if(!el)return;
+  var today=new Date().toISOString().slice(0,10);
+  // Collect bookings from all 4 keys
+  var items=[];
+  var keys=["1up_bk_fourways","1up_bk_rosebank","1up_venue_fourways","1up_venue_rosebank"];
+  keys.forEach(function(key){
+    var branch=key.includes("rosebank")?"rosebank":"fourways";
+    var isVenue=key.startsWith("1up_venue");
+    try{
+      var raw=localStorage.getItem(key);
+      if(!raw)return;
+      var list=JSON.parse(raw);
+      list.forEach(function(b){
+        var bDate=b.date||b.startDate||"";
+        if(!bDate.startsWith(today))return;
+        if(b.status==="cancelled")return;
+        items.push({
+          type: isVenue?"event":"party",
+          name: b.name||b.company||"—",
+          time: b.timeslot||b.startTime||"",
+          endTime: b.endTime||"",
+          branch: branch,
+          status: b.status||""
+        });
+      });
+    }catch(e){}
+  });
+  if(!items.length){
+    el.innerHTML='<div class="sched-empty">No bookings at 1-UP today 🎉</div>';
+    return;
+  }
+  // Sort by time
+  items.sort(function(a,b){return(a.time||"").localeCompare(b.time||"");});
+  el.innerHTML=items.map(function(it){
+    var timeDisplay=it.time+(it.endTime?" – "+it.endTime:"");
+    var badgeCls=it.type==="event"?"sched-event":"sched-party";
+    var typeLabel=it.type==="event"?"🏟️ Event":"🎉 Kids Party";
+    var branchLabel=it.branch==="rosebank"?"Rosebank":"Fourways";
+    return '<div class="sched-item">'
+      +'<div class="sched-time">'+(timeDisplay||"All day")+'</div>'
+      +'<div class="sched-info">'
+      +  '<div class="sched-type">'+escP(it.name)+'</div>'
+      +  '<div class="sched-branch">📍 '+branchLabel+'</div>'
+      +'</div>'
+      +'<span class="sched-badge '+badgeCls+'">'+typeLabel+'</span>'
+      +'</div>';
+  }).join("");
+}
+
+function escP(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function formatDate(d){
+  if(!d)return"—";
+  try{return new Date(d).toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"});}
+  catch(e){return d;}
+}
+
+function formatDT(ts){
+  if(!ts)return"—";
+  try{
+    var d=new Date(ts);
+    return d.toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){return ts;}
+}
+
+// ---- Pure-JS QR Encoder ----
+function drawPortalQR(text){
+  var canvas=document.getElementById("portal-qr-canvas");
+  var ctx=canvas.getContext("2d");
+  var size=180;
+  var qr=buildQRMatrix(text);
+  var moduleSize=Math.floor(size/qr.length);
+  var offset=Math.floor((size-qr.length*moduleSize)/2);
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,size,size);
+  ctx.fillStyle="#111";
+  for(var r=0;r<qr.length;r++){
+    for(var c=0;c<qr[r].length;c++){
+      if(qr[r][c])ctx.fillRect(offset+c*moduleSize,offset+r*moduleSize,moduleSize,moduleSize);
+    }
+  }
+}
+
+function buildQRMatrix(text){
+  var bytes=new TextEncoder().encode(text);
+  if(bytes.length>17)console.warn("QR text too long for version 2");
+  var dataBits=[];
+  dataBits.push(0,1,0,0);
+  var len=Math.min(bytes.length,17);
+  for(var i=7;i>=0;i--)dataBits.push((len>>i)&1);
+  for(var i=0;i<len;i++){for(var j=7;j>=0;j--)dataBits.push((bytes[i]>>j)&1);}
+  for(var i=0;i<4;i++)dataBits.push(0);
+  while(dataBits.length%8!==0)dataBits.push(0);
+  var padBytes=[0xEC,0x11],pi=0;
+  while(dataBits.length<352){var b=padBytes[pi%2];for(var j=7;j>=0;j--)dataBits.push((b>>j)&1);pi++;}
+  var N=25;
+  var matrix=Array.from({length:N},function(){return Array(N).fill(null);});
+  placeFinder(matrix,0,0);placeFinder(matrix,0,N-7);placeFinder(matrix,N-7,0);
+  for(var i=8;i<N-8;i++){matrix[6][i]=i%2===0;matrix[i][6]=i%2===0;}
+  placeAlignment(matrix,18,18);
+  for(var i=0;i<9;i++){matrix[i][8]=null;matrix[8][i]=null;}
+  matrix[N-8][8]=true;
+  var dataBitsFull=dataBits.slice(0,352),di=0,up=true;
+  for(var c=N-1;c>=0;c--){
+    if(c===6)c--;
+    var cols=[c,c-1];
+    if(up){for(var r=N-1;r>=0;r--){for(var k=0;k<cols.length;k++){var cc=cols[k];if(cc<0||matrix[r][cc]!==null)continue;matrix[r][cc]=di<dataBitsFull.length?dataBitsFull[di]:false;di++;}}}
+    else{for(var r=0;r<N;r++){for(var k=0;k<cols.length;k++){var cc=cols[k];if(cc<0||matrix[r][cc]!==null)continue;matrix[r][cc]=di<dataBitsFull.length?dataBitsFull[di]:false;di++;}}}
+    up=!up;
+  }
+  for(var r=0;r<N;r++)for(var c=0;c<N;c++)if(matrix[r][c]===null)matrix[r][c]=false;
+  return matrix;
+}
+function placeFinder(m,r,c){
+  for(var dr=0;dr<7;dr++){for(var dc=0;dc<7;dc++){
+    var v=(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4));
+    if(r+dr<m.length&&c+dc<m[0].length)m[r+dr][c+dc]=v;
+  }}
+}
+function placeAlignment(m,row,col){
+  for(var dr=-2;dr<=2;dr++){for(var dc=-2;dc<=2;dc++){
+    var v=(dr===-2||dr===2||dc===-2||dc===2||(dr===0&&dc===0));
+    var r=row+dr,c=col+dc;
+    if(r>=0&&r<m.length&&c>=0&&c<m[0].length)m[r][c]=v;
+  }}
+}
+</script>
+</body>
+</html>

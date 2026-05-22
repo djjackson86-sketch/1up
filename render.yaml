@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: 1up-urban-playground
+    env: static
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+    routes:
+      - type: rewrite
+        source: /staff
+        destination: /1up_booking_app_2.html
+      - type: rewrite
+        source: /party
+        destination: /1up-party-booking.html
+      - type: rewrite
+        source: /event
+        destination: /1up-event-booking.html
+      - type: rewrite
+        source: /members
+        destination: /1up-member-portal.html
