@@ -66,6 +66,7 @@
   .status-expired{background:var(--red-light);color:var(--red);}
   .status-suspended{background:var(--red-light);color:var(--red);}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -331,65 +332,13 @@ function formatDT(ts){
   }catch(e){return ts;}
 }
 
-// ---- Pure-JS QR Encoder ----
+// ---- QR Code Generator ----
 function drawPortalQR(text){
   var canvas=document.getElementById("portal-qr-canvas");
-  var ctx=canvas.getContext("2d");
-  var size=180;
-  var qr=buildQRMatrix(text);
-  var moduleSize=Math.floor(size/qr.length);
-  var offset=Math.floor((size-qr.length*moduleSize)/2);
-  ctx.fillStyle="#fff";ctx.fillRect(0,0,size,size);
-  ctx.fillStyle="#111";
-  for(var r=0;r<qr.length;r++){
-    for(var c=0;c<qr[r].length;c++){
-      if(qr[r][c])ctx.fillRect(offset+c*moduleSize,offset+r*moduleSize,moduleSize,moduleSize);
-    }
-  }
-}
-
-function buildQRMatrix(text){
-  var bytes=new TextEncoder().encode(text);
-  if(bytes.length>17)console.warn("QR text too long for version 2");
-  var dataBits=[];
-  dataBits.push(0,1,0,0);
-  var len=Math.min(bytes.length,17);
-  for(var i=7;i>=0;i--)dataBits.push((len>>i)&1);
-  for(var i=0;i<len;i++){for(var j=7;j>=0;j--)dataBits.push((bytes[i]>>j)&1);}
-  for(var i=0;i<4;i++)dataBits.push(0);
-  while(dataBits.length%8!==0)dataBits.push(0);
-  var padBytes=[0xEC,0x11],pi=0;
-  while(dataBits.length<352){var b=padBytes[pi%2];for(var j=7;j>=0;j--)dataBits.push((b>>j)&1);pi++;}
-  var N=25;
-  var matrix=Array.from({length:N},function(){return Array(N).fill(null);});
-  placeFinder(matrix,0,0);placeFinder(matrix,0,N-7);placeFinder(matrix,N-7,0);
-  for(var i=8;i<N-8;i++){matrix[6][i]=i%2===0;matrix[i][6]=i%2===0;}
-  placeAlignment(matrix,18,18);
-  for(var i=0;i<9;i++){matrix[i][8]=null;matrix[8][i]=null;}
-  matrix[N-8][8]=true;
-  var dataBitsFull=dataBits.slice(0,352),di=0,up=true;
-  for(var c=N-1;c>=0;c--){
-    if(c===6)c--;
-    var cols=[c,c-1];
-    if(up){for(var r=N-1;r>=0;r--){for(var k=0;k<cols.length;k++){var cc=cols[k];if(cc<0||matrix[r][cc]!==null)continue;matrix[r][cc]=di<dataBitsFull.length?dataBitsFull[di]:false;di++;}}}
-    else{for(var r=0;r<N;r++){for(var k=0;k<cols.length;k++){var cc=cols[k];if(cc<0||matrix[r][cc]!==null)continue;matrix[r][cc]=di<dataBitsFull.length?dataBitsFull[di]:false;di++;}}}
-    up=!up;
-  }
-  for(var r=0;r<N;r++)for(var c=0;c<N;c++)if(matrix[r][c]===null)matrix[r][c]=false;
-  return matrix;
-}
-function placeFinder(m,r,c){
-  for(var dr=0;dr<7;dr++){for(var dc=0;dc<7;dc++){
-    var v=(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4));
-    if(r+dr<m.length&&c+dc<m[0].length)m[r+dr][c+dc]=v;
-  }}
-}
-function placeAlignment(m,row,col){
-  for(var dr=-2;dr<=2;dr++){for(var dc=-2;dc<=2;dc++){
-    var v=(dr===-2||dr===2||dc===-2||dc===2||(dr===0&&dc===0));
-    var r=row+dr,c=col+dc;
-    if(r>=0&&r<m.length&&c>=0&&c<m[0].length)m[r][c]=v;
-  }}
+  QRCode.toCanvas(canvas,text,{
+    width:180,margin:2,
+    color:{dark:"#111111",light:"#ffffff"}
+  },function(err){if(err)console.error("QR error:",err);});
 }
 </script>
 </body>
