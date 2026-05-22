@@ -2894,28 +2894,65 @@ function stopPhotoStream(){
 // ---- QR SCANNER ----
 function openScanner(){
   document.getElementById("modal-scanner").classList.add("open");
-  document.getElementById("scanner-status").textContent="Starting camera...";
-  setTimeout(function(){
-    if(typeof Html5Qrcode==="undefined"){
-      document.getElementById("scanner-status").textContent="⚠️ Camera library not loaded. Try refreshing.";return;
-    }
-    html5QrScanner=new Html5Qrcode("scanner-viewport");
+  document.getElementById("scanner-status").textContent="Requesting camera…";
+  document.getElementById("scanner-viewport").innerHTML="";
+  if(typeof Html5Qrcode==="undefined"){
+    document.getElementById("scanner-status").textContent="Use 📸 Take Photo button below";
+    return;
+  }
+  if(html5QrScanner){try{html5QrScanner.stop();}catch(e){}html5QrScanner=null;}
+  html5QrScanner=new Html5Qrcode("scanner-viewport");
+  html5QrScanner.start(
+    {facingMode:"environment"},
+    {fps:10,qrbox:{width:190,height:190}},
+    function(decodedText){processScanResult(decodedText);},
+    function(){}
+  ).then(function(){
+    document.getElementById("scanner-status").textContent="📷 Point camera at the QR code";
+  }).catch(function(){
+    // Back camera failed — try any camera
     html5QrScanner.start(
-      {facingMode:"environment"},
-      {fps:10,qrbox:{width:200,height:200}},
+      true,
+      {fps:10,qrbox:{width:190,height:190}},
       function(decodedText){processScanResult(decodedText);},
-      function(err){}
+      function(){}
     ).then(function(){
-      document.getElementById("scanner-status").textContent="📷 Camera active — point at QR code";
-    }).catch(function(err){
-      document.getElementById("scanner-status").textContent="⚠️ Camera error: "+err.message;
+      document.getElementById("scanner-status").textContent="📷 Point camera at the QR code";
+    }).catch(function(){
+      document.getElementById("scanner-status").textContent="Camera unavailable — use 📸 button below";
     });
-  },300);
+  });
 }
 
 function closeScanner(){
   if(html5QrScanner){html5QrScanner.stop().catch(function(){});html5QrScanner=null;}
+  document.getElementById("scanner-viewport").innerHTML="";
   document.getElementById("modal-scanner").classList.remove("open");
+}
+
+function scanFromFile(input){
+  if(!input||!input.files||!input.files[0])return;
+  var file=input.files[0];
+  document.getElementById("scanner-status").textContent="🔍 Reading QR code…";
+  if(typeof Html5Qrcode==="undefined"){
+    document.getElementById("scanner-status").textContent="⚠️ Scanner not loaded.";
+    input.value="";return;
+  }
+  function doScan(){
+    var tmpId="qr-file-decoder";
+    var tmpEl=document.getElementById(tmpId);
+    if(!tmpEl){tmpEl=document.createElement("div");tmpEl.id=tmpId;tmpEl.style.display="none";document.body.appendChild(tmpEl);}
+    var dec=new Html5Qrcode(tmpId);
+    dec.scanFile(file,false).then(function(result){
+      input.value="";
+      processScanResult(result);
+    }).catch(function(){
+      document.getElementById("scanner-status").textContent="❌ No QR found. Try a clearer photo.";
+      input.value="";
+    });
+  }
+  if(html5QrScanner){html5QrScanner.stop().catch(function(){}).then(function(){html5QrScanner=null;doScan();});}
+  else{doScan();}
 }
 
 function processScanResult(text){
@@ -3190,11 +3227,10 @@ initMembers();
       <div class="modal-title" style="font-size:15px;">📷 Scan Member QR</div>
       <button class="btn btn-ghost btn-sm" onclick="closeScanner()">✕</button>
     </div>
-    <div class="scanner-viewport" id="scanner-viewport">
-      <div class="scanner-frame"></div>
-    </div>
-    <p style="font-size:12px;color:var(--gray);text-align:center;margin-bottom:12px;">Point camera at the member's QR code</p>
-    <div id="scanner-status" style="text-align:center;font-size:13px;font-weight:700;color:var(--gray);margin-bottom:8px;"></div>
+    <div class="scanner-viewport" id="scanner-viewport"></div>
+    <div id="scanner-status" style="text-align:center;font-size:13px;font-weight:700;color:var(--gray);margin:8px 0;min-height:20px;"></div>
+    <input type="file" id="qr-file-input" accept="image/*" capture="environment" style="display:none" onchange="scanFromFile(this)">
+    <button class="btn btn-dark btn-sm" style="width:100%;margin-bottom:6px;" onclick="document.getElementById('qr-file-input').click()">📸 Take Photo of QR Code</button>
     <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="closeScanner()">Cancel</button>
   </div>
 </div>
