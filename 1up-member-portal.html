@@ -269,10 +269,9 @@ function renderPortalDash(){
   var badge=document.getElementById("p-status-badge");
   badge.textContent=m.status?m.status.charAt(0).toUpperCase()+m.status.slice(1):"—";
   badge.className="status-badge status-"+(m.status||"expired");
-  // QR
-  var qrData="MEMBER:"+m.id;
-  document.getElementById("p-qr-label").textContent=qrData;
-  drawPortalQR(qrData);
+  // QR — encode bare ID only (staff scanner looks up by id directly)
+  document.getElementById("p-qr-label").textContent="MEMBER:"+m.id;
+  drawPortalQR(m.id);
   // Visits
   var visitList=document.getElementById("p-visits-list");
   if(!m.visits||!m.visits.length){

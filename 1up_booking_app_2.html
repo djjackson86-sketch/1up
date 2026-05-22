@@ -2625,7 +2625,19 @@ function initMembers(){
   });
   if(changed)localStorage.setItem("1up_members",JSON.stringify(existing));
 }
-function getMembers(){return JSON.parse(localStorage.getItem("1up_members")||"[]");}
+function getMembers(){
+  var existing=[];
+  try{var raw=localStorage.getItem("1up_members");if(raw)existing=JSON.parse(raw);}catch(e){}
+  // Ensure demo members always present with correct data
+  var changed=false;
+  DEMO_MEMBERS.forEach(function(dm){
+    var idx=existing.findIndex(function(x){return String(x.id)===String(dm.id);});
+    if(idx===-1){existing.push(dm);changed=true;}
+    else if(!existing[idx].password){existing[idx].password=dm.password;changed=true;}
+  });
+  if(changed)localStorage.setItem("1up_members",JSON.stringify(existing));
+  return existing;
+}
 function saveMembers(arr){localStorage.setItem("1up_members",JSON.stringify(arr));}
 
 // ---- STAFF MEMBER LIST ----
@@ -2984,14 +2996,17 @@ function closeScanner(){
 
 function processScanResult(text){
   var id=text.trim();
-  if(id.toUpperCase().startsWith("MEMBER:"))id=id.substring(7).trim();
+  try{id=decodeURIComponent(id);}catch(e){}
+  // Strip MEMBER: prefix if present (handles both "551092" and "MEMBER:551092")
+  if(/^member:/i.test(id))id=id.replace(/^member:/i,"").trim();
   closeScanner();
   showScanResult(validateMember(id));
 }
 
 function validateMember(id){
   var members=getMembers();
-  var m=members.find(function(x){return x.id===id;});
+  // Loose match: string compare after trimming, also try toString
+  var m=members.find(function(x){return String(x.id).trim()===String(id).trim();});
   if(!m)return{valid:false,reason:"Member not found",name:"Unknown",id:id};
   var today=new Date().toISOString().slice(0,10);
   // Check if last visit was < 30 min ago (before logging new one)
