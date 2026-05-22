@@ -44,9 +44,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .btn-teal:active{background:#00a89a;}
 .consent-box{background:var(--gray-light);border-radius:10px;padding:14px;margin-bottom:12px;}
 .consent-box p{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:8px;}
-.check-row{display:flex;align-items:flex-start;gap:10px;margin-top:10px;}
-.check-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--teal);cursor:pointer;}
-.check-row label{font-size:12px;line-height:1.5;color:var(--dark);cursor:pointer;user-select:none;}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-top:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.cr-box{width:24px;height:24px;min-width:24px;border-radius:6px;border:2px solid var(--gray-mid);background:#fff;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-top:0;flex-shrink:0;}
+.check-row.checked .cr-box{background:var(--teal);border-color:#00a89a;}
+.cr-tick{display:none;width:7px;height:12px;border:2.5px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);}
+.check-row.checked .cr-tick{display:block;}
+.cr-label{font-size:12px;line-height:1.5;color:var(--dark);user-select:none;padding-top:3px;}
+.check-row.cr-err .cr-box{border-color:var(--red);}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:999;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 .success-wrap{display:none;max-width:500px;margin:30px auto;padding:0 14px;text-align:center;}
@@ -155,13 +159,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="sec-label">🔒 Consent</div>
     <div class="consent-box">
       <p>By submitting this form you agree to 1-UP Urban Playground collecting your personal information to process this enquiry. In accordance with <strong>POPIA</strong>, your data will only be used to manage your venue enquiry and will not be shared with third parties.</p>
-      <div class="check-row">
-        <input type="checkbox" id="chk-popia">
-        <label for="chk-popia">I consent to 1-UP collecting and using my personal information for this enquiry. *</label>
+      <div class="check-row" id="cr-popia" onclick="toggleCR('popia')">
+        <div class="cr-box"><div class="cr-tick"></div></div>
+        <span class="cr-label">I consent to 1-UP collecting and using my personal information for this enquiry. *</span>
       </div>
-      <div class="check-row">
-        <input type="checkbox" id="chk-terms">
-        <label for="chk-terms">I understand this is an enquiry only. A 1-UP representative will contact me to confirm availability and finalise details. *</label>
+      <div class="check-row" id="cr-terms" onclick="toggleCR('terms')">
+        <div class="cr-box"><div class="cr-tick"></div></div>
+        <span class="cr-label">I understand this is an enquiry only. A 1-UP representative will contact me to confirm availability and finalise details. *</span>
       </div>
     </div>
 
@@ -184,6 +188,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="toast" id="toast"></div>
 
 <script>
+var _consent={popia:false,terms:false};
+function toggleCR(key){
+  _consent[key]=!_consent[key];
+  var el=document.getElementById("cr-"+key);
+  if(el){el.classList.toggle("checked",_consent[key]);el.classList.remove("cr-err");}
+}
 function getChips(id){
   var btns=document.querySelectorAll("#"+id+" .extra-btn.selected");
   var vals=[];
@@ -207,9 +217,6 @@ function submitEnquiry(){
   var name  =(document.getElementById("vf-name").value||"").trim();
   var phone =(document.getElementById("vf-phone").value||"").trim();
   var date  =document.getElementById("vf-date").value;
-  var popia =document.getElementById("chk-popia").checked;
-  var terms =document.getElementById("chk-terms").checked;
-
   ["vf-name","vf-phone","vf-date"].forEach(function(id){
     var el=document.getElementById(id);if(el)el.classList.remove("err");
   });
@@ -218,7 +225,11 @@ function submitEnquiry(){
   if(!phone){document.getElementById("vf-phone").classList.add("err");ok=false;}
   if(!date) {document.getElementById("vf-date").classList.add("err");ok=false;}
   if(!ok){showToast("Please fill in all required fields.");return;}
-  if(!popia||!terms){showToast("Please accept the consent & terms.");return;}
+  if(!_consent.popia||!_consent.terms){
+    if(!_consent.popia)document.getElementById("cr-popia").classList.add("cr-err");
+    if(!_consent.terms)document.getElementById("cr-terms").classList.add("cr-err");
+    showToast("Please accept the consent & terms.");return;
+  }
 
   var branch=document.getElementById("vf-branch").value;
   var ref   =generateRef();
