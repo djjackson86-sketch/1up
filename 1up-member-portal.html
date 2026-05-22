@@ -196,7 +196,18 @@
 <script>
 var portalMember=null;
 
-function getMembers(){return JSON.parse(localStorage.getItem("1up_members")||"[]");}
+var DEMO_MEMBERS=[
+  {id:"928374",memberId:"MEM-001",name:"Sipho Khumalo",email:"sipho@example.com",phone:"082 111 2233",status:"active",expiry:"2026-12-31",memberType:"Premium Yearly",type:"Premium Yearly",password:"pass123",joinDate:"2025-01-10",photo:null,checkins:12,visits:[{ts:"2026-05-21T14:20:00",branch:"fourways"},{ts:"2026-05-14T11:05:00",branch:"fourways"},{ts:"2026-05-07T16:45:00",branch:"rosebank"}]},
+  {id:"551092",memberId:"MEM-002",name:"Thandeka Dube",email:"thandeka@example.com",phone:"071 555 6677",status:"active",expiry:"2026-08-15",memberType:"Standard Monthly",type:"Standard Monthly",password:"hello1up",joinDate:"2025-08-15",photo:null,checkins:8,visits:[{ts:"2026-05-20T10:30:00",branch:"rosebank"},{ts:"2026-05-13T09:15:00",branch:"rosebank"}]},
+  {id:"773661",memberId:"MEM-003",name:"James van der Merwe",email:"james@example.com",phone:"083 777 8899",status:"expired",expiry:"2026-01-31",memberType:"Premium Monthly",type:"Premium Monthly",password:"skate99",joinDate:"2025-02-01",photo:null,checkins:3,visits:[{ts:"2026-01-28T15:00:00",branch:"fourways"}]},
+  {id:"992118",memberId:"MEM-004",name:"Priya Naidoo",email:"priya@example.com",phone:"079 333 4455",status:"suspended",expiry:"2026-07-20",memberType:"Standard Yearly",type:"Standard Yearly",password:"dance2026",joinDate:"2025-07-20",photo:null,checkins:5,visits:[{ts:"2026-05-01T13:20:00",branch:"fourways"},{ts:"2026-04-15T14:10:00",branch:"rosebank"}]},
+];
+
+function getMembers(){
+  var raw=localStorage.getItem("1up_members");
+  if(!raw){localStorage.setItem("1up_members",JSON.stringify(DEMO_MEMBERS));return DEMO_MEMBERS;}
+  return JSON.parse(raw);
+}
 
 function fillDemo(id, pass){
   document.getElementById("p-login-id").value = id;
