@@ -34,7 +34,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nav-scan-bar .nsb-pulse{width:8px;height:8px;border-radius:50%;background:var(--or);margin-left:auto;animation:nsbpulse 1.8s ease-in-out infinite;}
 @keyframes nsbpulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
 .nav-tabs{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #ffffff20;}
-.tab{padding:10px 2px 8px;text-align:center;font-size:11px;font-weight:700;color:#ffffff60;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.5px;}
+.tab{padding:8px 2px 6px;text-align:center;font-size:9px;font-weight:700;color:#ffffff60;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.tab-icon{font-size:18px;line-height:1;}
+.tab-label{line-height:1;}
 .tab.active{color:var(--or);border-bottom-color:var(--or);}
 .booking-subtabs{display:flex;gap:4px;margin-bottom:12px;background:var(--gray-light);border-radius:10px;padding:4px;}
 .booking-subtab{flex:1;padding:8px 6px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--gray);transition:all 0.15s;font-family:inherit;text-align:center;}
@@ -233,12 +235,12 @@ textarea{resize:vertical;min-height:70px;}
     <div class="nsb-pulse"></div>
   </div>
   <div class="nav-tabs" style="grid-template-columns:repeat(6,1fr);">
-    <div class="tab active" onclick="showTab('dashboard')">📊 Home</div>
-    <div class="tab" onclick="showTab('bookings')">📋 Bookings</div>
-    <div class="tab" onclick="showTab('activities')">🎮 Activities</div>
-    <div class="tab" onclick="showTab('stock')">🍬 Stock</div>
-    <div class="tab" onclick="showTab('members')">🔐 Members</div>
-    <div class="tab" onclick="showTab('setup')">⚙️ Setup</div>
+    <div class="tab active" onclick="showTab('dashboard')"><span class="tab-icon">📊</span><span class="tab-label">Home</span></div>
+    <div class="tab" onclick="showTab('bookings')"><span class="tab-icon">📋</span><span class="tab-label">Bookings</span></div>
+    <div class="tab" onclick="showTab('activities')"><span class="tab-icon">🎮</span><span class="tab-label">Activities</span></div>
+    <div class="tab" onclick="showTab('stock')"><span class="tab-icon">🍬</span><span class="tab-label">Stock</span></div>
+    <div class="tab" onclick="showTab('members')"><span class="tab-icon">🔐</span><span class="tab-label">Members</span></div>
+    <div class="tab" onclick="showTab('setup')"><span class="tab-icon">⚙️</span><span class="tab-label">Setup</span></div>
   </div>
 </div>
 
