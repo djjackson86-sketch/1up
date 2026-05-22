@@ -3019,7 +3019,7 @@ function validateMember(id){
   if(m.status==="expired"||m.expiry<today)return{valid:false,reason:"Membership expired on "+formatDate(m.expiry),name:m.name,id:m.id,member:m,recentVisit:recentVisit};
   // Log visit
   if(!m.visits)m.visits=[];
-  m.visits.unshift({ts:new Date().toISOString(),branch:currentBranch||"fourways"});
+  m.visits.unshift({ts:new Date().toISOString(),branch:activeBranch||"fourways"});
   if(m.visits.length>5)m.visits=m.visits.slice(0,5);
   m.checkins=(m.checkins||0)+1;
   saveMembers(members);
@@ -3027,56 +3027,79 @@ function validateMember(id){
 }
 
 function showScanResult(result){
-  var body=document.getElementById("scan-result-body");
-  var title=document.getElementById("scan-result-title");
   var m=result.member;
-  var borderCol=result.valid?"var(--green)":"var(--red)";
+  var valid=result.valid;
+  var accentCol=valid?"var(--green)":"var(--red)";
+  var accentLight=valid?"var(--green-light)":"var(--red-light)";
+
+  // Photo — large for ID verification
   var photoHtml=m&&m.photo
-    ?'<img src="'+m.photo+'" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid '+borderCol+';">'
-    :'<div style="width:72px;height:72px;border-radius:50%;background:var(--gray-mid);display:flex;align-items:center;justify-content:center;font-size:30px;border:3px solid '+borderCol+';">👤</div>';
-  // Last visit line — if valid, visits[0] is the one just logged, so show visits[1]
-  var prevVisit=null;
-  if(m&&m.visits&&m.visits.length){
-    prevVisit=result.valid?m.visits[1]:m.visits[0];
-  }
+    ?'<img src="'+m.photo+'" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid '+accentCol+';box-shadow:0 0 0 4px '+accentLight+';">'
+    :'<div style="width:110px;height:110px;border-radius:50%;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:48px;border:4px solid '+accentCol+';box-shadow:0 0 0 4px '+accentLight+';">👤</div>';
+
+  // Last visit (visits[1] if valid since [0] was just logged)
+  var prevVisit=m&&m.visits&&m.visits.length?(valid?m.visits[1]:m.visits[0]):null;
   var lvHtml=prevVisit
-    ?'<div style="font-size:11px;color:var(--gray);margin-top:6px;padding:6px 10px;background:var(--gray-light);border-radius:8px;">🕐 Last visit: '+formatDT(prevVisit.ts)+' · '+esc(prevVisit.branch||"")+'</div>'
-    :'<div style="font-size:11px;color:var(--gray);margin-top:6px;">🕐 No previous visits on record</div>';
-  var warnHtml=result.recentVisit&&result.valid
-    ?'<div style="background:var(--red-light);border:1.5px solid var(--red);border-radius:10px;padding:10px;margin-top:10px;text-align:center;">'+
-       '<div style="font-size:14px;font-weight:800;color:var(--red);">⚠️ Possible double entry</div>'+
-       '<div style="font-size:12px;color:var(--red);margin-top:2px;">This member scanned less than 30 minutes ago.</div>'+
-     '</div>':"";
-  if(result.valid){
-    title.textContent="✅ Valid Member";title.style.color="var(--green)";
-    body.innerHTML=
-      '<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">'+photoHtml+
-        '<div>'+
-          '<div style="font-size:18px;font-weight:900;line-height:1.2;">'+esc(result.name)+'</div>'+
-          '<div style="font-size:12px;color:var(--gray);">'+(m?esc(m.memberId||m.id):"")+'</div>'+
-          '<div style="font-size:11px;color:var(--green);font-weight:700;margin-top:3px;">✓ ACTIVE</div>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">'+
-        '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
-          '<div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Type</div>'+
-          '<div style="font-size:12px;font-weight:800;">'+(m?esc(m.memberType||m.type||"—"):"—")+'</div></div>'+
-        '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
-          '<div style="font-size:10px;color:var(--gray);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Expires</div>'+
-          '<div style="font-size:12px;font-weight:800;">'+(m?formatDate(m.expiry):"—")+'</div></div>'+
-      '</div>'+lvHtml+warnHtml;
+    ?'<div style="font-size:11px;color:var(--gray);padding:6px 10px;background:var(--gray-light);border-radius:8px;margin-top:8px;">🕐 Last visit: '+formatDT(prevVisit.ts)+' · '+esc(prevVisit.branch||"")+'</div>'
+    :'<div style="font-size:11px;color:var(--gray);margin-top:8px;">🕐 No previous visits on record</div>';
+
+  var html='';
+  if(valid){
+    // Green status banner
+    html+='<div style="background:var(--green);border-radius:10px;padding:12px;text-align:center;margin-bottom:14px;">'+
+            '<div style="font-size:18px;font-weight:900;color:#fff;letter-spacing:1px;">✅ ACCESS GRANTED</div>'+
+          '</div>';
+    // Photo centred
+    html+='<div style="text-align:center;margin-bottom:14px;">'+photoHtml+'</div>';
+    // Name + ID
+    html+='<div style="text-align:center;margin-bottom:14px;">'+
+            '<div style="font-size:22px;font-weight:900;color:var(--dark);">'+esc(result.name)+'</div>'+
+            '<div style="font-size:12px;color:var(--gray);margin-top:2px;">'+(m?esc(m.memberId||m.id):"")+'</div>'+
+          '</div>';
+    // Info grid
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">'+
+            '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
+              '<div style="font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Type</div>'+
+              '<div style="font-size:11px;font-weight:800;margin-top:2px;">'+(m?esc(m.memberType||m.type||"—"):"—")+'</div>'+
+            '</div>'+
+            '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
+              '<div style="font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Expires</div>'+
+              '<div style="font-size:11px;font-weight:800;margin-top:2px;">'+(m?formatDate(m.expiry):"—")+'</div>'+
+            '</div>'+
+            '<div style="background:var(--green-light);border-radius:8px;padding:8px;text-align:center;">'+
+              '<div style="font-size:9px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Visits</div>'+
+              '<div style="font-size:11px;font-weight:800;color:var(--green);margin-top:2px;">'+(m?m.checkins||0:0)+'</div>'+
+            '</div>'+
+          '</div>';
+    html+=lvHtml;
+    if(result.recentVisit){
+      html+='<div style="background:var(--red-light);border:1.5px solid var(--red);border-radius:10px;padding:10px;margin-top:10px;text-align:center;">'+
+              '<div style="font-size:13px;font-weight:800;color:var(--red);">⚠️ Already scanned in last 30 min</div>'+
+            '</div>';
+    }
   } else {
-    title.textContent="❌ Access Denied";title.style.color="var(--red)";
-    body.innerHTML=
-      '<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">'+photoHtml+
-        '<div>'+
-          '<div style="font-size:18px;font-weight:900;line-height:1.2;">'+(result.name!=="Unknown"?esc(result.name):"Not Found")+'</div>'+
-          '<div style="font-size:12px;color:var(--gray);">'+(m?esc(m.memberId||m.id):esc(result.id))+'</div>'+
-          '<div style="font-size:12px;color:var(--red);font-weight:700;margin-top:3px;">'+esc(result.reason)+'</div>'+
-        '</div>'+
-      '</div>'+lvHtml;
+    // Red status banner
+    html+='<div style="background:var(--red);border-radius:10px;padding:12px;text-align:center;margin-bottom:14px;">'+
+            '<div style="font-size:18px;font-weight:900;color:#fff;letter-spacing:1px;">❌ ACCESS DENIED</div>'+
+          '</div>';
+    html+='<div style="text-align:center;margin-bottom:14px;">'+photoHtml+'</div>';
+    html+='<div style="text-align:center;margin-bottom:12px;">'+
+            '<div style="font-size:20px;font-weight:900;color:var(--dark);">'+(result.name&&result.name!=="Unknown"?esc(result.name):"Member Not Found")+'</div>'+
+            '<div style="font-size:12px;color:var(--gray);margin-top:2px;">'+(m?esc(m.memberId||m.id):esc(result.id))+'</div>'+
+          '</div>';
+    html+='<div style="background:var(--red-light);border:1.5px solid var(--red);border-radius:10px;padding:12px;text-align:center;">'+
+            '<div style="font-size:14px;font-weight:800;color:var(--red);">'+esc(result.reason)+'</div>'+
+          '</div>';
+    html+=lvHtml;
   }
+
+  document.getElementById("scan-result-body").innerHTML=html;
+  document.getElementById("scan-result-title").textContent="";
   document.getElementById("modal-scan-result").classList.add("open");
+  // Refresh recent logins in background so it's up to date when staff opens that tab
+  try{renderRecentLogins();}catch(e){}
+  try{renderMembersList();}catch(e){}
+}
 }
 
 function closeScanResult(){
