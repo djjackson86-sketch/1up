@@ -215,7 +215,7 @@ textarea{resize:vertical;min-height:70px;}
 .wa-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .wa-bar .btn{flex:1;min-width:0;}
 </style>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
 <body>
 
@@ -2600,7 +2600,6 @@ function saveStockEdit(){
 }
 
 // ===== MEMBER SYSTEM =====
-var html5QrScanner=null;
 
 const DEMO_MEMBERS=[
   {id:"928374",memberId:"MEM-001",name:"Sipho Khumalo",email:"sipho@example.com",phone:"082 111 2233",status:"active",expiry:"2026-12-31",memberType:"Premium Yearly",type:"Premium Yearly",password:"pass123",joinDate:"2025-01-10",photo:null,checkins:12,visits:[{ts:"2026-05-21T14:20:00",branch:"fourways"},{ts:"2026-05-14T11:05:00",branch:"fourways"},{ts:"2026-05-07T16:45:00",branch:"rosebank"}]},
@@ -2892,67 +2891,83 @@ function stopPhotoStream(){
 }
 
 // ---- QR SCANNER ----
+var _scanStream=null,_scanRaf=null,_scanVideo=null,_scanCanvas=null,_scanCtx=null,_scanActive=false;
+
+// Init BarcodeDetector once if available
+var _barcodeDetector=null;
+if(typeof BarcodeDetector!=="undefined"){
+  try{_barcodeDetector=new BarcodeDetector({formats:["qr_code"]});}catch(e){}
+}
+
 function openScanner(){
   document.getElementById("modal-scanner").classList.add("open");
+  var vp=document.getElementById("scanner-viewport");
+  vp.innerHTML="";
   document.getElementById("scanner-status").textContent="Requesting camera…";
-  document.getElementById("scanner-viewport").innerHTML="";
-  if(typeof Html5Qrcode==="undefined"){
-    document.getElementById("scanner-status").textContent="Use 📸 Take Photo button below";
-    return;
-  }
-  if(html5QrScanner){try{html5QrScanner.stop();}catch(e){}html5QrScanner=null;}
-  html5QrScanner=new Html5Qrcode("scanner-viewport");
-  html5QrScanner.start(
-    {facingMode:"environment"},
-    {fps:10,qrbox:{width:190,height:190}},
-    function(decodedText){processScanResult(decodedText);},
-    function(){}
-  ).then(function(){
-    document.getElementById("scanner-status").textContent="📷 Point camera at the QR code";
-  }).catch(function(){
-    // Back camera failed — try any camera
-    html5QrScanner.start(
-      true,
-      {fps:10,qrbox:{width:190,height:190}},
-      function(decodedText){processScanResult(decodedText);},
-      function(){}
-    ).then(function(){
-      document.getElementById("scanner-status").textContent="📷 Point camera at the QR code";
-    }).catch(function(){
-      document.getElementById("scanner-status").textContent="Camera unavailable — use 📸 button below";
+  _scanActive=true;
+
+  // Build video element
+  _scanVideo=document.createElement("video");
+  _scanVideo.setAttribute("playsinline","");
+  _scanVideo.setAttribute("muted","");
+  _scanVideo.style.cssText="width:100%;height:100%;object-fit:cover;border-radius:10px;display:block;";
+  // Frame overlay
+  var frame=document.createElement("div");
+  frame.className="scanner-frame";
+  vp.style.position="relative";
+  vp.appendChild(_scanVideo);
+  vp.appendChild(frame);
+
+  _scanCanvas=document.createElement("canvas");
+  _scanCtx=_scanCanvas.getContext("2d");
+
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}})
+    .then(function(stream){
+      if(!_scanActive){stream.getTracks().forEach(function(t){t.stop();});return;}
+      _scanStream=stream;
+      _scanVideo.srcObject=stream;
+      _scanVideo.play();
+      _scanVideo.addEventListener("loadedmetadata",function(){
+        _scanCanvas.width=_scanVideo.videoWidth||640;
+        _scanCanvas.height=_scanVideo.videoHeight||480;
+        document.getElementById("scanner-status").textContent="📷 Point at the member QR code";
+        _scanRaf=requestAnimationFrame(scanTick);
+      });
+    })
+    .catch(function(err){
+      document.getElementById("scanner-status").textContent="⚠️ Camera denied: "+((err&&err.message)||"check browser permissions");
     });
-  });
+}
+
+function scanTick(){
+  if(!_scanActive||!_scanVideo||_scanVideo.readyState<2){
+    _scanRaf=requestAnimationFrame(scanTick);return;
+  }
+  _scanCtx.drawImage(_scanVideo,0,0,_scanCanvas.width,_scanCanvas.height);
+
+  if(_barcodeDetector){
+    _barcodeDetector.detect(_scanCanvas).then(function(res){
+      if(!_scanActive)return;
+      if(res&&res.length){processScanResult(res[0].rawValue);}
+      else{_scanRaf=requestAnimationFrame(scanTick);}
+    }).catch(function(){_scanRaf=requestAnimationFrame(scanTick);});
+  } else if(typeof jsQR!=="undefined"){
+    var d=_scanCtx.getImageData(0,0,_scanCanvas.width,_scanCanvas.height);
+    var code=jsQR(d.data,d.width,d.height,{inversionAttempts:"dontInvert"});
+    if(code&&_scanActive){processScanResult(code.data);}
+    else{_scanRaf=requestAnimationFrame(scanTick);}
+  } else {
+    _scanRaf=requestAnimationFrame(scanTick);
+  }
 }
 
 function closeScanner(){
-  if(html5QrScanner){html5QrScanner.stop().catch(function(){});html5QrScanner=null;}
+  _scanActive=false;
+  if(_scanRaf){cancelAnimationFrame(_scanRaf);_scanRaf=null;}
+  if(_scanStream){_scanStream.getTracks().forEach(function(t){t.stop();});_scanStream=null;}
+  _scanVideo=null;_scanCanvas=null;_scanCtx=null;
   document.getElementById("scanner-viewport").innerHTML="";
   document.getElementById("modal-scanner").classList.remove("open");
-}
-
-function scanFromFile(input){
-  if(!input||!input.files||!input.files[0])return;
-  var file=input.files[0];
-  document.getElementById("scanner-status").textContent="🔍 Reading QR code…";
-  if(typeof Html5Qrcode==="undefined"){
-    document.getElementById("scanner-status").textContent="⚠️ Scanner not loaded.";
-    input.value="";return;
-  }
-  function doScan(){
-    var tmpId="qr-file-decoder";
-    var tmpEl=document.getElementById(tmpId);
-    if(!tmpEl){tmpEl=document.createElement("div");tmpEl.id=tmpId;tmpEl.style.display="none";document.body.appendChild(tmpEl);}
-    var dec=new Html5Qrcode(tmpId);
-    dec.scanFile(file,false).then(function(result){
-      input.value="";
-      processScanResult(result);
-    }).catch(function(){
-      document.getElementById("scanner-status").textContent="❌ No QR found. Try a clearer photo.";
-      input.value="";
-    });
-  }
-  if(html5QrScanner){html5QrScanner.stop().catch(function(){}).then(function(){html5QrScanner=null;doScan();});}
-  else{doScan();}
 }
 
 function processScanResult(text){
@@ -3229,8 +3244,6 @@ initMembers();
     </div>
     <div class="scanner-viewport" id="scanner-viewport"></div>
     <div id="scanner-status" style="text-align:center;font-size:13px;font-weight:700;color:var(--gray);margin:8px 0;min-height:20px;"></div>
-    <input type="file" id="qr-file-input" accept="image/*" capture="environment" style="display:none" onchange="scanFromFile(this)">
-    <button class="btn btn-dark btn-sm" style="width:100%;margin-bottom:6px;" onclick="document.getElementById('qr-file-input').click()">📸 Take Photo of QR Code</button>
     <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="closeScanner()">Cancel</button>
   </div>
 </div>
