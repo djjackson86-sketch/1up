@@ -188,6 +188,16 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="toast" id="toast"></div>
 
 <script>
+// ---- Telegram Notifications ----
+var TG_TOKEN="8278068049:AAHpgO115I2UHljiVhlq8WjiHcKr-mPD7NQ";
+var TG_CHAT="-5123149673";
+function sendTelegram(msg){
+  fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})
+  }).catch(function(){});
+}
+
 var _consent={popia:false,terms:false};
 function toggleCR(key){
   _consent[key]=!_consent[key];
@@ -256,6 +266,27 @@ function submitEnquiry(){
   try{var raw=localStorage.getItem(key);if(raw)existing=JSON.parse(raw);}catch(e){}
   existing.push(enquiry);
   try{localStorage.setItem(key,JSON.stringify(existing));}catch(e){showToast("Storage error. Please try again.");return;}
+
+  // Telegram notification
+  var branchLabel=branch==="fourways"?"Fourways Mall":"Rosebank";
+  var areas=enquiry.areas&&enquiry.areas.length?enquiry.areas.join(", "):"Not specified";
+  var services=enquiry.services&&enquiry.services.length?enquiry.services.join(", "):"None";
+  var dateRange=date+(enquiry.endDate&&enquiry.endDate!==date?" → "+enquiry.endDate:"");
+  var timeRange=enquiry.startTime?(enquiry.startTime+(enquiry.endTime?" – "+enquiry.endTime:"")):"TBC";
+  sendTelegram(
+    "🏟️ <b>New Event Enquiry</b>\n\n"+
+    "📍 <b>Branch:</b> "+branchLabel+"\n"+
+    "🆔 <b>Ref:</b> "+ref+"\n\n"+
+    "🏢 <b>Organiser:</b> "+name+(enquiry.contact?" ("+enquiry.contact+")":"")+"\n"+
+    "📱 <b>Phone:</b> "+phone+"\n"+
+    (enquiry.email?"📧 <b>Email:</b> "+enquiry.email+"\n":"")+
+    "\n🎯 <b>Event Type:</b> "+(enquiry.eventType||"Not specified")+"\n"+
+    "👥 <b>Attendance:</b> "+(enquiry.attendance||"TBC")+"\n"+
+    "📅 <b>Date:</b> "+dateRange+"\n"+
+    "⏰ <b>Time:</b> "+timeRange+"\n"+
+    "🎛️ <b>Areas:</b> "+areas+"\n"+
+    "🔧 <b>Services:</b> "+services
+  );
 
   document.getElementById("form-wrap").style.display="none";
   document.getElementById("suc-ref").textContent=ref;

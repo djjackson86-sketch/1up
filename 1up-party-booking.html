@@ -225,6 +225,16 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="toast" id="toast"></div>
 
 <script>
+// ---- Telegram Notifications ----
+var TG_TOKEN="8278068049:AAHpgO115I2UHljiVhlq8WjiHcKr-mPD7NQ";
+var TG_CHAT="-5123149673";
+function sendTelegram(msg){
+  fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})
+  }).catch(function(){});
+}
+
 var selectedMeal="";
 var _consent={popia:false,terms:false};
 function toggleCR(key){
@@ -312,6 +322,24 @@ function submitBooking(){
   try{var raw=localStorage.getItem(key);if(raw)existing=JSON.parse(raw);}catch(e){}
   existing.push(booking);
   try{localStorage.setItem(key,JSON.stringify(existing));}catch(e){showToast("Storage error. Please try again.");return;}
+
+  // Telegram notification
+  var branchLabel=branch==="fourways"?"Fourways Mall":"Rosebank";
+  var extras=booking.extras&&booking.extras.length?booking.extras.join(", "):"None";
+  sendTelegram(
+    "🎉 <b>New Kids Party Booking</b>\n\n"+
+    "📍 <b>Branch:</b> "+branchLabel+"\n"+
+    "🆔 <b>Ref:</b> "+ref+"\n\n"+
+    "👤 <b>Parent:</b> "+name+"\n"+
+    "📱 <b>WhatsApp:</b> "+phone+"\n"+
+    "📧 <b>Email:</b> "+email+"\n\n"+
+    "🎂 <b>Birthday Child:</b> "+booking.kidname+" (turning "+booking.age+")\n"+
+    "👥 <b>Guests:</b> "+booking.guests+" ("+booking.kids+" kids · "+booking.adults+" adults)\n"+
+    "📦 <b>Package:</b> "+pkg+"\n"+
+    "📅 <b>Date:</b> "+date+"\n"+
+    "⏰ <b>Time:</b> "+slot+"\n"+
+    "🎁 <b>Extras:</b> "+extras
+  );
 
   document.getElementById("form-wrap").style.display="none";
   document.getElementById("suc-ref").textContent=ref;
