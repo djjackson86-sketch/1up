@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>1-UP Members Portal</title>
 <style>
   :root{
@@ -228,9 +231,14 @@ function portalLogin(){
   var pass=(document.getElementById("p-login-pass").value||"").trim();
   var errEl=document.getElementById("p-login-error");
   if(!id||!pass){errEl.textContent="Please enter your Member ID and password.";errEl.style.display="block";return;}
-  var members=getMembers();
-  var m=members.find(function(x){return x.id===id&&x.password===pass;});
-  if(!m){errEl.textContent="Invalid Member ID or password. Please try again.";errEl.style.display="block";return;}
+  // Check hardcoded demo members first — bypasses localStorage entirely
+  var m=DEMO_MEMBERS.find(function(x){return x.id===id&&x.password===pass;});
+  // Then check any real members in localStorage
+  if(!m){
+    var stored=getMembers().filter(function(x){return !DEMO_MEMBERS.find(function(d){return d.id===x.id;});});
+    m=stored.find(function(x){return x.id===id&&x.password===pass;});
+  }
+  if(!m){errEl.textContent="Invalid ID or password. Please try again.";errEl.style.display="block";return;}
   errEl.style.display="none";
   portalMember=m;
   renderPortalDash();
