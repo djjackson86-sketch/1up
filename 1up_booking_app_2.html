@@ -223,7 +223,7 @@ textarea{resize:vertical;min-height:70px;}
 
 <div class="nav">
   <div class="nav-top">
-    <div class="nav-title" id="nav-title">1-UP <span>Fourways</span></div>
+    <div class="nav-title" id="nav-title">1-UP <span>Urban Play</span></div>
     <div class="nav-branches">
       <button class="nav-branch-btn active-fw" id="btn-fw" onclick="setBranch('fourways')">Fourways</button>
       <button class="nav-branch-btn" id="btn-rb" onclick="setBranch('rosebank')">Rosebank</button>
@@ -998,7 +998,7 @@ function setBranch(b){
   loadAll();loadVenue();loadStock();
   document.getElementById("btn-fw").className = b==="fourways" ? "nav-branch-btn active-fw" : "nav-branch-btn";
   document.getElementById("btn-rb").className = b==="rosebank" ? "nav-branch-btn active-rb" : "nav-branch-btn";
-  document.getElementById("nav-title").innerHTML='1-UP <span>'+( b==="fourways"?"Fourways":"Rosebank")+'</span>';
+  document.getElementById("nav-title").innerHTML='1-UP <span>Urban Play</span>';
   document.getElementById("branch-info-title").textContent=b==="fourways"?"📍 Fourways Mall":"📍 Rosebank";
   document.getElementById("branch-info-body").textContent=b==="fourways"
     ?"Shop CF02, 11 Ruby Close, Fourways · Weekdays 10am–7pm · Weekends 10am–9pm"
