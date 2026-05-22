@@ -69,7 +69,7 @@
   .status-expired{background:var(--red-light);color:var(--red);}
   .status-suspended{background:var(--red-light);color:var(--red);}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -143,7 +143,7 @@
   <div class="qr-card">
     <div class="qr-card-title">📱 Your Membership Card</div>
     <div class="qr-canvas-wrap">
-      <canvas id="portal-qr-canvas" width="180" height="180"></canvas>
+      <div id="portal-qr-canvas"></div>
     </div>
     <div class="qr-member-id" id="p-qr-label">MEMBER:000000</div>
     <div class="qr-hint">Show this QR at reception to check in</div>
@@ -362,16 +362,13 @@ function formatDT(ts){
 
 // ---- QR Code Generator ----
 function drawPortalQR(text){
-  var canvas=document.getElementById("portal-qr-canvas");
-  if(!canvas)return;
-  if(typeof QRCode==="undefined"){
-    // Library not loaded yet — retry after short delay
-    setTimeout(function(){drawPortalQR(text);},500);
-    return;
-  }
+  var el=document.getElementById("portal-qr-canvas");
+  if(!el)return;
+  if(typeof QRCode==="undefined"){setTimeout(function(){drawPortalQR(text);},400);return;}
   try{
-    QRCode.toCanvas(canvas,text,{width:180,margin:2,color:{dark:"#111111",light:"#ffffff"}},function(err){if(err)console.error("QR:",err);});
-  }catch(e){console.error("QR draw failed:",e);}
+    el.innerHTML="";
+    new QRCode(el,{text:text,width:180,height:180,colorDark:"#111111",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.L});
+  }catch(e){console.error("QR:",e);}
 }
 </script>
 </body>
