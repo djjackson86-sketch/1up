@@ -2338,43 +2338,35 @@ function genOrderSheet(){
   const rows=lowItems.map(i=>{
     const d=stockData[i.storeCat]?.[i.id];
     const qty=d!=null?d.qty:i.qty;
-    const rp=d!=null?d.reorderPt:i.reorderPt;
     const oq=d!=null?d.orderQty:i.orderQty;
     const{singleName,unitTypes}=getUnitTypes(d,i);
     const largest=largestUnit(unitTypes,singleName);
-    const s=stockStatus(qty,rp);
+    const s=stockStatus(qty,d!=null?d.reorderPt:i.reorderPt);
     const qtyColor=s==="out"?"#dc2626":"#d97706";
     return`<tr>
-      <td>${i.name}</td>
-      <td style="text-align:center;color:${qtyColor};font-weight:700;">${qty}</td>
-      <td style="text-align:center;color:#888;font-size:11px;font-style:italic;">${singleName}s</td>
-      <td style="text-align:center;font-weight:700;">${oq}</td>
-      <td style="text-align:center;color:#888;font-size:11px;font-style:italic;">${largest.name.toLowerCase()}</td>
-      <td style="width:80px;border:1px solid #ccc;"></td></tr>`;
+      <td style="padding:8px 10px;border:1px solid #ddd;">${i.name}</td>
+      <td style="padding:8px 10px;border:1px solid #ddd;text-align:center;color:${qtyColor};font-weight:700;">${qty}</td>
+      <td style="padding:8px 10px;border:1px solid #ddd;text-align:center;color:#888;font-size:11px;font-style:italic;">${singleName}s</td>
+      <td style="padding:8px 10px;border:1px solid #ddd;text-align:center;font-weight:700;">${oq}</td>
+      <td style="padding:8px 10px;border:1px solid #ddd;text-align:center;color:#888;font-size:11px;font-style:italic;">${largest.name.toLowerCase()}</td>
+      <td style="padding:8px 10px;border:1px solid #ddd;width:80px;"></td></tr>`;
   }).join("");
-  const w=window.open("","_blank","width=800,height=600");
-  w.document.write(`<!DOCTYPE html><html><head><title>Order Sheet — 1-Up ${branch}</title>
-  <style>body{font-family:Arial,sans-serif;padding:24px;color:#111;}h1{font-size:20px;margin-bottom:4px;}
-  .sub{font-size:12px;color:#666;margin-bottom:20px;}
-  table{width:100%;border-collapse:collapse;}th,td{padding:8px 10px;border:1px solid #ddd;font-size:13px;}
-  th{background:#111;color:#E8FF00;font-weight:700;text-align:center;}
-  th:first-child{text-align:left;}
-  tr:nth-child(even){background:#f9f9f9;}
-  td:nth-child(2),td:nth-child(4),td:nth-child(6){border-left:3px solid #111;}
-  th:nth-child(2),th:nth-child(3),th:nth-child(4){border-left:3px solid #111;}
-  @media print{.no-print{display:none;}}</style></head><body>
-  <h1>🗒 Order Sheet — 1-Up Urban Playground</h1>
-  <div class="sub">Branch: <strong>${branch}</strong> &nbsp;|&nbsp; Generated: ${dateStr}</div>
-  <table><thead>
-    <tr><th rowspan="2">Item</th><th colspan="2">Current Stock</th><th colspan="2">Order Qty</th><th rowspan="2">Ordered ✓</th></tr>
-  </thead>
-  <tbody>${rows}</tbody></table>
-  <br><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-  <button class="no-print" onclick="window.close()" style="padding:10px 20px;background:#f3f4f6;color:#111;border:2px solid #ddd;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">✕ Close</button>
-  <button class="no-print" onclick="window.print()" style="padding:10px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">🖨 Print / Save PDF</button>
-  </div>
-  </body></html>`);
-  w.document.close();
+  document.getElementById("sheet-overlay-title").textContent="🗒 Order Sheet — "+branch;
+  document.getElementById("sheet-overlay-body").innerHTML=`
+    <h2 style="font-size:18px;margin-bottom:4px;">🗒 Order Sheet — 1-Up Urban Playground</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:18px;">Branch: <strong>${branch}</strong> &nbsp;|&nbsp; Generated: ${dateStr}</p>
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;min-width:500px;">
+      <thead><tr>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;text-align:left;border:1px solid #333;">Item</th>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;text-align:center;border:1px solid #333;" colspan="2">Current Stock</th>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;text-align:center;border:1px solid #333;" colspan="2">Order Qty</th>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;text-align:center;border:1px solid #333;">Ordered ✓</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  document.getElementById("sheet-overlay").style.display="block";
+  window.scrollTo(0,0);
 }
 
 function genStockTakeSheet(){
@@ -2387,35 +2379,39 @@ function genStockTakeSheet(){
   const branch=activeBranch==="fourways"?"Fourways Mall":"Rosebank";
   const now=new Date();
   const dateStr=now.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" "+now.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
-  const rows=allDefs.map(i=>{
+  const rows=allDefs.map((i,idx)=>{
     const d=stockData[i.storeCat]?.[i.id];
     const qty=d!=null?d.qty:i.qty;
     const rp=d!=null?d.reorderPt:i.reorderPt;
     const ts=d?.stockTakeTime||"";
     const s=stockStatus(qty,rp);
     const sc=s==="out"?"#dc2626":s==="low"?"#d97706":"#16a34a";
-    return`<tr><td>${i.name}</td><td style="text-align:center;">${i.unit}</td>
-      <td style="text-align:center;font-weight:700;color:${sc};">${qty}</td>
-      <td style="text-align:center;font-size:11px;color:#555;">${ts||"—"}</td>
-      <td style="text-align:center;font-weight:700;color:${sc};font-size:11px;">${s.toUpperCase()}</td></tr>`;
+    const td="padding:8px 10px;border:1px solid #ddd;font-size:13px;";
+    const bg=idx%2===1?"background:#f9f9f9":"";
+    return`<tr style="${bg}">
+      <td style="${td}">${i.name}</td>
+      <td style="${td}text-align:center;">${i.unit}</td>
+      <td style="${td}text-align:center;font-weight:700;color:${sc};">${qty}</td>
+      <td style="${td}text-align:center;font-size:11px;color:#555;">${ts||"—"}</td>
+      <td style="${td}text-align:center;font-weight:700;color:${sc};font-size:11px;">${s.toUpperCase()}</td></tr>`;
   }).join("");
-  const w=window.open("","_blank","width=800,height=600");
-  w.document.write(`<!DOCTYPE html><html><head><title>Stock Take — 1-Up ${branch}</title>
-  <style>body{font-family:Arial,sans-serif;padding:24px;color:#111;}h1{font-size:20px;margin-bottom:4px;}
-  .sub{font-size:12px;color:#666;margin-bottom:20px;}
-  table{width:100%;border-collapse:collapse;}th,td{padding:8px 10px;border:1px solid #ddd;font-size:13px;}
-  th{background:#111;color:#E8FF00;font-weight:700;}tr:nth-child(even){background:#f9f9f9;}
-  @media print{.no-print{display:none;}}</style></head><body>
-  <h1>📋 Stock Take Sheet — 1-Up Urban Playground</h1>
-  <div class="sub">Branch: <strong>${branch}</strong> &nbsp;|&nbsp; Printed: ${dateStr}</div>
-  <table><thead><tr><th>Item</th><th>Unit</th><th>Stock Count</th><th>Stock Take Time</th><th>Status</th></tr></thead>
-  <tbody>${rows}</tbody></table>
-  <br><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-  <button class="no-print" onclick="window.close()" style="padding:10px 20px;background:#f3f4f6;color:#111;border:2px solid #ddd;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">✕ Close</button>
-  <button class="no-print" onclick="window.print()" style="padding:10px 20px;background:#111;color:#E8FF00;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:14px;">🖨 Print / Save PDF</button>
-  </div>
-  </body></html>`);
-  w.document.close();
+  document.getElementById("sheet-overlay-title").textContent="📋 Stock Take — "+branch;
+  document.getElementById("sheet-overlay-body").innerHTML=`
+    <h2 style="font-size:18px;margin-bottom:4px;">📋 Stock Take Sheet — 1-Up Urban Playground</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:18px;">Branch: <strong>${branch}</strong> &nbsp;|&nbsp; Printed: ${dateStr}</p>
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;min-width:400px;">
+      <thead><tr>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;border:1px solid #333;text-align:left;">Item</th>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;border:1px solid #333;text-align:center;">Unit</th>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;border:1px solid #333;text-align:center;">Stock Count</th>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;border:1px solid #333;text-align:center;">Last Taken</th>
+        <th style="padding:8px 10px;background:#111;color:#E8FF00;font-weight:700;border:1px solid #333;text-align:center;">Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  document.getElementById("sheet-overlay").style.display="block";
+  window.scrollTo(0,0);
 }
 
 function addStockItem(){
@@ -2438,6 +2434,10 @@ function addStockItem(){
   document.getElementById("new-item-cost").value="";
   renderStockTable();
   showStockToast("✅ Item added!");
+}
+
+function closeSheetOverlay(){
+  document.getElementById("sheet-overlay").style.display="none";
 }
 
 function showStockToast(msg){
@@ -3239,6 +3239,16 @@ initMembers();
       <button class="btn btn-ghost" onclick="closeWATemplates()">Cancel</button>
     </div>
   </div>
+</div>
+
+<!-- SHEET OVERLAY (Order / Stock Take) -->
+<div id="sheet-overlay" style="display:none;position:fixed;inset:0;background:#fff;z-index:300;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="position:sticky;top:0;background:#111;padding:10px 14px;display:flex;align-items:center;gap:12px;z-index:1;">
+    <button onclick="closeSheetOverlay()" style="background:var(--or);color:#111;border:none;border-radius:8px;padding:8px 16px;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;">← Back to Stock</button>
+    <span id="sheet-overlay-title" style="color:#fff;font-weight:700;font-size:14px;"></span>
+    <button onclick="window.print()" style="margin-left:auto;background:transparent;color:var(--or);border:1.5px solid var(--or);border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;">🖨 Print</button>
+  </div>
+  <div id="sheet-overlay-body" style="padding:20px;font-family:Arial,sans-serif;color:#111;"></div>
 </div>
 
 <!-- QR SCANNER MODAL -->
