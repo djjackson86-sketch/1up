@@ -774,15 +774,8 @@ textarea{resize:vertical;min-height:70px;}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="form-group"><label>Date</label><input id="f-date" type="date"></div>
       <div class="form-group"><label>Time Slot</label>
-        <select id="f-timeslot">
-          <option value="">Select time...</option>
-          <option>10:00 – 12:00</option>
-          <option>12:00 – 14:00</option>
-          <option>14:00 – 16:00</option>
-          <option>16:00 – 18:00</option>
-          <option>18:00 – 20:00</option>
-        </select>
-      </div>
+          <input type="time" id="f-timeslot">
+        </div>
     </div>
     <div class="form-group"><label>Status</label>
       <select id="f-status">
@@ -899,14 +892,7 @@ textarea{resize:vertical;min-height:70px;}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div class="form-group"><label>Preferred Date *</label><input id="cf-date" type="date"></div>
           <div class="form-group"><label>Time Slot *</label>
-            <select id="cf-timeslot">
-              <option value="">Select time...</option>
-              <option>10:00 – 12:00</option>
-              <option>12:00 – 14:00</option>
-              <option>14:00 – 16:00</option>
-              <option>16:00 – 18:00</option>
-              <option>18:00 – 20:00</option>
-            </select>
+            <input type="time" id="cf-timeslot">
           </div>
         </div>
         <div class="form-group">
@@ -1011,7 +997,7 @@ function showTab(t){
   if(t==="cust-booking"){document.getElementById("modal-cust-form").classList.add("open");return;}
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(tb=>tb.classList.remove("active"));
-  const tabs=["dashboard","bookings","activities","stock","setup","members"];
+  const tabs=["dashboard","bookings","activities","stock","members","setup"];
   const idx=tabs.indexOf(t);
   if(idx>=0){document.querySelectorAll(".tab")[idx].classList.add("active");}
   document.getElementById("page-"+t).classList.add("active");
@@ -1586,33 +1572,193 @@ function closeBook(){document.getElementById("modal-book").classList.remove("ope
 
 // ===== SMART FILL =====
 function smartFill(){
-  const txt=document.getElementById("smart-paste").value.trim();
-  if(!txt){alert("Paste some text first!");return;}
+  const raw=document.getElementById("smart-paste").value.trim();
+  if(!raw){alert("Paste the customer's reply first!");return;}
+  const txt=raw;
   const t=txt.toLowerCase();
-  const nm=txt.match(/(?:name[:\-\s]+|for[:\s]+|booking for[:\s]+|customer[:\s]+)([A-Z][a-z]+(?: [A-Z][a-z]+)?)/i)||txt.match(/^([A-Z][a-z]+(?: [A-Z][a-z]+)?)[,\n]/m);
-  if(nm)document.getElementById("f-name").value=nm[1];
-  const ph=txt.match(/(?:0|\+27)[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{4}/);
-  if(ph)document.getElementById("f-phone").value=ph[0].replace(/[\s-]/g,"");
-  const months={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-  const dt=txt.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)/i);
-  if(dt){const mo=months[dt[2].toLowerCase().slice(0,3)];if(mo)document.getElementById("f-date").value=new Date().getFullYear()+"-"+pad(mo)+"-"+pad(+dt[1]);}
-  const kidM=txt.match(/(?:child|kid|birthday|celebrating)[:\s]+([A-Z][a-z]+)/i);
-  if(kidM)document.getElementById("f-kidname").value=kidM[1];
-  const ageM=txt.match(/(?:turning|age[:\s]+|turns)[\s]+(\d{1,2})/i);
-  if(ageM)document.getElementById("f-age").value=ageM[1];
-  const guestM=txt.match(/(\d{1,3})\s*(?:guests|kids|children|people)/i);
-  if(guestM)document.getElementById("f-guests").value=guestM[1];
-  const pkgMap={skate:"Skate Party",esport:"Esports Party",gaming:"Esports Party",soccer:"Street Soccer Party",dance:"Dance Party",combo:"Combo Package (Any 2)",full:"Full Venue Party"};
-  for(const[key,val]of Object.entries(pkgMap)){if(t.includes(key)){document.getElementById("f-package").value=val;break;}}
-  const timeM=txt.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)?/i);
-  if(timeM){
-    const slots=["10:00 – 12:00","12:00 – 14:00","14:00 – 16:00","16:00 – 18:00","18:00 – 20:00"];
-    const hr=+timeM[1];
-    const matched=slots.find(s=>+s.split(":")[0]===hr);
-    if(matched)document.getElementById("f-timeslot").value=matched;
+  const filled=[],miss=[];
+
+  // Parse every line into a label→value map.
+  // Handles both "- Label: Value" AND "- Label Value" (no colon).
+  const lineMap={};
+  txt.split("\n").forEach(function(line){
+    const stripped=line.replace(/^[\s\-\*•]+/,"").trim();
+    if(!stripped)return;
+    const colonM=stripped.match(/^([^:]{3,60}):\s*(.*)$/);
+    if(colonM){lineMap[colonM[1].trim().toLowerCase()]=colonM[2].trim();return;}
+    const spaceM=stripped.match(/^(parent\s*[\/]?\s*guardian full name|whatsapp number|email address|birthday child(?:'s)? full name|age the child is turning|number of kids attending|number of adults attending|kids meal choice|party package|preferred date|preferred time slot|any extras|adult catering requirements|any special requests.*|branch)\s+(.+)$/i);
+    if(spaceM)lineMap[spaceM[1].trim().toLowerCase()]=spaceM[2].trim();
+  });
+
+  function lv(){
+    for(var i=0;i<arguments.length;i++){
+      var k=arguments[i].toLowerCase();
+      for(var lk in lineMap){if(lk.includes(k)||k.includes(lk)){var v=lineMap[lk];if(v&&v.length>0)return v;}}
+    }
+    return null;
   }
-  if(t.includes("rosebank"))document.getElementById("f-branch").value="rosebank";
-  if(t.includes("fourways"))document.getElementById("f-branch").value="fourways";
+
+  // BRANCH
+  var branch=lv("branch");
+  if(!branch)branch=t.includes("rosebank")?"rosebank":t.includes("fourways")?"fourways":null;
+  else branch=branch.toLowerCase().includes("rosebank")?"rosebank":"fourways";
+  if(branch){document.getElementById("f-branch").value=branch;filled.push("Branch: "+(branch==="rosebank"?"Rosebank":"Fourways"));}
+  else miss.push("Branch");
+
+  // CUSTOMER NAME — works even if lowercase
+  var name=lv("parent","guardian","full name","contact name","your name");
+  if(!name){
+    txt.split("\n").forEach(function(line){
+      if(name)return;
+      var cl=line.replace(/^[\s\-]+/,"").trim();
+      if(/^[a-zA-Z]{2,}(\s+[a-zA-Z]{2,})+$/.test(cl)&&!/booking form|urban playground|thank you|good day|we look|once we|1-up/i.test(cl)&&cl.length<60)name=cl;
+    });
+  }
+  if(name)name=name.replace(/[,;:]+$/,"").trim().replace(/\b\w/g,function(c){return c.toUpperCase();});
+  if(name&&name.length>2){document.getElementById("f-name").value=name;filled.push("Name: "+name);}
+  else miss.push("Customer name");
+
+  // PHONE
+  var phone=lv("whatsapp","phone","number","cell","contact number");
+  if(!phone){var phm=txt.match(/(?:\+27|0)[\s\-]?\d{2}[\s\-]?\d{3}[\s\-]?\d{4}/);if(phm)phone=phm[0];}
+  if(!phone){txt.split("\n").forEach(function(line){if(phone)return;var cl=line.replace(/^[\s\-]+/,"").trim();if(/^(\+27|0)\d[\d\s]{8,11}$/.test(cl))phone=cl;});}
+  if(phone){document.getElementById("f-phone").value=phone.replace(/[\s\-]/g,"");filled.push("Phone: "+phone.replace(/[\s\-]/g,""));}
+  else miss.push("Phone");
+
+  // EMAIL
+  var email=lv("email","e-mail");
+  if(!email){var emm=txt.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);if(emm)email=emm[0];}
+  if(email&&email.includes("@")){document.getElementById("f-email").value=email;filled.push("Email: "+email);}
+
+  // CHILD NAME — capitalise even if lowercase
+  var kidname=lv("birthday child","child's full name","child full name","child name");
+  if(!kidname){var km=txt.match(/(?:child(?:'s)?(?:\s+full)?\s+name|kid(?:'s)?\s+name|party\s+for|birthday\s+(?:boy|girl))[:\s]+([a-zA-Z]+(?: [a-zA-Z]+)*)/i);if(km)kidname=km[1];}
+  if(kidname){kidname=kidname.trim().replace(/[,;:]+$/,"").replace(/\b\w/g,function(c){return c.toUpperCase();});document.getElementById("f-kidname").value=kidname;filled.push("Child: "+kidname);}
+  else miss.push("Child's name");
+
+  // AGE
+  var ageVal=lv("age the child is turning","age turning","age","turning");
+  if(!ageVal){var am=txt.match(/(?:turning|turns|age)[:\s]+(\d{1,2})/i)||txt.match(/(\d{1,2})(?:st|nd|rd|th)\s+birthday/i);if(am)ageVal=am[1];}
+  if(ageVal){var ageN=(ageVal+"").match(/\d{1,2}/);if(ageN&&+ageN[0]>0&&+ageN[0]<25){document.getElementById("f-age").value=ageN[0];filled.push("Age: "+ageN[0]);}}
+  else miss.push("Age");
+
+  // KIDS
+  var kidsVal=lv("number of kids","no. of kids","kids attending","number of children");
+  if(!kidsVal){var kk=txt.match(/(\d{1,3})\s*(?:kids|children)\s*attending/i)||txt.match(/(?:kids|children)[:\s]+(\d{1,3})/i);if(kk)kidsVal=kk[1];}
+  if(kidsVal){var kn=(kidsVal+"").match(/\d{1,3}/);if(kn){document.getElementById("f-kids").value=kn[0];filled.push("Kids: "+kn[0]);}}
+  else miss.push("No. of kids");
+
+  // ADULTS
+  var adultsVal=lv("number of adults","no. of adults","adults attending");
+  if(!adultsVal){var aa=txt.match(/(\d{1,3})\s*adults\s*attending/i)||txt.match(/(?:adults)[:\s]+(\d{1,3})/i);if(aa)adultsVal=aa[1];}
+  if(adultsVal){var an=(adultsVal+"").match(/\d{1,3}/);if(an){document.getElementById("f-adults").value=an[0];filled.push("Adults: "+an[0]);}}
+  else miss.push("No. of adults");
+  if(typeof updateGuestsTotal==="function")updateGuestsTotal("f");
+
+  // KIDS MEAL
+  var mealVal=lv("kids meal","meal choice","kids meal choice")||t;
+  var mealKey=null;
+  if(/nugget/i.test(mealVal))mealKey="nuggets";
+  else if(/hot.?dog/i.test(mealVal))mealKey="hotdog";
+  else if(/mini.?burger|slider/i.test(mealVal))mealKey="mini-burger";
+  if(mealKey){var mel=document.getElementById("meal-"+mealKey);if(mel&&typeof selectMeal==="function"){selectMeal("f",mealKey,mel);filled.push("Kids meal: "+mealKey.replace(/-/g," "));}}
+  else miss.push("Kids meal");
+
+  // PACKAGE
+  var pkgVal=lv("party package","package")||t;
+  var pkgFound=null;
+  var pkgList=[
+    {k:["full venue","whole venue","entire venue"],v:"Full Venue Party"},
+    {k:["combo"],v:"Combo Package (Any 2)"},
+    {k:["skate"],v:"Skate Party"},
+    {k:["esport","gaming","xbox","playstation"],v:"Esports Party"},
+    {k:["soccer","football","cage"],v:"Street Soccer Party"},
+    {k:["dance"],v:"Dance Party"},
+  ];
+  for(var pi=0;pi<pkgList.length;pi++){if(pkgList[pi].k.some(function(k){return pkgVal.toLowerCase().includes(k);})){pkgFound=pkgList[pi].v;break;}}
+  if(pkgFound){document.getElementById("f-package").value=pkgFound;filled.push("Package: "+pkgFound);}
+  else miss.push("Package");
+
+  // DATE — "28th may", "28 May 2026", "28/05/2026"
+  var dateStr=lv("preferred date","date","event date","party date");
+  if(!dateStr){var dm=txt.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:\s+(\d{4}))?/i);if(dm)dateStr=dm[0];}
+  if(!dateStr){var dm2=txt.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);if(dm2)dateStr=dm2[0];}
+  if(dateStr){var iso=parseDateToISO(dateStr);if(iso){document.getElementById("f-date").value=iso;filled.push("Date: "+formatDate(iso));}else miss.push("Date");}
+  else miss.push("Date");
+
+  // TIME — "12-4pm", "12:00", "14:00", "2pm"
+  var timeStr=lv("preferred time slot","time slot","time","preferred time");
+  if(!timeStr){var tm=txt.match(/\b(\d{1,2})(?::(\d{2}))?\s*(?:am|pm)?\s*[-–]\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)/i)||txt.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i)||txt.match(/\b(\d{1,2}):(\d{2})\b/);if(tm)timeStr=tm[0];}
+  if(timeStr){
+    var sm=timeStr.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+    if(sm){
+      var hr=+sm[1],mn=sm[2]?+sm[2]:0,mer=sm[3]||(timeStr.toLowerCase().includes("pm")?"pm":"");
+      if(mer.toLowerCase()==="pm"&&hr<12)hr+=12;
+      if(mer.toLowerCase()==="am"&&hr===12)hr=0;
+      if(hr>=6&&hr<=23){var tv=String(hr).padStart(2,"0")+":"+String(mn).padStart(2,"0");document.getElementById("f-timeslot").value=tv;filled.push("Time: "+tv);}
+      else miss.push("Time slot");
+    }
+  } else miss.push("Time slot");
+
+  // EXTRAS
+  var extrasVal=lv("any extras","extras","add-ons")||"";
+  var scanExtras=t+" "+extrasVal.toLowerCase();
+  var extraMap={"birthday cake":"Birthday Cake","balloon":"Balloon","photo backdrop":"Photo Backdrop","pizza and slush":"Pizza","boba drink":"Boba","dj /":"DJ","dj/":"DJ","sound system":"DJ","face paint":"Face Painting","trophy":"Trophy","medal":"Trophy","goodie bag":"Goodie Bags","goodie":"Goodie Bags"};
+  var extraBtns=document.querySelectorAll("#extras-grid .extra-btn");
+  var extrasFound=[];
+  Object.keys(extraMap).forEach(function(k){
+    if(extrasVal.toLowerCase().includes(k)||scanExtras.includes(k)){
+      var label=extraMap[k];
+      extraBtns.forEach(function(btn){if(btn.textContent.trim().toLowerCase().includes(label.toLowerCase())&&!btn.classList.contains("selected")){btn.classList.add("selected");if(extrasFound.indexOf(label)===-1)extrasFound.push(label);}});
+    }
+  });
+  if(extrasFound.length)filled.push("Extras: "+extrasFound.join(", "));
+
+  // ADULT CATERING
+  var cateringVal=lv("adult catering","catering requirements","catering");
+  if(cateringVal&&cateringVal.length>1&&!/^none$|^n\/a$|^-\s*$/.test(cateringVal.trim())){
+    var catEl=document.getElementById("f-catering");
+    if(catEl){
+      var catList=[
+        {k:["full adult","adult buffet","full buffet"],v:"Full Adult Buffet"},
+        {k:["pizza"],v:"Pizza & Drinks (adults)"},
+        {k:["bar package","soft bar"],v:"Bar Package (soft bar)"},
+        {k:["platter"],v:"Adult Snack Platters"},
+        {k:["boba"],v:"Boba Drinks"},
+        {k:["soft drink","fizzy","cooldrink","soda"],v:"Soft Drinks & Water"},
+        {k:["tea","coffee","cappuccino"],v:"Tea & Coffee"},
+      ];
+      var cv=cateringVal.toLowerCase();
+      for(var ci=0;ci<catList.length;ci++){if(catList[ci].k.some(function(k){return cv.includes(k);})){catEl.value=catList[ci].v;filled.push("Adult catering: "+catList[ci].v);break;}}
+    }
+  }
+
+  // NOTES
+  var notesVal=lv("special requests","allergies","accessibility","any special requests","notes");
+  if(!notesVal){var nm2=txt.match(/(?:special request|allerg|accessibility)[:\s]+(.{3,})/i);if(nm2)notesVal=nm2[1];}
+  if(notesVal&&notesVal.length>2&&!/^none$|^n\/a$|^-\s*$/.test(notesVal.trim())){var nEl=document.getElementById("f-notes");if(nEl&&!nEl.value){nEl.value=notesVal.trim().slice(0,400);filled.push("Notes captured");}}
+
+  // RESULT BANNER
+  var res=document.getElementById("smart-fill-result");
+  if(!res){res=document.createElement("div");res.id="smart-fill-result";res.style.cssText="border-radius:10px;padding:10px 14px;margin-top:10px;font-size:12px;line-height:1.8;";document.getElementById("smart-paste").parentNode.appendChild(res);}
+  var summary="";
+  if(filled.length)summary+="<strong>Filled:</strong><br>"+filled.join(" &middot; ")+"<br>";
+  if(miss.length)summary+=(filled.length?"<br>":"")+"<strong style='color:#dc2626;'>Still needed:</strong><br>"+miss.join(" &middot; ");
+  res.innerHTML=summary;res.style.background=miss.length?"#fff8f0":"#f0fdf4";res.style.border=miss.length?"1px solid #d97706":"1px solid #16a34a";res.style.display="block";
+}
+
+function parseDateToISO(s){
+  if(!s)return null;
+  var mo_map={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12,january:1,february:2,march:3,april:4,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
+  var yr=new Date().getFullYear();
+  var m=s.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:\s+(\d{4}))?/i);
+  if(m){var mo=mo_map[m[2].toLowerCase().slice(0,9)];var y=m[3]?+m[3]:yr;if(mo)return y+"-"+pad(mo)+"-"+pad(+m[1]);}
+  m=s.match(/(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s+(\d{4}))?/i);
+  if(m){var mo2=mo_map[m[1].toLowerCase().slice(0,9)];var y2=m[3]?+m[3]:yr;if(mo2)return y2+"-"+pad(mo2)+"-"+pad(+m[2]);}
+  m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if(m){var y3=m[3].length===2?"20"+m[3]:m[3];return y3+"-"+pad(+m[2])+"-"+pad(+m[1]);}
+  m=s.match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return m[0];
+  return null;
 }
 
 function toggleVoice(){
@@ -2008,16 +2154,13 @@ function venueSmartFill(){
 // ===== STOCK TAKE =====
 const STOCK_DEF={
   machines:[
-    {id:"m_coffee",   name:"Coffee Machine",        cat:"machines", unit:"machine",     qty:1, reorderPt:1, orderQty:1},
-    {id:"m_slush",    name:"Slushy Machine",         cat:"machines", unit:"machine",     qty:1, reorderPt:1, orderQty:1},
-    {id:"m_popcorn",  name:"Popcorn Machine",        cat:"machines", unit:"machine",     qty:1, reorderPt:1, orderQty:1},
     {id:"m_slush_syrup_strawberry", name:"Slush Syrup — Strawberry",    cat:"machines", unit:"bottle",      qty:4, reorderPt:2, orderQty:4},
-    {id:"m_slush_syrup_blue",       name:"Slush Syrup — Blue Raspberry", cat:"machines", unit:"bottle",     qty:4, reorderPt:2, orderQty:4},
-    {id:"m_coffee_beans",           name:"Coffee Beans",                 cat:"machines", unit:"kg bag",     qty:2, reorderPt:1, orderQty:2},
-    {id:"m_coffee_cups",            name:"Takeaway Cups",                cat:"machines", unit:"sleeve (50)",qty:3, reorderPt:2, orderQty:4},
-    {id:"m_popcorn_bags",           name:"Popcorn Bags",                 cat:"machines", unit:"pack (100)", qty:2, reorderPt:1, orderQty:2},
-    {id:"m_popcorn_kernels",        name:"Popcorn Kernels",              cat:"machines", unit:"kg bag",     qty:3, reorderPt:1, orderQty:2},
-    {id:"m_popcorn_oil",            name:"Popcorn Oil",                  cat:"machines", unit:"litre",      qty:2, reorderPt:1, orderQty:2},
+    {id:"m_slush_syrup_blue",       name:"Slush Syrup — Blue Raspberry", cat:"machines", unit:"bottle",      qty:4, reorderPt:2, orderQty:4},
+    {id:"m_coffee_beans",           name:"Coffee Beans",                 cat:"machines", unit:"kg bag",      qty:2, reorderPt:1, orderQty:2},
+    {id:"m_coffee_cups",            name:"Takeaway Cups",                cat:"machines", unit:"sleeve (50)", qty:3, reorderPt:2, orderQty:4},
+    {id:"m_popcorn_bags",           name:"Popcorn Bags",                 cat:"machines", unit:"pack (100)",  qty:2, reorderPt:1, orderQty:2},
+    {id:"m_popcorn_kernels",        name:"Popcorn Kernels",              cat:"machines", unit:"kg bag",      qty:3, reorderPt:1, orderQty:2},
+    {id:"m_popcorn_oil",            name:"Popcorn Oil",                  cat:"machines", unit:"litre",       qty:2, reorderPt:1, orderQty:2},
   ],
   drinks:[
     {id:"d_monster_orig",   name:"Monster Energy Original",       cat:"energy", unit:"can",         qty:24, reorderPt:12, orderQty:24},
