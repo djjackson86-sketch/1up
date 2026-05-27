@@ -1016,6 +1016,60 @@ function today(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+
 function formatDate(s){if(!s)return"";const d=new Date(s+"T00:00:00");return d.toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"});}
 function fmtR(n){return"R "+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
 
+// ===== TELEGRAM NOTIFICATIONS =====
+const TG_TOKEN="8278068049:AAHpgO115I2UHljiVhlq8WjiHcKr-mPD7NQ";
+const TG_CHAT="-5123149673";
+function tgEsc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function sendTelegram(msg){
+  fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendMessage",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})
+  }).catch(function(){});
+}
+function branchLabel(branch){return branch==="rosebank"?"Rosebank":"Fourways Mall";}
+function notifyStaffPartyBooking(b){
+  if(!b)return;
+  var extras=Array.isArray(b.extras)&&b.extras.length?b.extras.join(", "):"None";
+  var ref=b.ref||("STAFF-P-"+b.id);
+  sendTelegram(
+    "<b>New Kids Party Booking (Staff)</b>\n\n"+
+    "<b>Branch:</b> "+tgEsc(branchLabel(b.branch))+"\n"+
+    "<b>Ref:</b> "+tgEsc(ref)+"\n\n"+
+    "<b>Parent:</b> "+tgEsc(b.name)+"\n"+
+    "<b>WhatsApp:</b> "+tgEsc(b.phone||"Not captured")+"\n"+
+    (b.email?"<b>Email:</b> "+tgEsc(b.email)+"\n":"")+
+    "\n<b>Birthday Child:</b> "+tgEsc(b.kidname||"Not captured")+(b.age?" (turning "+tgEsc(b.age)+")":"")+"\n"+
+    "<b>Guests:</b> "+tgEsc(b.guests||0)+" ("+tgEsc(b.kids||0)+" kids · "+tgEsc(b.adults||0)+" adults)\n"+
+    "<b>Package:</b> "+tgEsc(b.package||"Not selected")+"\n"+
+    "<b>Date:</b> "+tgEsc(b.date||"TBC")+"\n"+
+    "<b>Time:</b> "+tgEsc(b.timeslot||"TBC")+"\n"+
+    "<b>Extras:</b> "+tgEsc(extras)
+  );
+}
+function notifyStaffEventBooking(v){
+  if(!v)return;
+  var areas=Array.isArray(v.areas)&&v.areas.length?v.areas.join(", "):"Not specified";
+  var services=Array.isArray(v.services)&&v.services.length?v.services.join(", "):"None";
+  var ref=v.ref||("STAFF-E-"+v.id);
+  var dateRange=(v.date||"TBC")+(v.edate&&v.edate!==v.date?" -> "+v.edate:"");
+  var timeRange=v.stime?(v.stime+(v.etime?" - "+v.etime:"")):"TBC";
+  sendTelegram(
+    "<b>New Event Booking (Staff)</b>\n\n"+
+    "<b>Branch:</b> "+tgEsc(branchLabel(v.branch))+"\n"+
+    "<b>Ref:</b> "+tgEsc(ref)+"\n\n"+
+    "<b>Organiser:</b> "+tgEsc(v.name)+(v.contact?" ("+tgEsc(v.contact)+")":"")+"\n"+
+    "<b>Phone:</b> "+tgEsc(v.phone||"Not captured")+"\n"+
+    (v.email?"<b>Email:</b> "+tgEsc(v.email)+"\n":"")+
+    "\n<b>Event Type:</b> "+tgEsc(v.etype||"Not specified")+"\n"+
+    "<b>Attendance:</b> "+tgEsc(v.attendance||"TBC")+"\n"+
+    "<b>Date:</b> "+tgEsc(dateRange)+"\n"+
+    "<b>Time:</b> "+tgEsc(timeRange)+"\n"+
+    "<b>Areas:</b> "+tgEsc(areas)+"\n"+
+    "<b>Services:</b> "+tgEsc(services)
+  );
+}
+
 // ===== BRANCH =====
 function setBranch(b){
   activeBranch=b;
@@ -1049,7 +1103,7 @@ function showTab(t){
 // ===== CONFLICT DETECTION =====
 function normalizeArea(s){
   // Strip leading emoji+space, lowercase
-  return String(s).replace(/^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}︀-️\u{1F300}-\u{1F9FF}]+\s*/u,"").toLowerCase().trim();
+  return String(s).replace(/^[\p{Extended_Pictographic}\uFE0E\uFE0F]+\s*/u,"").toLowerCase().trim();
 }
 function getBookingAreas(b,bkType){
   if(bkType==="event"){
@@ -1575,6 +1629,7 @@ function openBook(id=null,presetDate=null){
 function saveBook(){
   const name=document.getElementById("f-name").value.trim();
   if(!name){alert("Please enter customer name.");return;}
+  const isNew=!editId;
   const extras=[...document.querySelectorAll(".extra-btn.selected")].map(b=>b.textContent);
   const kids=+document.getElementById("f-kids").value||0;
   const adults=+document.getElementById("f-adults").value||0;
@@ -1605,6 +1660,7 @@ function saveBook(){
     notes:document.getElementById("f-notes").value.trim()
   };
   if(editId)bookings=bookings.map(b=>+b.id===+editId?bk:b);else bookings.push(bk);
+  if(isNew)notifyStaffPartyBooking(bk);
   saveAll();closeBook();renderDashboard();renderKanban();renderCalendar();
 }
 function closeBook(){document.getElementById("modal-book").classList.remove("open");editId=null;}
@@ -2069,6 +2125,7 @@ function saveVenue(){
   if(!name){alert("Please enter an organiser or company name.");return;}
   const date=document.getElementById("vf-date").value;
   if(!date){alert("Please select a start date.");return;}
+  const isNew=!venueEditId;
   const areas=[...document.querySelectorAll("#vf-areas-grid .extra-btn.selected")].map(b=>b.textContent.trim());
   const services=[...document.querySelectorAll("#vf-services-grid .extra-btn.selected")].map(b=>b.textContent.trim());
   const v={
@@ -2093,6 +2150,7 @@ function saveVenue(){
   };
   if(venueEditId)venueBookings=venueBookings.map(x=>+x.id===+venueEditId?v:x);
   else venueBookings.push(v);
+  if(isNew)notifyStaffEventBooking(v);
   saveVenueAll();closeVenue();renderKanban();renderCalendar();
 }
 
