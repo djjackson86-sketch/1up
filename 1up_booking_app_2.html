@@ -1033,18 +1033,18 @@ function notifyStaffPartyBooking(b){
   var extras=Array.isArray(b.extras)&&b.extras.length?b.extras.join(", "):"None";
   var ref=b.ref||("STAFF-P-"+b.id);
   sendTelegram(
-    "<b>New Kids Party Booking (Staff)</b>\n\n"+
-    "<b>Branch:</b> "+tgEsc(branchLabel(b.branch))+"\n"+
-    "<b>Ref:</b> "+tgEsc(ref)+"\n\n"+
-    "<b>Parent:</b> "+tgEsc(b.name)+"\n"+
-    "<b>WhatsApp:</b> "+tgEsc(b.phone||"Not captured")+"\n"+
-    (b.email?"<b>Email:</b> "+tgEsc(b.email)+"\n":"")+
-    "\n<b>Birthday Child:</b> "+tgEsc(b.kidname||"Not captured")+(b.age?" (turning "+tgEsc(b.age)+")":"")+"\n"+
-    "<b>Guests:</b> "+tgEsc(b.guests||0)+" ("+tgEsc(b.kids||0)+" kids · "+tgEsc(b.adults||0)+" adults)\n"+
-    "<b>Package:</b> "+tgEsc(b.package||"Not selected")+"\n"+
-    "<b>Date:</b> "+tgEsc(b.date||"TBC")+"\n"+
-    "<b>Time:</b> "+tgEsc(b.timeslot||"TBC")+"\n"+
-    "<b>Extras:</b> "+tgEsc(extras)
+    "🎉 <b>New Kids Party Booking (Staff)</b>\n\n"+
+    "📍 <b>Branch:</b> "+tgEsc(branchLabel(b.branch))+"\n"+
+    "🆔 <b>Ref:</b> "+tgEsc(ref)+"\n\n"+
+    "👤 <b>Parent:</b> "+tgEsc(b.name)+"\n"+
+    "📱 <b>WhatsApp:</b> "+tgEsc(b.phone||"Not captured")+"\n"+
+    (b.email?"📧 <b>Email:</b> "+tgEsc(b.email)+"\n":"")+
+    "\n🎂 <b>Birthday Child:</b> "+tgEsc(b.kidname||"Not captured")+(b.age?" (turning "+tgEsc(b.age)+")":"")+"\n"+
+    "👥 <b>Guests:</b> "+tgEsc(b.guests||0)+" ("+tgEsc(b.kids||0)+" kids · "+tgEsc(b.adults||0)+" adults)\n"+
+    "📦 <b>Package:</b> "+tgEsc(b.package||"Not selected")+"\n"+
+    "📅 <b>Date:</b> "+tgEsc(b.date||"TBC")+"\n"+
+    "⏰ <b>Time:</b> "+tgEsc(b.timeslot||"TBC")+"\n"+
+    "🎁 <b>Extras:</b> "+tgEsc(extras)
   );
 }
 function notifyStaffEventBooking(v){
@@ -1055,18 +1055,18 @@ function notifyStaffEventBooking(v){
   var dateRange=(v.date||"TBC")+(v.edate&&v.edate!==v.date?" -> "+v.edate:"");
   var timeRange=v.stime?(v.stime+(v.etime?" - "+v.etime:"")):"TBC";
   sendTelegram(
-    "<b>New Event Booking (Staff)</b>\n\n"+
-    "<b>Branch:</b> "+tgEsc(branchLabel(v.branch))+"\n"+
-    "<b>Ref:</b> "+tgEsc(ref)+"\n\n"+
-    "<b>Organiser:</b> "+tgEsc(v.name)+(v.contact?" ("+tgEsc(v.contact)+")":"")+"\n"+
-    "<b>Phone:</b> "+tgEsc(v.phone||"Not captured")+"\n"+
-    (v.email?"<b>Email:</b> "+tgEsc(v.email)+"\n":"")+
-    "\n<b>Event Type:</b> "+tgEsc(v.etype||"Not specified")+"\n"+
-    "<b>Attendance:</b> "+tgEsc(v.attendance||"TBC")+"\n"+
-    "<b>Date:</b> "+tgEsc(dateRange)+"\n"+
-    "<b>Time:</b> "+tgEsc(timeRange)+"\n"+
-    "<b>Areas:</b> "+tgEsc(areas)+"\n"+
-    "<b>Services:</b> "+tgEsc(services)
+    "🏟️ <b>New Event Booking (Staff)</b>\n\n"+
+    "📍 <b>Branch:</b> "+tgEsc(branchLabel(v.branch))+"\n"+
+    "🆔 <b>Ref:</b> "+tgEsc(ref)+"\n\n"+
+    "🏢 <b>Organiser:</b> "+tgEsc(v.name)+(v.contact?" ("+tgEsc(v.contact)+")":"")+"\n"+
+    "📱 <b>Phone:</b> "+tgEsc(v.phone||"Not captured")+"\n"+
+    (v.email?"📧 <b>Email:</b> "+tgEsc(v.email)+"\n":"")+
+    "\n🎯 <b>Event Type:</b> "+tgEsc(v.etype||"Not specified")+"\n"+
+    "👥 <b>Attendance:</b> "+tgEsc(v.attendance||"TBC")+"\n"+
+    "📅 <b>Date:</b> "+tgEsc(dateRange)+"\n"+
+    "⏰ <b>Time:</b> "+tgEsc(timeRange)+"\n"+
+    "🎛️ <b>Areas:</b> "+tgEsc(areas)+"\n"+
+    "🔧 <b>Services:</b> "+tgEsc(services)
   );
 }
 
