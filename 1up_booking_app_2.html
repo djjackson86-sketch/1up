@@ -644,15 +644,18 @@ textarea{resize:vertical;min-height:70px;}
 <div class="modal-bg" id="modal-invoice">
   <div class="modal">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div class="modal-title">🧾 Invoice / Quote</div>
+      <div class="modal-title">🧾 Quote / Invoice</div>
       <button class="btn btn-ghost btn-sm" onclick="closeInvoice()">✕</button>
     </div>
     <div id="invoice-inputs">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="form-group"><label>Invoice Number</label><input id="inv-num" placeholder="e.g. 1UP-001"></div>
-        <div class="form-group"><label>Invoice Date</label><input id="inv-date" type="date"></div>
+        <div class="form-group"><label>Document Type</label><select id="inv-doc-type" onchange="updateInvoiceLabels()"><option value="quote">Quote</option><option value="invoice">Invoice</option></select></div>
+        <div class="form-group"><label id="inv-num-label">Quote Number</label><input id="inv-num" placeholder="e.g. 1UP-Q-001"></div>
       </div>
-      <div class="form-group"><label>Total Amount (R)</label><input id="inv-total" type="number" placeholder="e.g. 2200"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group"><label id="inv-date-label">Quote Date</label><input id="inv-date" type="date"></div>
+        <div class="form-group"><label>Total Amount (R)</label><input id="inv-total" type="number" placeholder="e.g. 2200"></div>
+      </div>
       <div class="form-group"><label>Deposit Paid (R)</label><input id="inv-deposit" type="number" placeholder="e.g. 500"></div>
       <div class="form-group"><label>VAT</label>
         <select id="inv-vat">
@@ -690,7 +693,7 @@ textarea{resize:vertical;min-height:70px;}
         <textarea id="inv-notes" rows="2" placeholder="Add anything extra..."></textarea>
       </div>
       <div class="form-group">
-        <label>🏦 Banking Details for Invoice</label>
+        <label id="inv-bank-label">🏦 Payment / Banking Details</label>
         <select id="inv-bank-preset" onchange="applyBankPreset(this.value)" style="margin-bottom:8px;">
           <option value="">Select account or enter manually...</option>
           <option value="fnb">FNB – Urban Playground Management (Pty) Ltd</option>
@@ -712,14 +715,14 @@ textarea{resize:vertical;min-height:70px;}
           <div id="inv-line-notes-list"></div>
         </div>
       </div>
-      <button class="btn btn-o" style="width:100%;margin-bottom:10px;" onclick="generateInvoice()">🧾 Generate Invoice</button>
+      <button class="btn btn-o" id="generate-doc-btn" style="width:100%;margin-bottom:10px;" onclick="generateInvoice()">🧾 Generate Quote</button>
     </div>
     <div id="invoice-preview" style="display:none;">
       <div style="background:#fff;border-radius:var(--radius);padding:20px;font-family:'Georgia',serif;" id="invoice-content"></div>
       <div style="margin-top:14px;padding:12px;background:var(--gray-light);border-radius:10px;">
         <p style="font-size:13px;color:var(--gray);text-align:center;margin-bottom:10px;">📸 Screenshot to save or share with customer</p>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-o btn-sm" style="flex:1;" onclick="downloadInvoice()">📥 Download Invoice</button>
+          <button class="btn btn-o btn-sm" id="download-doc-btn" style="flex:1;" onclick="downloadInvoice()">📥 Download Quote</button>
           <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="backToInputs()">← Edit</button>
         </div>
       </div>
@@ -1020,6 +1023,10 @@ function saveAll(){lsSet("1up_bk_"+activeBranch,bookings);lsSet("1up_inv",invCou
 function loadAll(){
   bookings=lsGet("1up_bk_"+activeBranch,[]);
   invCounter=lsGet("1up_inv",1);
+  bookings=bookings.map(function(b){
+    if(!Array.isArray(b.documents))b.documents=[];
+    return b;
+  });
 }
 
 // ===== UTILS =====
@@ -1027,6 +1034,55 @@ function pad(n){return String(n).padStart(2,"0");}
 function today(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
 function formatDate(s){if(!s)return"";const d=new Date(s+"T00:00:00");return d.toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"});}
 function fmtR(n){return"R "+Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
+function buildSavedDocumentPage(content,title){return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+  <style>body{font-family:Georgia,serif;max-width:600px;margin:40px auto;padding:20px;color:#111827;}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:3px solid #111;}
+  .inv-logo{font-size:22px;font-weight:900;color:#111;}.inv-sub{font-size:11px;color:#6b7280;margin-top:2px;}
+  .inv-num{text-align:right;font-size:12px;color:#6b7280;}.inv-num strong{display:block;font-size:15px;color:#111827;}
+  .inv-section{margin-bottom:14px;}.inv-section-title{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .inv-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;}
+  .inv-total-box{background:#111;color:#E8FF00;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+  .inv-balance-box{background:#dcfce7;color:#16a34a;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  .inv-footer{margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;text-align:center;line-height:1.6;}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .badge-confirmed{background:#dcfce7;color:#16a34a;}.badge-pending{background:#fef9c4;color:#d97706;}.badge-done{background:#e0f7fa;color:#0891b2;}
+  </style></head><body>${content}</body></html>`;}
+function saveGeneratedDocument(bookingId,doc){
+  const booking=bookings.find(function(x){return +x.id===+bookingId;});
+  if(!booking)return;
+  const existingDocs=Array.isArray(booking.documents)?booking.documents:[];
+  const existingIdx=existingDocs.findIndex(function(d){return d&&d.number===doc.number&&d.type===doc.type;});
+  const finalDoc=existingIdx>-1?Object.assign({},existingDocs[existingIdx],doc):Object.assign({id:"doc_"+Date.now()},doc);
+  if(existingIdx>-1)existingDocs.splice(existingIdx,1);
+  existingDocs.unshift(finalDoc);
+  booking.documents=existingDocs.slice(0,12);
+}
+function getBookingDocumentsHtml(b,compact){
+  const docs=Array.isArray(b&&b.documents)?b.documents.slice().sort(function(a,b2){return (b2.generatedAt||"").localeCompare(a.generatedAt||"");}):[];
+  if(!docs.length)return "";
+  const title=compact?"Saved Docs":"Saved Quotes / Invoices";
+  const gap=compact?6:8;
+  const pad=compact?"3px 8px":"4px 10px";
+  return `<div style="margin-top:8px;padding:8px 10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;">
+    <div style="font-size:11px;font-weight:800;color:#374151;margin-bottom:6px;">🔗 ${title}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:${gap}px;">${docs.map(function(doc){
+      const docLabel=doc.type==="invoice"?"Invoice":"Quote";
+      const docDate=doc.date?formatDate(doc.date):"";
+      return `<a href="#" onclick="return openSavedBookingDocument(${b.id},'${doc.id}')" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d1d5db;border-radius:999px;padding:${pad};font-size:11px;font-weight:700;color:#7c2d12;text-decoration:none;">🧾 ${docLabel} ${esc(doc.number||"")}${docDate?` · ${docDate}`:""}</a>`;
+    }).join("")}</div>
+  </div>`;
+}
+function openSavedBookingDocument(bookingId,docId){
+  const booking=bookings.find(function(x){return +x.id===+bookingId;});
+  const doc=booking&&Array.isArray(booking.documents)?booking.documents.find(function(d){return d&&d.id===docId;}):null;
+  if(!doc){alert("Saved document not found.");return false;}
+  const page=buildSavedDocumentPage(doc.content||"",doc.number||"1UP-document");
+  const blob=new Blob([page],{type:"text/html;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  window.open(url,"_blank","noopener,noreferrer");
+  setTimeout(function(){URL.revokeObjectURL(url);},60000);
+  return false;
+}
 
 // ===== BRANCH =====
 function setBranch(b){
@@ -1215,6 +1271,7 @@ function kanbanCard(b,bkType,col){
   var editBtn=isCancelled?"":isParty?'<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openBook('+b.id+')">✏️</button>':
                                      '<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openVenue('+b.id+')">✏️</button>';
   var invBtn=isParty&&!isCancelled?'<button class="btn btn-purple btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openInvoice('+b.id+')">🧾</button>':"";
+  var docsHtml=isParty?getBookingDocumentsHtml(b,true):"";
   var delBtn=isParty?'<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delBook('+b.id+')">🗑</button>':
                      '<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delVenue('+b.id+')">🗑</button>';
   var cancelledBadge=isCancelled?'<span style="font-size:10px;font-weight:700;background:var(--red-light);color:var(--red);padding:2px 7px;border-radius:10px;">❌ Cancelled</span>':"";
@@ -1230,6 +1287,7 @@ function kanbanCard(b,bkType,col){
     (isParty&&b.kidname?'<div class="kcard-meta">🎂 '+esc(b.kidname)+' turns '+(b.age||"?")+'</div>':"")+
     (isParty&&(b.kids||b.adults)?'<div class="kcard-meta">👶 '+(b.kids||0)+' kids · 🧑 '+(b.adults||0)+' adults</div>':"")+
     conflictHtml+
+    docsHtml+
     '<div class="kcard-actions">'+moveHtml+editBtn+invBtn+delBtn+'</div>'+
   '</div>';
 }
@@ -1434,11 +1492,12 @@ function showDay(ds,flag=''){
         ${b.kidname?`<div class="book-meta">🎂 ${b.kidname} turns ${b.age||"?"}</div>`:""}
         ${(b.kids||b.adults)?`<div class="book-meta">👶 ${b.kids||0} kids · 🧑 ${b.adults||0} adults</div>`:""}
         ${b.kidsmeal?`<div class="book-meta">🍽️ Kids meal: ${b.kidsmeal==="mini-burger"?"🍔 Mini Burger & Chips":b.kidsmeal==="hotdog"?"🌭 Hotdog & Chips":"🍗 Nuggets & Chips"}</div>`:""}
+        ${getBookingDocumentsHtml(b,false)}
         <div class="book-actions">
           <span class="badge badge-${b.status==="confirmed"?"confirmed":b.status==="done"?"done":b.status==="new"?"new":"pending"}">${b.status}</span>
           ${dayVenue.length?'<span style="font-size:11px;color:var(--red);font-weight:700;">⚠️ Venue conflict</span>':""}
           <button class="btn btn-ghost btn-sm" onclick="closeDay();openBook(${b.id})">✏️ Edit</button>
-          <button class="btn btn-purple btn-sm" onclick="closeDay();openInvoice(${b.id})">🧾 Invoice</button>
+          <button class="btn btn-purple btn-sm" onclick="closeDay();openInvoice(${b.id})">🧾 Quote / Invoice</button>
         </div>
       </div>`).join("");
   } else if(!dayVenue.length){
@@ -1494,12 +1553,13 @@ function renderBookings(q=""){
       ${b.kidsmeal?`<div class="book-meta" style="color:var(--or-dark);">🍽️ Kids meal: ${mealLabel(b.kidsmeal)}</div>`:""}
       ${extras.length?`<div class="book-meta" style="color:var(--or-dark);">✨ ${extras.join(", ")}</div>`:""}
       ${b.notes?`<div class="book-meta">📝 ${b.notes}</div>`:""}
+      ${getBookingDocumentsHtml(b,false)}
       <div class="book-actions">
         ${b.status!=="confirmed"?`<button class="btn btn-green btn-sm" onclick="quickStatus(${b.id},'confirmed')">✅ Confirm</button>`:""}
         <select class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 6px;" onchange="quickStatus(${b.id},this.value);this.value=''"><option value="">⚡ Status</option><option value="new">🆕 New</option><option value="pending">⏳ Pending</option><option value="confirmed">✅ Confirmed</option><option value="done">✔️ Done</option><option value="cancelled">❌ Cancelled</option></select>
         ${b.status!=="done"?`<button class="btn btn-teal btn-sm" onclick="quickStatus(${b.id},'done')">✔️ Done</button>`:""}
         <button class="btn btn-ghost btn-sm" onclick="openBook(${b.id})">✏️ Edit</button>
-        <button class="btn btn-purple btn-sm" onclick="openInvoice(${b.id})">🧾 Invoice</button>
+        <button class="btn btn-purple btn-sm" onclick="openInvoice(${b.id})">🧾 Quote / Invoice</button>
         <button class="btn btn-red btn-sm" onclick="delBook(${b.id})">🗑️</button>
       </div>
     </div>`;
@@ -1535,10 +1595,11 @@ function renderFormSubmissions(){
       <div style="font-size:12px;color:var(--gray);">📅 ${formatDate(b.date)} ${b.timeslot||""} · 🎉 ${b.package||""}</div>
       <div style="font-size:12px;color:var(--gray);">📞 ${b.phone||""} · 👶 ${b.kids||0} kids · 🧑 ${b.adults||0} adults</div>
       ${b.kidsmeal?`<div style="font-size:12px;color:var(--or-dark);">🍽️ Kids meal: ${mealLabel(b.kidsmeal)}</div>`:""}
-      <div style="display:flex;gap:6px;margin-top:8px;">
+      ${getBookingDocumentsHtml(b,false)}
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
         <button class="btn btn-green btn-sm" onclick="quickStatus(${b.id},'confirmed');renderFormSubmissions();">✅ Confirm</button>
         <button class="btn btn-ghost btn-sm" onclick="openBook(${b.id})">✏️ Edit</button>
-        <button class="btn btn-purple btn-sm" onclick="openInvoice(${b.id})">🧾 Invoice</button>
+        <button class="btn btn-purple btn-sm" onclick="openInvoice(${b.id})">🧾 Quote / Invoice</button>
       </div>
     </div>`).join("");
 }
@@ -1873,9 +1934,34 @@ function exportCSV(){
 }
 
 // ===== INVOICE =====
+function buildInvoiceNumber(docType){
+  return (docType==="invoice"?"1UP-INV-":"1UP-Q-")+String(invCounter).padStart(3,"0");
+}
+function updateInvoiceLabels(){
+  const docType=((document.getElementById("inv-doc-type")||{}).value)||"quote";
+  const docLabel=docType==="invoice"?"Invoice":"Quote";
+  const numLabel=document.getElementById("inv-num-label");
+  const dateLabel=document.getElementById("inv-date-label");
+  const bankLabel=document.getElementById("inv-bank-label");
+  const generateBtn=document.getElementById("generate-doc-btn");
+  const downloadBtn=document.getElementById("download-doc-btn");
+  if(numLabel)numLabel.textContent=docLabel+" Number";
+  if(dateLabel)dateLabel.textContent=docLabel+" Date";
+  if(bankLabel)bankLabel.textContent=docType==="invoice"?"🏦 Banking Details for Invoice":"🏦 Payment / Banking Details";
+  if(generateBtn)generateBtn.textContent=(docType==="invoice"?"🧾 Generate Invoice":"🧾 Generate Quote");
+  if(downloadBtn)downloadBtn.textContent=(docType==="invoice"?"📥 Download Invoice":"📥 Download Quote");
+  const numInput=document.getElementById("inv-num");
+  if(numInput){
+    numInput.placeholder=docType==="invoice"?"e.g. 1UP-INV-001":"e.g. 1UP-Q-001";
+    if(!numInput.value||/^1UP-(INV|Q)-\d+$/i.test(numInput.value))numInput.value=buildInvoiceNumber(docType);
+  }
+}
 function openInvoice(id){
   invoiceBookingId=id;
-  document.getElementById("inv-num").value="1UP-"+String(invCounter).padStart(3,"0");
+  var booking=bookings.find(x=>+x.id===+id)||{};
+  var defaultDocType=(booking.status==="confirmed"||booking.status==="done")?"invoice":"quote";
+  document.getElementById("inv-doc-type").value=defaultDocType;
+  document.getElementById("inv-num").value=buildInvoiceNumber(defaultDocType);
   document.getElementById("inv-date").value=today();
   document.getElementById("inv-total").value="";
   document.getElementById("inv-deposit").value="";
@@ -1898,6 +1984,7 @@ function openInvoice(id){
         +'</div>';
     }).join(''):'<div style="font-size:12px;color:var(--gray);">No items on this booking yet.</div>';
   }
+  updateInvoiceLabels();
   document.getElementById("invoice-inputs").style.display="block";
   document.getElementById("invoice-preview").style.display="none";
   document.getElementById("modal-invoice").classList.add("open");
@@ -1921,6 +2008,8 @@ function backToInputs(){document.getElementById("invoice-inputs").style.display=
 function generateInvoice(){
   const b=bookings.find(x=>+x.id===+invoiceBookingId);
   if(!b){alert("Booking not found.");return;}
+  const docType=((document.getElementById("inv-doc-type")||{}).value)||"quote";
+  const docLabel=docType==="invoice"?"Invoice":"Quote";
   const bankName=(document.getElementById("inv-bank-name")||{}).value||"";
   const bankType=(document.getElementById("inv-bank-type")||{}).value||"";
   const bankAcName=(document.getElementById("inv-bank-acname")||{}).value||"";
@@ -1968,7 +2057,7 @@ function generateInvoice(){
           <div class="inv-sub">@1up_southafrica</div>
         </div>
       </div>
-      <div class="inv-num"><strong>${invNum}</strong>${formatDate(invDate)}<br>
+      <div class="inv-num"><div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#b45309;margin-bottom:4px;">${docLabel.toUpperCase()}</div><strong>${invNum}</strong>${formatDate(invDate)}<br>
       <span class="badge badge-${b.status==="confirmed"?"confirmed":b.status==="done"?"done":"pending"}" style="margin-top:6px;">${b.status}</span></div>
     </div>
     <div class="inv-section">
@@ -1998,7 +2087,7 @@ function generateInvoice(){
     ${tickedNotes.length?`<div class="inv-section"><div class="inv-section-title">Important Notes</div><div style="font-size:12px;color:#444;line-height:2.0;">${tickedNotes.map(n=>`<div style="margin-bottom:2px;">${n}</div>`).join("")}</div></div>`:""}
     <div class="inv-footer">
       <div style="background:#f9fafb;border-radius:8px;padding:10px;margin-bottom:10px;text-align:left;">
-        <div style="font-weight:700;color:#111827;font-size:13px;margin-bottom:8px;">🏦 Banking Details</div>
+        <div style="font-weight:700;color:#111827;font-size:13px;margin-bottom:8px;">${docType==="invoice"?"🏦 Banking Details":"🏦 Payment Details"}</div>
         ${bankAcNum?`<table style="font-size:12px;width:100%;border-collapse:collapse;">
           ${bankName?`<tr><td style="color:#6b7280;padding:2px 0;width:110px;">Bank</td><td style="font-weight:600;">${bankName}</td></tr>`:""}
           ${bankType?`<tr><td style="color:#6b7280;padding:2px 0;">Account Type</td><td style="font-weight:600;">${bankType}</td></tr>`:""}
@@ -2015,25 +2104,25 @@ function generateInvoice(){
   document.getElementById("invoice-content").innerHTML=html;
   document.getElementById("invoice-inputs").style.display="none";
   document.getElementById("invoice-preview").style.display="block";
+  saveGeneratedDocument(invoiceBookingId,{
+    type:docType,
+    label:docLabel,
+    number:invNum,
+    date:invDate,
+    generatedAt:new Date().toISOString(),
+    content:html
+  });
   invCounter++;saveAll();
+  renderBookings();renderFormSubmissions();renderKanban();renderDashboard();
+  if(selectedDay&&b.date===selectedDay&&document.getElementById("modal-day").classList.contains("open"))showDay(selectedDay);
 }
 
 function downloadInvoice(){
   const content=document.getElementById("invoice-content").innerHTML;
-  const invNum=document.getElementById("inv-num").value||"invoice";
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${invNum}</title>
-  <style>body{font-family:Georgia,serif;max-width:600px;margin:40px auto;padding:20px;color:#111827;}
-  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:3px solid #111;}
-  .inv-logo{font-size:22px;font-weight:900;color:#111;}.inv-sub{font-size:11px;color:#6b7280;margin-top:2px;}
-  .inv-num{text-align:right;font-size:12px;color:#6b7280;}.inv-num strong{display:block;font-size:15px;color:#111827;}
-  .inv-section{margin-bottom:14px;}.inv-section-title{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-  .inv-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;}
-  .inv-total-box{background:#111;color:#E8FF00;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
-  .inv-balance-box{background:#dcfce7;color:#16a34a;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
-  .inv-footer{margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;text-align:center;line-height:1.6;}
-  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-  .badge-confirmed{background:#dcfce7;color:#16a34a;}.badge-pending{background:#fef9c4;color:#d97706;}.badge-done{background:#e0f7fa;color:#0891b2;}
-  </style></head><body>${content}</body></html>`;
+  const docType=((document.getElementById("inv-doc-type")||{}).value)||"quote";
+  const docSlug=docType==="invoice"?"invoice":"quote";
+  const invNum=document.getElementById("inv-num").value||docSlug;
+  const html=buildSavedDocumentPage(content,invNum);
   const blob=new Blob([html],{type:"text/html;charset=utf-8;"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download=invNum.replace(/\s+/g,"-")+".html";a.click();URL.revokeObjectURL(url);
