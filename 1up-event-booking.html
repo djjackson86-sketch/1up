@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>1-UP Urban Playground — Event Enquiry</title>
+<title>1-UP Urban Playground — Event / Freestyle Enquiry</title>
 <style>
 :root{
   --or:#E8FF00;--or2:#c8dc00;--or-light:#fafee0;--or-dark:#8a9800;
@@ -70,7 +70,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="nav-top">
     <div class="nav-logo">1UP</div>
     <div>
-      <div class="nav-title">🏟️ <span>Event</span> Enquiry</div>
+      <div class="nav-title">🏟️ <span>Event</span> / Freestyle Enquiry</div>
       <div class="nav-sub">1-UP Urban Playground</div>
     </div>
   </div>
@@ -101,6 +101,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <option value="">Select event type...</option>
         <option>Corporate Event</option>
         <option>Brand Activation</option>
+        <option>Freestyle Football</option>
         <option>School / Sports Day</option>
         <option>Competition / Tournament</option>
         <option>Filming / Shoot</option>
@@ -110,7 +111,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <option>Other</option>
       </select>
     </div>
-    <div class="form-group"><label>Expected Attendance</label><input id="vf-attendance" type="number" placeholder="e.g. 200" min="1"></div>
+    <div class="form-group" id="vf-attendance-wrap"><label>Expected Attendance</label><input id="vf-attendance" type="number" placeholder="e.g. 200" min="1"></div>
 
     <div class="sec-label">📅 Dates &amp; Times</div>
     <div class="grid-2" style="margin-bottom:12px;">
@@ -128,7 +129,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <div class="extras-grid" id="vf-areas-grid">
         <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🛹 Skatepark</button>
         <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🎮 Esports Zone</button>
-        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">⚽ Soccer Cage</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">⚽ Soccer Arena</button>
+        <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">📣 Activation Space</button>
         <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">💃 Dance Arena</button>
         <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">☕ Café Area</button>
         <button class="extra-btn" type="button" onclick="this.classList.toggle('selected')">🛍️ Retail Area</button>
@@ -169,7 +171,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
     </div>
 
-    <button class="btn btn-teal" onclick="submitEnquiry()">🏟️ Submit Event Enquiry</button>
+    <button class="btn btn-teal" id="submit-btn" onclick="submitEnquiry()">🏟️ Submit Event Enquiry</button>
 
   </div>
 </div>
@@ -242,9 +244,10 @@ function submitEnquiry(){
   }
 
   var branch=document.getElementById("vf-branch").value;
+  var isFreestyle=document.getElementById("vf-etype").value==="Freestyle Football";
   var ref   =generateRef();
   var enquiry={
-    id:Date.now(),ref:ref,source:"public",bookingType:"event",status:"pending",branch:branch,
+    id:Date.now(),ref:ref,source:"public",bookingType:isFreestyle?"freestyle":"event",status:"pending",branch:branch,
     name:name,
     contact:(document.getElementById("vf-contact").value||"").trim(),
     phone:phone,
@@ -254,8 +257,12 @@ function submitEnquiry(){
     date:date,
     startDate:date,
     endDate:document.getElementById("vf-edate").value,
+    edate:document.getElementById("vf-edate").value,
     startTime:document.getElementById("vf-stime").value,
+    stime:document.getElementById("vf-stime").value,
     endTime:document.getElementById("vf-etime").value,
+    etime:document.getElementById("vf-etime").value,
+    etype:document.getElementById("vf-etype").value,
     areas:getChips("vf-areas-grid"),
     services:getChips("vf-services-grid"),
     notes:(document.getElementById("vf-notes").value||"").trim(),
@@ -274,7 +281,7 @@ function submitEnquiry(){
   var dateRange=date+(enquiry.endDate&&enquiry.endDate!==date?" → "+enquiry.endDate:"");
   var timeRange=enquiry.startTime?(enquiry.startTime+(enquiry.endTime?" – "+enquiry.endTime:"")):"TBC";
   sendTelegram(
-    "🏟️ <b>New Event Enquiry</b>\n\n"+
+    (isFreestyle?"⚽ <b>New Freestyle Football Enquiry</b>\n\n":"🏟️ <b>New Event Enquiry</b>\n\n")+
     "📍 <b>Branch:</b> "+branchLabel+"\n"+
     "🆔 <b>Ref:</b> "+ref+"\n\n"+
     "🏢 <b>Organiser:</b> "+name+(enquiry.contact?" ("+enquiry.contact+")":"")+"\n"+
@@ -295,6 +302,23 @@ function submitEnquiry(){
 }
 
 (function(){
+  var params=new URLSearchParams(window.location.search);
+  var type=(params.get("type")||"").toLowerCase();
+  if(type==="freestyle"){
+    var et=document.getElementById("vf-etype");if(et)et.value="Freestyle Football";
+    var aw=document.getElementById("vf-attendance-wrap");if(aw)aw.style.display="none";
+    var btn=document.getElementById("submit-btn");if(btn)btn.textContent="⚽ Submit Freestyle Football Enquiry";
+    document.querySelectorAll("#vf-areas-grid .extra-btn").forEach(function(b){
+      var txt=b.textContent.toLowerCase();
+      if(txt.includes("soccer arena")||txt.includes("activation"))b.classList.add("selected");
+    });
+  }
+  var etype=document.getElementById("vf-etype");
+  if(etype){etype.addEventListener("change",function(){
+    var isFs=etype.value==="Freestyle Football";
+    var aw=document.getElementById("vf-attendance-wrap");if(aw)aw.style.display=isFs?"none":"block";
+    if(isFs)document.getElementById("vf-attendance").value="";
+  });}
   var today=new Date().toISOString().slice(0,10);
   var sd=document.getElementById("vf-date");
   var ed=document.getElementById("vf-edate");

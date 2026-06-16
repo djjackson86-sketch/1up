@@ -27,12 +27,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nav-branch-btn{padding:4px 14px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:#222;color:#888;transition:all 0.15s;white-space:nowrap;}
 .nav-branch-btn.active-fw{background:var(--or);color:#111;}
 .nav-branch-btn.active-rb{background:#00E5FF;color:#111;}
-.nav-scan-bar{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#1a1800;border-top:1px solid #2a2800;border-bottom:1px solid #2a2800;padding:14px 16px;cursor:pointer;color:var(--or);font-size:16px;font-weight:900;letter-spacing:1px;transition:background 0.15s;user-select:none;text-transform:uppercase;position:relative;}
-.nav-scan-bar:hover{background:#252200;}
-.nav-scan-bar:active{background:#302800;}
-.nav-scan-bar .nsb-icon{font-size:34px;line-height:1;}
-.nav-scan-bar .nsb-pulse{width:10px;height:10px;border-radius:50%;background:var(--or);position:absolute;right:18px;top:50%;transform:translateY(-50%);animation:nsbpulse 1.8s ease-in-out infinite;}
-@keyframes nsbpulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+
 .nav-tabs{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #ffffff20;}
 .tab{padding:8px 2px 6px;text-align:center;font-size:9px;font-weight:700;color:#ffffff60;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
 .tab-icon{font-size:18px;line-height:1;}
@@ -154,70 +149,9 @@ textarea{resize:vertical;min-height:70px;}
 .pkg-card .pkg-price{font-size:13px;font-weight:900;color:#8a9800;margin-top:4px;}
 .success-card{background:var(--green-light);border:1.5px solid var(--green);border-radius:12px;padding:20px;text-align:center;display:none;}
 .success-card.show{display:block;}
-/* QR SCAN BUTTON (Homepage) */
-.scan-hero{background:linear-gradient(135deg,#111 0%,#1a1a2e 100%);border:2px dashed var(--or);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;cursor:pointer;transition:all 0.2s;}
-.scan-hero:hover{border-color:var(--teal);box-shadow:0 0 20px rgba(0,196,180,0.2);}
-.scan-hero-icon{font-size:36px;margin-bottom:6px;}
-.scan-hero-text{font-size:18px;font-weight:900;color:var(--or);text-transform:uppercase;letter-spacing:2px;}
-.scan-hero-sub{font-size:11px;color:#888;margin-top:4px;}
-/* QR SCANNER MODAL */
-.scanner-viewport{width:100%;height:260px;border-radius:12px;overflow:hidden;background:#000;margin-bottom:12px;position:relative;}
-.scanner-viewport video{width:100%;height:100%;object-fit:cover;}
-.scanner-frame{position:absolute;inset:20px;border:3px solid var(--or);border-radius:12px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,0.5);}
-.scanner-frame::after{content:'';position:absolute;top:0;left:0;width:24px;height:24px;border-top:4px solid var(--teal);border-left:4px solid var(--teal);border-radius:4px 0 0 0;}
-.scanner-frame::before{content:'';position:absolute;bottom:0;right:0;width:24px;height:24px;border-bottom:4px solid var(--teal);border-right:4px solid var(--teal);border-radius:0 0 4px 0;}
-/* SCAN RESULT */
-.scan-result{text-align:center;padding:10px 0;}
-.scan-result-icon{font-size:48px;margin-bottom:8px;}
-.scan-result-name{font-size:20px;font-weight:900;color:var(--dark);}
-.scan-result-meta{font-size:13px;color:var(--gray);margin-top:4px;line-height:1.8;}
-.scan-valid{background:var(--green-light);border:2px solid var(--green);border-radius:14px;padding:16px;margin-bottom:12px;}
-.scan-invalid{background:var(--red-light);border:2px solid var(--red);border-radius:14px;padding:16px;margin-bottom:12px;}
-/* MEMBER LOGIN */
-.member-login{max-width:360px;margin:0 auto;}
-.member-login-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.12);padding:28px 22px;text-align:center;}
-.member-login-logo{font-size:32px;font-weight:900;color:#111;margin-bottom:4px;}
-.member-login-logo span{color:var(--or);}
-.member-login-sub{font-size:12px;color:var(--gray);margin-bottom:22px;}
-/* MEMBER DASHBOARD */
-.member-dash{max-width:400px;margin:0 auto;}
-.member-qr-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.12);padding:24px;text-align:center;}
-.member-qr-img{margin:16px auto;display:flex;justify-content:center;}
-.member-qr-img canvas,.member-qr-img img{border:4px solid #111;border-radius:12px;padding:8px;background:#fff;}
-.member-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
-.member-info-item{background:var(--gray-light);border-radius:10px;padding:12px;text-align:center;}
-.member-info-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
-.member-info-val{font-size:14px;font-weight:800;color:var(--dark);}
-.status-active{color:var(--green);}
-.status-expired{color:var(--red);}
-.status-suspended{color:var(--yellow);}
-/* ===== KANBAN ===== */
-.kanban-board{display:flex;flex-direction:column;gap:14px;}
-.kanban-col{width:100%;}
-.kanban-col-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;border:1.5px solid transparent;margin-bottom:10px;}
-.kanban-col-cards{display:grid;grid-template-columns:1fr;gap:8px;}
-.kanban-col-hdr.col-new{background:var(--or-light);border-color:var(--or);}
-.kanban-col-hdr.col-pending{background:var(--yellow-light);border-color:var(--yellow);}
-.kanban-col-hdr.col-confirmed{background:var(--green-light);border-color:var(--green);}
-.kanban-col-hdr.col-done{background:var(--teal-light);border-color:var(--teal);}
-.badge-done2{background:var(--teal-light);color:var(--teal);}
-.kcard{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.09);padding:11px;margin-bottom:8px;border-left:4px solid var(--gray-mid);}
-.kcard-party{border-left-color:var(--or-dark);}
-.kcard-event{border-left-color:var(--teal);}
-.kcard-cancelled{border-left-color:var(--red);opacity:.75;}
-.kbadge{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:0.3px;}
-.kbadge-party{background:var(--or-light);color:var(--or-dark);}
-.kbadge-event{background:var(--teal-light);color:var(--teal);}
-.kbadge-staff{background:#111;color:var(--or);}
-.kbadge-public{background:var(--purple-light);color:var(--purple);}
-.kcard-name{font-weight:800;font-size:14px;margin:5px 0 3px;line-height:1.2;}
-.kcard-meta{font-size:11px;color:var(--gray);line-height:1.7;}
-.kcard-actions{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
-/* WA share bar */
 .wa-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .wa-bar .btn{flex:1;min-width:0;}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
 <body>
 
@@ -229,17 +163,11 @@ textarea{resize:vertical;min-height:70px;}
       <button class="nav-branch-btn" id="btn-rb" onclick="setBranch('rosebank')">Rosebank</button>
     </div>
   </div>
-  <div class="nav-scan-bar" onclick="openScanner()">
-    <span class="nsb-icon">📷</span>
-    <span>Scan Member QR</span>
-    <div class="nsb-pulse"></div>
-  </div>
-  <div class="nav-tabs" style="grid-template-columns:repeat(6,1fr);">
+  <div class="nav-tabs" style="grid-template-columns:repeat(5,1fr);">
     <div class="tab active" onclick="showTab('dashboard')"><span class="tab-icon">📊</span><span class="tab-label">Home</span></div>
     <div class="tab" onclick="showTab('bookings')"><span class="tab-icon">📋</span><span class="tab-label">Bookings</span></div>
     <div class="tab" onclick="showTab('activities')"><span class="tab-icon">🎮</span><span class="tab-label">Activities</span></div>
     <div class="tab" onclick="showTab('stock')"><span class="tab-icon">🍬</span><span class="tab-label">Stock</span></div>
-    <div class="tab" onclick="showTab('members')"><span class="tab-icon">🔐</span><span class="tab-label">Members</span></div>
     <div class="tab" onclick="showTab('setup')"><span class="tab-icon">⚙️</span><span class="tab-label">Setup</span></div>
   </div>
 </div>
@@ -271,6 +199,7 @@ textarea{resize:vertical;min-height:70px;}
     <div style="display:flex;gap:6px;">
       <button class="btn btn-o btn-sm" onclick="openBook()">🎉 Party</button>
       <button class="btn btn-teal btn-sm" onclick="openVenue()">🏟️ Event</button>
+      <button class="btn btn-purple btn-sm" onclick="openFreestyle()">⚽ Freestyle</button>
     </div>
   </div>
 
@@ -283,7 +212,7 @@ textarea{resize:vertical;min-height:70px;}
     </div>
     <div class="cal-legend">
       <div class="cal-legend-item"><span class="cal-dot"></span> Kids Party</div>
-      <div class="cal-legend-item"><span class="cal-dot-venue"></span> Event / Venue</div>
+      <div class="cal-legend-item"><span class="cal-dot-venue"></span> Event / Freestyle</div>
       <div class="cal-legend-item"><span class="cal-dot-stock"></span> Low stock</div>
     </div>
     <div class="cal-grid" id="cal-headers"></div>
@@ -294,6 +223,7 @@ textarea{resize:vertical;min-height:70px;}
   <div class="wa-bar">
     <button class="btn btn-green btn-sm" onclick="sendWhatsApp('party')" style="font-size:11px;">📤 Party Link</button>
     <button class="btn btn-teal btn-sm" onclick="sendWhatsApp('event')" style="font-size:11px;">📤 Event Link</button>
+    <button class="btn btn-purple btn-sm" onclick="sendWhatsApp('freestyle')" style="font-size:11px;">📤 Freestyle Link</button>
     <button class="btn btn-ghost btn-sm" onclick="openWATemplates()" style="font-size:11px;">⚙️ Templates</button>
     <button class="btn btn-ghost btn-sm" onclick="openExport()" style="font-size:11px;">📥 Export</button>
   </div>
@@ -304,6 +234,7 @@ textarea{resize:vertical;min-height:70px;}
     <div style="display:flex;gap:8px;font-size:10px;font-weight:700;">
       <span style="color:var(--or-dark);">🎉 Party</span>
       <span style="color:var(--teal);">🏟️ Event</span>
+      <span style="color:var(--purple);">⚽ Freestyle</span>
     </div>
   </div>
   <div style="margin-bottom:10px;">
@@ -446,7 +377,7 @@ textarea{resize:vertical;min-height:70px;}
 <div class="modal-bg" id="modal-venue">
   <div class="modal">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div class="modal-title" id="modal-venue-title">New Venue Hire</div>
+      <div class="modal-title" id="modal-venue-title">New Event Booking</div>
       <button class="btn btn-ghost btn-sm" onclick="closeVenue()">✕</button>
     </div>
     <div class="smart-area">
@@ -471,6 +402,7 @@ textarea{resize:vertical;min-height:70px;}
         <option value="">Select event type...</option>
         <option>Corporate Event</option>
         <option>Brand Activation</option>
+        <option>Freestyle Football</option>
         <option>School / Sports Day</option>
         <option>Competition / Tournament</option>
         <option>Filming / Shoot</option>
@@ -480,7 +412,7 @@ textarea{resize:vertical;min-height:70px;}
         <option>Other</option>
       </select>
     </div>
-    <div class="form-group"><label>Expected Attendance</label><input id="vf-attendance" type="number" placeholder="e.g. 200" min="1"></div>
+    <div class="form-group" id="vf-attendance-wrap"><label>Expected Attendance</label><input id="vf-attendance" type="number" placeholder="e.g. 200" min="1"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="form-group"><label>Start Date *</label><input id="vf-date" type="date"></div>
       <div class="form-group"><label>End Date</label><input id="vf-edate" type="date"></div>
@@ -494,7 +426,8 @@ textarea{resize:vertical;min-height:70px;}
       <div class="extras-grid" id="vf-areas-grid">
         <button class="extra-btn" onclick="this.classList.toggle('selected')">🛹 Skatepark</button>
         <button class="extra-btn" onclick="this.classList.toggle('selected')">🎮 Esports Zone</button>
-        <button class="extra-btn" onclick="this.classList.toggle('selected')">⚽ Soccer Cage</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">⚽ Soccer Arena</button>
+        <button class="extra-btn" onclick="this.classList.toggle('selected')">📣 Activation Space</button>
         <button class="extra-btn" onclick="this.classList.toggle('selected')">💃 Dance Arena</button>
         <button class="extra-btn" onclick="this.classList.toggle('selected')">☕ Café Area</button>
         <button class="extra-btn" onclick="this.classList.toggle('selected')">🛍️ Retail Area</button>
@@ -579,46 +512,6 @@ textarea{resize:vertical;min-height:70px;}
     <p style="font-size:12px;color:var(--gray);margin-bottom:10px;">Deletes ALL bookings for current branch. Export first!</p>
     <button class="btn btn-red btn-sm" onclick="resetAll()">Reset Branch Data</button>
   </div>
-</div>
-
-<!-- MEMBERS PAGE -->
-<div class="page" id="page-members">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <div style="font-weight:900;font-size:17px;">🧑‍🤝‍🧑 Members</div>
-    <button class="btn btn-o btn-sm" id="btn-add-member" onclick="openAddMember()" style="font-size:12px;padding:6px 14px;">➕ Add</button>
-  </div>
-
-  <!-- Sub-tabs -->
-  <div class="booking-subtabs" style="margin-bottom:14px;">
-    <button class="booking-subtab active" id="msub-btn-members" onclick="showMemberSub('members')">🧑‍🤝‍🧑 Members</button>
-    <button class="booking-subtab" id="msub-btn-logins" onclick="showMemberSub('logins')">🕐 Recent Logins</button>
-  </div>
-
-  <!-- ── SUB: MEMBERS ── -->
-  <div id="msub-members">
-    <!-- Portal link share row -->
-    <div style="background:#111;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;">
-      <div style="font-size:11px;color:#999;line-height:1.5;">Member Portal link<br><span style="color:var(--or);font-weight:700;font-size:11px;">Share with members to access their QR card</span></div>
-      <button class="btn btn-sm" style="background:var(--or);color:#111;font-size:11px;padding:5px 12px;flex-shrink:0;font-weight:700;" onclick="copyPortalLink()">🔗 Copy Link</button>
-    </div>
-    <!-- Search -->
-    <div style="margin-bottom:12px;">
-      <input id="member-search-input" type="search" placeholder="🔍 Search by name or member ID..."
-        oninput="searchMembers()"
-        style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-mid);border-radius:10px;font-size:14px;box-sizing:border-box;">
-    </div>
-    <!-- Member list -->
-    <div id="members-list"></div>
-  </div>
-
-  <!-- ── SUB: RECENT LOGINS ── -->
-  <div id="msub-logins" style="display:none;">
-    <div style="font-size:12px;color:var(--gray);margin-bottom:12px;">QR scan check-ins from the last 7 days · all branches</div>
-    <div id="recent-logins-list"></div>
-  </div>
-
-  <!-- Toast -->
-  <div id="member-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111;color:var(--or);padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.3s;z-index:999;pointer-events:none;white-space:nowrap;"></div>
 </div>
 
 <!-- EXPORT MODAL -->
@@ -1013,7 +906,7 @@ const EXTRAS_LIST=["🎂 Birthday Cake","🎈 Balloon Décor","📸 Photo Backdr
 let bookings=[],editId=null,selectedDay=null,activeBranch="fourways";
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 let recognition=null,isListening=false;
-let invoiceBookingId=null,invCounter=1;
+let invoiceBookingId=null,invoiceBookingType="party",invCounter=1;
 let bookingFilter="all";
 
 // ===== STORAGE =====
@@ -1047,8 +940,9 @@ function buildSavedDocumentPage(content,title){return `<!DOCTYPE html><html><hea
   .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
   .badge-confirmed{background:#dcfce7;color:#16a34a;}.badge-pending{background:#fef9c4;color:#d97706;}.badge-done{background:#e0f7fa;color:#0891b2;}
   </style></head><body>${content}</body></html>`;}
-function saveGeneratedDocument(bookingId,doc){
-  const booking=bookings.find(function(x){return +x.id===+bookingId;});
+function saveGeneratedDocument(bookingId,doc,scope){
+  const list=scope==="venue"?venueBookings:bookings;
+  const booking=list.find(function(x){return +x.id===+bookingId;});
   if(!booking)return;
   const existingDocs=Array.isArray(booking.documents)?booking.documents:[];
   const existingIdx=existingDocs.findIndex(function(d){return d&&d.number===doc.number&&d.type===doc.type;});
@@ -1057,7 +951,7 @@ function saveGeneratedDocument(bookingId,doc){
   existingDocs.unshift(finalDoc);
   booking.documents=existingDocs.slice(0,12);
 }
-function getBookingDocumentsHtml(b,compact){
+function getBookingDocumentsHtml(b,compact,scope){
   const docs=Array.isArray(b&&b.documents)?b.documents.slice().sort(function(a,b2){return (b2.generatedAt||"").localeCompare(a.generatedAt||"");}):[];
   if(!docs.length)return "";
   const title=compact?"Saved Docs":"Saved Quotes / Invoices";
@@ -1068,12 +962,13 @@ function getBookingDocumentsHtml(b,compact){
     <div style="display:flex;flex-wrap:wrap;gap:${gap}px;">${docs.map(function(doc){
       const docLabel=doc.type==="invoice"?"Invoice":"Quote";
       const docDate=doc.date?formatDate(doc.date):"";
-      return `<a href="#" onclick="return openSavedBookingDocument(${b.id},'${doc.id}')" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d1d5db;border-radius:999px;padding:${pad};font-size:11px;font-weight:700;color:#7c2d12;text-decoration:none;">🧾 ${docLabel} ${esc(doc.number||"")}${docDate?` · ${docDate}`:""}</a>`;
+      return `<a href="#" onclick="return openSavedBookingDocument(${b.id},'${doc.id}','${scope||"party"}')" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d1d5db;border-radius:999px;padding:${pad};font-size:11px;font-weight:700;color:#7c2d12;text-decoration:none;">🧾 ${docLabel} ${esc(doc.number||"")}${docDate?` · ${docDate}`:""}</a>`;
     }).join("")}</div>
   </div>`;
 }
-function openSavedBookingDocument(bookingId,docId){
-  const booking=bookings.find(function(x){return +x.id===+bookingId;});
+function openSavedBookingDocument(bookingId,docId,scope){
+  const list=scope==="venue"?venueBookings:bookings;
+  const booking=list.find(function(x){return +x.id===+bookingId;});
   const doc=booking&&Array.isArray(booking.documents)?booking.documents.find(function(d){return d&&d.id===docId;}):null;
   if(!doc){alert("Saved document not found.");return false;}
   const page=buildSavedDocumentPage(doc.content||"",doc.number||"1UP-document");
@@ -1103,7 +998,7 @@ function showTab(t){
   if(t==="cust-booking"){document.getElementById("modal-cust-form").classList.add("open");return;}
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(tb=>tb.classList.remove("active"));
-  const tabs=["dashboard","bookings","activities","stock","members","setup"];
+  const tabs=["dashboard","bookings","activities","stock","setup"];
   const idx=tabs.indexOf(t);
   if(idx>=0){document.querySelectorAll(".tab")[idx].classList.add("active");}
   document.getElementById("page-"+t).classList.add("active");
@@ -1111,7 +1006,6 @@ function showTab(t){
   if(t==="bookings"){initBookingsCalendar();loadVenue();renderKanban();}
   if(t==="activities")renderActivities();
   if(t==="stock"){loadStock();renderStockTable();}
-  if(t==="members"){showMemberSub("members");renderMembersList();}
 }
 
 // ===== CONFLICT DETECTION =====
@@ -1124,11 +1018,11 @@ function getBookingAreas(b,bkType){
     return (b.areas||[]).map(normalizeArea).filter(Boolean);
   }
   var pkg=(b.package||"").toLowerCase();
-  if(pkg.includes("full"))    return ["skatepark","esports zone","soccer cage","dance arena","café area","cafe area","retail area"];
-  if(pkg.includes("combo"))   return ["skatepark","esports zone","soccer cage","dance arena"];
+  if(pkg.includes("full"))    return ["skatepark","esports zone","soccer arena","activation space","dance arena","café area","cafe area","retail area"];
+  if(pkg.includes("combo"))   return ["skatepark","esports zone","soccer arena","dance arena"];
   if(pkg.includes("skate"))   return ["skatepark"];
   if(pkg.includes("esport"))  return ["esports zone"];
-  if(pkg.includes("soccer"))  return ["soccer cage"];
+  if(pkg.includes("soccer")||pkg.includes("football"))  return ["soccer arena"];
   if(pkg.includes("dance"))   return ["dance arena"];
   return [];
 }
@@ -1245,12 +1139,13 @@ function kanbanCard(b,bkType,col){
   var src=b.source==="public"?"public":"staff";
   var br=(b.branch||activeBranch||"fourways")==="rosebank"?"Rosebank":"Fourways";
   var brColor=br==="Rosebank"?"#00E5FF":"var(--or)";
-  var typeBadge=isParty?'<span class="kbadge kbadge-party">🎉 Party</span>':'<span class="kbadge kbadge-event">🏟️ Event</span>';
+  var isFreestyle=!isParty&&(b.bookingType==="freestyle"||b.etype==="Freestyle Football");
+  var typeBadge=isParty?'<span class="kbadge kbadge-party">🎉 Party</span>':(isFreestyle?'<span class="kbadge kbadge-freestyle">⚽ Freestyle</span>':'<span class="kbadge kbadge-event">🏟️ Event</span>');
   var srcBadge=src==="public"?'<span class="kbadge kbadge-public">🌐 Public</span>':'<span class="kbadge kbadge-staff">👤 Staff</span>';
   var name=esc(b.name||"Unknown");
   var dateStr=b.date?formatDate(b.date):b.startDate?formatDate(b.startDate):"No date";
   var timeStr=isParty?(b.timeslot||""):(b.startTime?(b.startTime+(b.endTime?" – "+b.endTime:"")):"");
-  var detail=isParty?(b.package||"No package"):(esc(b.etype||b.eventType||"Event")+(b.attendance?" · "+b.attendance+" pax":""));
+  var detail=isParty?(b.package||"No package"):(esc(b.etype||b.eventType||(isFreestyle?"Freestyle Football":"Event"))+(b.attendance?" · "+b.attendance+" pax":""));
   // Area+time conflict detection
   var conflict=!isCancelled&&bookingHasConflict(b,bkType);
   var conflictHtml=conflict?'<div style="font-size:10px;font-weight:700;color:var(--red);margin-top:4px;padding:4px 6px;background:#fee2e2;border-radius:6px;">⚠️ Area conflict — cannot confirm until resolved</div>':"";
@@ -1270,12 +1165,12 @@ function kanbanCard(b,bkType,col){
   }
   var editBtn=isCancelled?"":isParty?'<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openBook('+b.id+')">✏️</button>':
                                      '<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openVenue('+b.id+')">✏️</button>';
-  var invBtn=isParty&&!isCancelled?'<button class="btn btn-purple btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openInvoice('+b.id+')">🧾</button>':"";
-  var docsHtml=isParty?getBookingDocumentsHtml(b,true):"";
+  var invBtn=!isCancelled?'<button class="btn btn-purple btn-sm" style="font-size:10px;padding:4px 8px;" onclick="openInvoice('+b.id+',\''+(isParty?'party':'venue')+'\')">🧾</button>':"";
+  var docsHtml=getBookingDocumentsHtml(b,true,isParty?"party":"venue");
   var delBtn=isParty?'<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delBook('+b.id+')">🗑</button>':
                      '<button class="btn btn-red btn-sm" style="font-size:10px;padding:4px 8px;" onclick="delVenue('+b.id+')">🗑</button>';
   var cancelledBadge=isCancelled?'<span style="font-size:10px;font-weight:700;background:var(--red-light);color:var(--red);padding:2px 7px;border-radius:10px;">❌ Cancelled</span>':"";
-  return '<div class="kcard kcard-'+bkType+(isCancelled?' kcard-cancelled':'')+'">'+
+  return '<div class="kcard kcard-'+(isFreestyle?'freestyle':bkType)+(isCancelled?' kcard-cancelled':'')+'">'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+typeBadge+
       '<div style="display:flex;gap:4px;align-items:center;">'+cancelledBadge+srcBadge+
         '<span style="font-size:10px;font-weight:700;background:#111;color:'+brColor+';padding:2px 6px;border-radius:10px;">'+br+'</span>'+
@@ -1323,17 +1218,101 @@ function showKanbanToast(msg){
 }
 
 // ===== WHATSAPP TEMPLATES =====
+function defaultWATemplates(){
+  return {
+    party:`Good day,
+
+Thank you for your interest in hosting a kids party at 1-UP Urban Playground, {BRANCH}.
+
+To secure your booking, please reply with the following details:
+
+- Branch: Fourways Mall or Rosebank
+- Parent / Guardian full name
+- WhatsApp number
+- Email address
+- Birthday child's full name
+- Age the child is turning
+- Number of kids attending
+- Number of adults attending
+- Kids meal choice: Mini Burger and Chips, Hotdog and Chips, or Nuggets and Chips
+- Party package: Skate Party, Esports Party, Street Soccer Party, Dance Party, Combo Package, or Full Venue Party
+- Preferred date
+- Preferred time slot
+- Any extras: Birthday Cake, Balloon Decor, Photo Backdrop, Boba Drinks, DJ / Sound System, Face Painting, Trophy or Medal, Goodie Bags
+- Food platter requirements (view our full menu here: https://djjackson86-sketch.github.io/1up/Urban_Playground_food_menu.pdf)
+- Any special requests, allergies or accessibility needs
+
+Booking form: {URL}
+
+Once we receive your details, our team will confirm availability and contact you within 24 hours with a quote and deposit information.
+
+We look forward to making it a memorable day.
+
+1-UP Urban Playground
+{BRANCH}`,
+    event:`Good day,
+
+Thank you for your interest in hosting an event at 1-UP Urban Playground, {BRANCH}.
+
+Please reply with the following details:
+
+- Branch: Fourways Mall or Rosebank
+- Organiser or company name
+- Contact person full name
+- WhatsApp number
+- Email address
+- Type of event
+- Expected number of attendees
+- Event start date and end date
+- Start time and end time
+- Areas required
+- Services needed
+- Food platter requirements (view our full menu here: https://djjackson86-sketch.github.io/1up/Urban_Playground_food_menu.pdf)
+- Estimated budget
+- Any special requirements or notes
+
+Enquiry form: {URL}
+
+Our events team will get back to you within 24 hours.
+
+1-UP Urban Playground
+{BRANCH}`,
+    freestyle:`Good day,
+
+Thank you for your interest in booking Freestyle Football at 1-UP Urban Playground, {BRANCH}.
+
+Please reply with the following details:
+
+- Branch: Fourways Mall or Rosebank
+- Organiser or company name
+- Contact person full name
+- WhatsApp number
+- Email address
+- Preferred date
+- Start time and end time
+- Required area: Soccer Arena or Activation Space
+- Services needed, if any
+- Food platter requirements (view our full menu here: https://djjackson86-sketch.github.io/1up/Urban_Playground_food_menu.pdf)
+- Estimated budget
+- Any special requirements or notes
+
+Freestyle Football enquiry form: {URL}
+
+Our team will get back to you within 24 hours.
+
+1-UP Urban Playground
+{BRANCH}`
+  };
+}
 function getWATemplates(){
-  return lsGet("1up_wa_templates",{
-    party:"Good day,\n\nThank you for your interest in hosting a kids party at 1-UP Urban Playground, {BRANCH}.\n\nTo secure your booking, please reply with the following details:\n\n- Branch: Fourways Mall or Rosebank\n- Parent / Guardian full name\n- WhatsApp number\n- Email address\n- Birthday child's full name\n- Age the child is turning\n- Number of kids attending\n- Number of adults attending\n- Kids meal choice: Mini Burger and Chips, Hotdog and Chips, or Nuggets and Chips\n- Party package: Skate Party, Esports Party, Street Soccer Party, Dance Party, Combo Package, or Full Venue Party\n- Preferred date\n- Preferred time slot\n- Any extras: Birthday Cake, Balloon Decor, Photo Backdrop, Boba Drinks, DJ / Sound System, Face Painting, Trophy or Medal, Goodie Bags\n- Food platter requirements (view our full menu here: https://djjackson86-sketch.github.io/1up/Urban_Playground_food_menu.pdf)\n- Any special requests, allergies or accessibility needs\n\nBooking form: {URL}\n\nOnce we receive your details, our team will confirm availability and contact you within 24 hours with a quote and deposit information.\n\nWe look forward to making it a memorable day.\n\n1-UP Urban Playground\n{BRANCH}",
-    event:"Good day,\n\nThank you for your interest in hosting an event at 1-UP Urban Playground, {BRANCH}.\n\nPlease reply with the following details:\n\n- Branch: Fourways Mall or Rosebank\n- Organiser or company name\n- Contact person full name\n- WhatsApp number\n- Email address\n- Type of event\n- Expected number of attendees\n- Event start date and end date\n- Start time and end time\n- Areas required\n- Services needed\n- Food platter requirements (view our full menu here: https://djjackson86-sketch.github.io/1up/Urban_Playground_food_menu.pdf)\n- Estimated budget\n- Any special requirements or notes\n\nEnquiry form: {URL}\n\nOur events team will get back to you within 24 hours.\n\n1-UP Urban Playground\n{BRANCH}"
-  });
+  return Object.assign(defaultWATemplates(), lsGet("1up_wa_templates",{}));
 }
 
 function sendWhatsApp(type){
   var templates=getWATemplates();
   var base=window.location.href.replace(/[^\/]*$/,"");
-  var url=base+(type==="party"?"1up-party-booking.html":"1up-event-booking.html");
+  var urls={party:"1up-party-booking.html",event:"1up-event-booking.html",freestyle:"1up-event-booking.html?type=freestyle"};
+  var url=base+(urls[type]||urls.event);
   var branchName=activeBranch==="rosebank"?"Rosebank":"Fourways";
   var msg=(templates[type]||"").replace(/\{URL\}/g,url).replace(/\{BRANCH\}/g,branchName);
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
@@ -1343,13 +1322,15 @@ function openWATemplates(){
   var t=getWATemplates();
   document.getElementById("wat-party").value=t.party;
   document.getElementById("wat-event").value=t.event;
+  document.getElementById("wat-freestyle").value=t.freestyle;
   document.getElementById("modal-wa-templates").classList.add("open");
 }
 function closeWATemplates(){document.getElementById("modal-wa-templates").classList.remove("open");}
 function saveWATemplates(){
   lsSet("1up_wa_templates",{
     party:document.getElementById("wat-party").value,
-    event:document.getElementById("wat-event").value
+    event:document.getElementById("wat-event").value,
+    freestyle:document.getElementById("wat-freestyle").value
   });
   closeWATemplates();
   showKanbanToast("✅ Templates saved!");
@@ -1539,6 +1520,8 @@ function renderBookings(q=""){
   if(!filtered.length){list.innerHTML='<div class="card" style="color:var(--gray);text-align:center;padding:24px;">No bookings — tap + New to add one!</div>';return;}
   list.innerHTML=filtered.map(b=>{
     const extras=Array.isArray(b.extras)?b.extras:[];
+  const areas=Array.isArray(b.areas)?b.areas:[];
+  const services=Array.isArray(b.services)?b.services:[];
     const branchPill=b.branch==="rosebank"?'<span class="branch-pill rb">Rosebank</span>':'<span class="branch-pill">Fourways</span>';
     const statusKey=b.status==="confirmed"?"confirmed":b.status==="done"?"done":b.status==="cancelled"?"cancelled":b.status==="new"?"new":"pending";
     return`<div class="book-card ${b.status==="new"?"new":b.status}">
@@ -1956,27 +1939,37 @@ function updateInvoiceLabels(){
     if(!numInput.value||/^1UP-(INV|Q)-\d+$/i.test(numInput.value))numInput.value=buildInvoiceNumber(docType);
   }
 }
-function openInvoice(id){
+function getInvoiceBooking(){
+  return invoiceBookingType==="venue"?venueBookings.find(x=>+x.id===+invoiceBookingId):bookings.find(x=>+x.id===+invoiceBookingId);
+}
+function openInvoice(id,type="party"){
   invoiceBookingId=id;
-  var booking=bookings.find(x=>+x.id===+id)||{};
+  invoiceBookingType=type;
+  var booking=type==="venue"?venueBookings.find(x=>+x.id===+id):bookings.find(x=>+x.id===+id);
+  booking=booking||{};
   var defaultDocType=(booking.status==="confirmed"||booking.status==="done")?"invoice":"quote";
   document.getElementById("inv-doc-type").value=defaultDocType;
   document.getElementById("inv-num").value=buildInvoiceNumber(defaultDocType);
   document.getElementById("inv-date").value=today();
-  document.getElementById("inv-total").value="";
-  document.getElementById("inv-deposit").value="";
+  document.getElementById("inv-total").value=booking.price||"";
+  document.getElementById("inv-deposit").value=booking.deposit||"";
   document.getElementById("inv-vat").value="none";
   document.getElementById("inv-notes").value="";
   document.querySelectorAll(".inv-note-check").forEach(cb=>cb.checked=false);
   ["inv-bank-name","inv-bank-type","inv-bank-acname","inv-bank-acnum","inv-bank-branch","inv-bank-ref"].forEach(function(fid){var el=document.getElementById(fid);if(el)el.value="";});
   var preset=document.getElementById("inv-bank-preset");if(preset)preset.value="";
-  var b2=bookings.find(x=>+x.id===+id);
   var lnList=document.getElementById("inv-line-notes-list");
-  if(lnList&&b2){
+  if(lnList&&booking){
     var items=[];
-    if(b2.package)items.push(b2.package);
-    if(b2.catering&&b2.catering!=="None")items.push(b2.catering);
-    (Array.isArray(b2.extras)?b2.extras:[]).forEach(function(e){items.push(e);});
+    if(type==="venue"){
+      if(booking.etype)items.push(booking.etype);
+      (Array.isArray(booking.areas)?booking.areas:[]).forEach(function(e){items.push(e);});
+      (Array.isArray(booking.services)?booking.services:[]).forEach(function(e){items.push(e);});
+    } else {
+      if(booking.package)items.push(booking.package);
+      if(booking.catering&&booking.catering!=="None")items.push(booking.catering);
+      (Array.isArray(booking.extras)?booking.extras:[]).forEach(function(e){items.push(e);});
+    }
     lnList.innerHTML=items.length?items.map(function(item){
       return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
         +'<span style="font-size:12px;min-width:150px;color:#374151;font-weight:600;flex-shrink:0;">'+item+'</span>'
@@ -2002,11 +1995,12 @@ function applyBankPreset(val){
   }
   document.getElementById("inv-bank-preset").value="";
 }
-function closeInvoice(){document.getElementById("modal-invoice").classList.remove("open");invoiceBookingId=null;}
+function closeInvoice(){document.getElementById("modal-invoice").classList.remove("open");invoiceBookingId=null;invoiceBookingType="party";}
 function backToInputs(){document.getElementById("invoice-inputs").style.display="block";document.getElementById("invoice-preview").style.display="none";}
 
 function generateInvoice(){
-  const b=bookings.find(x=>+x.id===+invoiceBookingId);
+  const b=getInvoiceBooking();
+  const isVenueDoc=invoiceBookingType==="venue";
   if(!b){alert("Booking not found.");return;}
   const docType=((document.getElementById("inv-doc-type")||{}).value)||"quote";
   const docLabel=docType==="invoice"?"Invoice":"Quote";
@@ -2041,6 +2035,8 @@ function generateInvoice(){
   const tickedNotes=[...document.querySelectorAll(".inv-note-check:checked")].map(cb=>NOTE_TEXT[cb.value]).filter(Boolean);
   if(invNotes)tickedNotes.push("📝 "+invNotes);
   const extras=Array.isArray(b.extras)?b.extras:[];
+  const areas=Array.isArray(b.areas)?b.areas:[];
+  const services=Array.isArray(b.services)?b.services:[];
   let subtotal=totalInput,vatAmt=0,grandTotal=totalInput;
   if(vatOpt==="included"){vatAmt=totalInput-(totalInput/1.15);subtotal=totalInput/1.15;grandTotal=totalInput;}
   else if(vatOpt==="excluded"){vatAmt=totalInput*0.15;grandTotal=totalInput+vatAmt;}
@@ -2068,14 +2064,19 @@ function generateInvoice(){
     </div>
     <div class="inv-section">
       <div class="inv-section-title">Event Details</div>
-      <div class="inv-row"><span>Date</span><span>${formatDate(b.date)}</span></div>
-      <div class="inv-row"><span>Time Slot</span><span>${b.timeslot||"—"}</span></div>
-      <div class="inv-row"><span>Package</span><span>${b.package||"—"}${getNote(b.package||"")}</span></div>
-      ${b.kidname?`<div class="inv-row"><span>Birthday Child</span><span>${b.kidname} (turns ${b.age})</span></div>`:""}
-      ${(b.kids||b.adults)?`<div class="inv-row"><span>Kids</span><span>${b.kids||0}</span></div><div class="inv-row"><span>Adults</span><span>${b.adults||0}</span></div><div class="inv-row"><span>Total Guests</span><span>${(+b.kids||0)+(+b.adults||0)}</span></div>`:b.guests?`<div class="inv-row"><span>Guests</span><span>${b.guests}</span></div>`:""}
-      ${b.kidsmeal?`<div class="inv-row"><span>Kids Meal</span><span>${mealLabel(b.kidsmeal)}</span></div>`:""}
-      ${b.catering&&b.catering!=="None"?`<div class="inv-row"><span>Catering</span><span>${b.catering}${getNote(b.catering)}</span></div>`:""}
-      ${extras.length?`<div class="inv-row"><span>Extras</span><div style="text-align:right;max-width:60%;">${extras.map(e=>`<div style="margin-bottom:2px;">${e}${getNote(e)}</div>`).join("")}</div></div>`:""}
+      <div class="inv-row"><span>Date</span><span>${formatDate(b.date)}${b.edate&&b.edate!==b.date?" → "+formatDate(b.edate):""}</span></div>
+      <div class="inv-row"><span>Time</span><span>${isVenueDoc?((b.stime||"—")+(b.etime?" – "+b.etime:"")):(b.timeslot||"—")}</span></div>
+      ${isVenueDoc?`<div class="inv-row"><span>Booking Type</span><span>${b.etype||"Event"}${getNote(b.etype||"")}</span></div>`:`<div class="inv-row"><span>Package</span><span>${b.package||"—"}${getNote(b.package||"")}</span></div>`}
+      ${isVenueDoc&&b.contact?`<div class="inv-row"><span>Contact Person</span><span>${b.contact}</span></div>`:""}
+      ${isVenueDoc&&b.attendance?`<div class="inv-row"><span>Expected Attendance</span><span>${b.attendance}</span></div>`:""}
+      ${isVenueDoc&&areas.length?`<div class="inv-row"><span>Areas Required</span><div style="text-align:right;max-width:60%;">${areas.map(e=>`<div style="margin-bottom:2px;">${e}${getNote(e)}</div>`).join("")}</div></div>`:""}
+      ${isVenueDoc&&services.length?`<div class="inv-row"><span>Services Needed</span><div style="text-align:right;max-width:60%;">${services.map(e=>`<div style="margin-bottom:2px;">${e}${getNote(e)}</div>`).join("")}</div></div>`:""}
+      ${!isVenueDoc&&b.kidname?`<div class="inv-row"><span>Birthday Child</span><span>${b.kidname} (turns ${b.age})</span></div>`:""}
+      ${!isVenueDoc&&((b.kids||b.adults)?`<div class="inv-row"><span>Kids</span><span>${b.kids||0}</span></div><div class="inv-row"><span>Adults</span><span>${b.adults||0}</span></div><div class="inv-row"><span>Total Guests</span><span>${(+b.kids||0)+(+b.adults||0)}</span></div>`:b.guests?`<div class="inv-row"><span>Guests</span><span>${b.guests}</span></div>`:"")}
+      ${!isVenueDoc&&b.kidsmeal?`<div class="inv-row"><span>Kids Meal</span><span>${mealLabel(b.kidsmeal)}</span></div>`:""}
+      ${!isVenueDoc&&b.catering&&b.catering!=="None"?`<div class="inv-row"><span>Catering</span><span>${b.catering}${getNote(b.catering)}</span></div>`:""}
+      ${!isVenueDoc&&extras.length?`<div class="inv-row"><span>Extras</span><div style="text-align:right;max-width:60%;">${extras.map(e=>`<div style="margin-bottom:2px;">${e}${getNote(e)}</div>`).join("")}</div></div>`:""}
+      ${isVenueDoc&&b.notes?`<div class="inv-row"><span>Notes</span><span style="text-align:right;max-width:60%;">${b.notes}</span></div>`:""}
     </div>
     <div class="inv-section">
       <div class="inv-section-title">Amount</div>
@@ -2111,9 +2112,11 @@ function generateInvoice(){
     date:invDate,
     generatedAt:new Date().toISOString(),
     content:html
-  });
-  invCounter++;saveAll();
-  renderBookings();renderFormSubmissions();renderKanban();renderDashboard();
+  },invoiceBookingType);
+  invCounter++;
+  if(isVenueDoc){saveVenueAll();renderVenueList();}
+  else{saveAll();renderBookings();renderFormSubmissions();}
+  renderKanban();renderDashboard();
   if(selectedDay&&b.date===selectedDay&&document.getElementById("modal-day").classList.contains("open"))showDay(selectedDay);
 }
 
@@ -2132,7 +2135,7 @@ function resetAll(){if(!confirm("Reset ALL data for "+activeBranch+" branch?"))r
 
 
 // ===== VENUE HIRE =====
-let venueBookings=[], venueEditId=null, venueFilter="all";
+let venueBookings=[], venueEditId=null, venueFilter="all", venueMode="event";
 
 function loadVenue(){venueBookings=lsGet("1up_venue_"+activeBranch,[]);}
 function saveVenueAll(){lsSet("1up_venue_"+activeBranch,venueBookings);}
@@ -2179,32 +2182,39 @@ function renderVenueList(){
         ${balance?`<span style="font-size:12px;color:var(--red);">Balance: ${balance}</span>`:""}
       </div>
       ${v.notes?`<div class="book-meta">📝 ${v.notes}</div>`:""}
+      ${getBookingDocumentsHtml(v,false,"venue")}
       <div class="book-actions">
         ${v.status!=="confirmed"?`<button class="btn btn-green btn-sm" onclick="quickVStatus(${v.id},'confirmed')">✅ Confirm</button>`:""}
         ${v.status!=="done"?`<button class="btn btn-teal btn-sm" onclick="quickVStatus(${v.id},'done')">✔️ Done</button>`:""}
         <button class="btn btn-ghost btn-sm" onclick="openVenue(${v.id})">✏️ Edit</button>
+        <button class="btn btn-purple btn-sm" onclick="openInvoice(${v.id},'venue')">🧾 Quote / Invoice</button>
         <button class="btn btn-red btn-sm" onclick="delVenue(${v.id})">🗑️</button>
       </div>
     </div>`;
   }).join("");
 }
 
-function openVenue(id=null){
+function openFreestyle(){openVenue(null,"freestyle");}
+function openVenue(id=null,mode="event"){
   venueEditId=id;
   const v=id?venueBookings.find(x=>+x.id===+id):null;
-  document.getElementById("modal-venue-title").textContent=id?"Edit Venue Hire":"New Venue Hire";
+  venueMode=v?(v.bookingType||"event"):mode;
+  const isFreestyle=venueMode==="freestyle";
+  document.getElementById("modal-venue-title").textContent=id?(isFreestyle?"Edit Freestyle Football":"Edit Event Booking"):(isFreestyle?"New Freestyle Football":"New Event Booking");
   document.getElementById("vf-branch").value=v?v.branch||activeBranch:activeBranch;
   document.getElementById("vf-name").value=v?v.name||"":"";
   document.getElementById("vf-contact").value=v?v.contact||"":"";
   document.getElementById("vf-phone").value=v?v.phone||"":"";
   document.getElementById("vf-email").value=v?v.email||"":"";
-  document.getElementById("vf-etype").value=v?v.etype||"":"";
+  document.getElementById("vf-etype").value=v?v.etype||"":(isFreestyle?"Freestyle Football":"");
   document.getElementById("vf-attendance").value=v?v.attendance||"":"";
+  document.getElementById("vf-attendance-wrap").style.display=isFreestyle?"none":"block";
+  if(isFreestyle)document.getElementById("vf-attendance").value="";
   document.getElementById("vf-date").value=v?v.date||today():today();
   document.getElementById("vf-edate").value=v?v.edate||"":"";
   document.getElementById("vf-stime").value=v?v.stime||"":"";
   document.getElementById("vf-etime").value=v?v.etime||"":"";
-  document.getElementById("vf-status").value=v?v.status||"enquiry":"enquiry";
+  document.getElementById("vf-status").value=v?(v.status==="enquiry"?"pending":(v.status||"pending")):"pending";
   document.getElementById("vf-price").value=v?v.price||"":"";
   document.getElementById("vf-deposit").value=v?v.deposit||"":"";
   document.getElementById("vf-notes").value=v?v.notes||"":"";
@@ -2228,7 +2238,7 @@ function saveVenue(){
   const areas=[...document.querySelectorAll("#vf-areas-grid .extra-btn.selected")].map(b=>b.textContent.trim());
   const services=[...document.querySelectorAll("#vf-services-grid .extra-btn.selected")].map(b=>b.textContent.trim());
   const v={
-    source:'staff',bookingType:'event',
+    source:'staff',bookingType:venueMode,
     id:venueEditId||Date.now(),
     branch:document.getElementById("vf-branch").value,
     name,
@@ -2252,7 +2262,7 @@ function saveVenue(){
   saveVenueAll();closeVenue();renderKanban();renderCalendar();
 }
 
-function closeVenue(){document.getElementById("modal-venue").classList.remove("open");venueEditId=null;}
+function closeVenue(){document.getElementById("modal-venue").classList.remove("open");venueEditId=null;venueMode="event";}
 function quickVStatus(id,s){const v=venueBookings.find(x=>+x.id===+id);if(!v)return;v.status=s;saveVenueAll();renderKanban();renderCalendar();}
 function delVenue(id){if(!confirm("Delete this venue hire booking?"))return;venueBookings=venueBookings.filter(x=>+x.id!==+id);saveVenueAll();renderKanban();renderCalendar();}
 
@@ -2876,509 +2886,8 @@ function saveStockEdit(){
   showStockToast("✅ Saved!");
 }
 
-// ===== MEMBER SYSTEM =====
-
-const DEMO_MEMBERS=[
-  {id:"928374",memberId:"MEM-001",name:"Sipho Khumalo",email:"sipho@example.com",phone:"082 111 2233",status:"active",expiry:"2026-12-31",memberType:"Premium Yearly",type:"Premium Yearly",password:"pass123",joinDate:"2025-01-10",photo:null,checkins:12,visits:[{ts:"2026-05-21T14:20:00",branch:"fourways"},{ts:"2026-05-14T11:05:00",branch:"fourways"},{ts:"2026-05-07T16:45:00",branch:"rosebank"}]},
-  {id:"551092",memberId:"MEM-002",name:"Thandeka Dube",email:"thandeka@example.com",phone:"071 555 6677",status:"active",expiry:"2026-08-15",memberType:"Standard Monthly",type:"Standard Monthly",password:"hello1up",joinDate:"2025-08-15",photo:null,checkins:8,visits:[{ts:"2026-05-20T10:30:00",branch:"rosebank"},{ts:"2026-05-13T09:15:00",branch:"rosebank"}]},
-  {id:"773661",memberId:"MEM-003",name:"James van der Merwe",email:"james@example.com",phone:"083 777 8899",status:"expired",expiry:"2026-01-31",memberType:"Premium Monthly",type:"Premium Monthly",password:"skate99",joinDate:"2025-02-01",photo:null,checkins:3,visits:[{ts:"2026-01-28T15:00:00",branch:"fourways"}]},
-  {id:"992118",memberId:"MEM-004",name:"Priya Naidoo",email:"priya@example.com",phone:"079 333 4455",status:"suspended",expiry:"2026-07-20",memberType:"Standard Yearly",type:"Standard Yearly",password:"dance2026",joinDate:"2025-07-20",photo:null,checkins:5,visits:[{ts:"2026-05-01T13:20:00",branch:"fourways"},{ts:"2026-04-15T14:10:00",branch:"rosebank"}]},
-];
-
-function initMembers(){
-  var existing=[];
-  try{var raw=localStorage.getItem("1up_members");if(raw)existing=JSON.parse(raw);}catch(e){}
-  var changed=!localStorage.getItem("1up_members");
-  DEMO_MEMBERS.forEach(function(dm){
-    var idx=existing.findIndex(function(x){return x.id===dm.id;});
-    if(idx===-1){existing.push(dm);changed=true;}
-    else if(!existing[idx].password){existing[idx].password=dm.password;changed=true;}
-  });
-  if(changed)localStorage.setItem("1up_members",JSON.stringify(existing));
-}
-function getMembers(){
-  var existing=[];
-  try{var raw=localStorage.getItem("1up_members");if(raw)existing=JSON.parse(raw);}catch(e){}
-  // Ensure demo members always present with correct data
-  var changed=false;
-  DEMO_MEMBERS.forEach(function(dm){
-    var idx=existing.findIndex(function(x){return String(x.id)===String(dm.id);});
-    if(idx===-1){existing.push(dm);changed=true;}
-    else if(!existing[idx].password){existing[idx].password=dm.password;changed=true;}
-  });
-  if(changed)localStorage.setItem("1up_members",JSON.stringify(existing));
-  return existing;
-}
-function saveMembers(arr){localStorage.setItem("1up_members",JSON.stringify(arr));}
-
-// ---- STAFF MEMBER LIST ----
-var _memberSearch="";
-var _editingMemberId=null;
-var _editPhotoData=null;
-var _photoStream=null;
-
-function renderMembersList(){
-  var members=getMembers();
-  var q=(_memberSearch||"").toLowerCase();
-  if(q) members=members.filter(function(m){
-    return m.name.toLowerCase().includes(q)||(m.memberId||"").toLowerCase().includes(q)||(m.id||"").includes(q);
-  });
-  var el=document.getElementById("members-list");
-  if(!el)return;
-  if(!members.length){
-    el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--gray);font-size:13px;">'+(q?"No members match \""+esc(q)+"\".":"No members yet — tap ➕ Add to create one.")+'</div>';
-    return;
-  }
-  el.innerHTML=members.map(function(m){
-    var statusColor=m.status==="active"?"var(--green)":m.status==="suspended"?"var(--red)":"var(--gray)";
-    var lastVisit=m.visits&&m.visits.length?m.visits[0]:null;
-    var lastVisitText=lastVisit?formatDT(lastVisit.ts)+" · "+esc(lastVisit.branch||""):"Never";
-    var photoHtml=m.photo
-      ?'<img src="'+m.photo+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--gray-mid);">'
-      :'<div style="width:48px;height:48px;border-radius:50%;background:var(--gray-mid);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👤</div>';
-    var borderColor=m.status==="active"?"var(--green)":m.status==="suspended"?"var(--red)":"var(--gray-mid)";
-    return '<div class="book-card" style="border-left-color:'+borderColor+';display:flex;align-items:center;gap:12px;padding:10px 12px;">'+
-      '<div style="flex-shrink:0;">'+photoHtml+'</div>'+
-      '<div style="flex:1;min-width:0;">'+
-        '<div style="font-weight:800;font-size:14px;line-height:1.2;">'+esc(m.name)+'</div>'+
-        '<div style="font-size:11px;color:var(--gray);margin-top:1px;">'+esc(m.memberId||"")+'</div>'+
-        '<div style="display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;">'+
-          '<span style="font-size:10px;font-weight:700;color:'+statusColor+';text-transform:uppercase;background:'+(m.status==="active"?"var(--green-light)":m.status==="suspended"?"var(--red-light)":"var(--gray-light)")+';padding:2px 7px;border-radius:12px;">'+esc(m.status)+'</span>'+
-          '<span style="font-size:10px;color:var(--gray);">'+esc(m.memberType||m.type||"—")+'</span>'+
-          '<span style="font-size:10px;color:var(--gray);">Exp '+formatDate(m.expiry)+'</span>'+
-        '</div>'+
-        '<div style="font-size:10px;color:var(--gray);margin-top:3px;">🕐 '+esc(lastVisitText)+'</div>'+
-      '</div>'+
-      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'+
-        '<button class="btn btn-ghost btn-sm" onclick="openEditMember(\''+esc(m.id)+'\')" style="font-size:11px;padding:5px 9px;">✏️</button>'+
-        '<button class="btn btn-red btn-sm" onclick="deleteMember(\''+esc(m.id)+'\')" style="font-size:11px;padding:5px 9px;">🗑</button>'+
-      '</div>'+
-    '</div>';
-  }).join("");
-}
-
-function formatDT(ts){
-  if(!ts)return"—";
-  try{
-    var d=new Date(ts);
-    return d.toLocaleDateString("en-ZA",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
-  }catch(e){return ts;}
-}
-
-function searchMembers(){
-  _memberSearch=(document.getElementById("member-search-input")||{}).value||"";
-  renderMembersList();
-}
-
-// ---- MEMBER SUB-TABS ----
-function showMemberSub(tab){
-  document.getElementById("msub-members").style.display = tab==="members" ? "" : "none";
-  document.getElementById("msub-logins").style.display  = tab==="logins"  ? "" : "none";
-  document.getElementById("msub-btn-members").className = "booking-subtab" + (tab==="members" ? " active" : "");
-  document.getElementById("msub-btn-logins").className  = "booking-subtab" + (tab==="logins"  ? " active" : "");
-  document.getElementById("btn-add-member").style.display = tab==="members" ? "" : "none";
-  if(tab==="logins") renderRecentLogins();
-}
-
-function renderRecentLogins(){
-  var el = document.getElementById("recent-logins-list");
-  if(!el) return;
-  var members = getMembers();
-  var cutoff = Date.now() - 7*24*60*60*1000; // 7 days ago
-  // Collect all visits from all members within the last 7 days
-  var rows = [];
-  members.forEach(function(m){
-    (m.visits||[]).forEach(function(v){
-      var t = new Date(v.ts).getTime();
-      if(t >= cutoff){
-        rows.push({
-          name: m.name,
-          memberId: m.memberId||m.id,
-          status: m.status,
-          memberType: m.memberType||m.type||"",
-          photo: m.photo||null,
-          ts: v.ts,
-          branch: v.branch||"",
-          t: t
-        });
-      }
-    });
-  });
-  // Sort newest first
-  rows.sort(function(a,b){ return b.t - a.t; });
-  if(!rows.length){
-    el.innerHTML='<div style="text-align:center;padding:30px 16px;color:var(--gray);font-size:13px;">No QR scan check-ins in the last 7 days.</div>';
-    return;
-  }
-  var html = "";
-  var prevDay = "";
-  rows.forEach(function(r){
-    var d = new Date(r.t);
-    var dayKey = d.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"short"});
-    if(dayKey !== prevDay){
-      html += '<div style="font-size:11px;font-weight:800;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;padding:10px 0 6px;'+(prevDay?'border-top:1px solid var(--gray-mid);margin-top:4px;':'')+'">'+dayKey+'</div>';
-      prevDay = dayKey;
-    }
-    var timeStr = d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
-    var branchLabel = r.branch==="rosebank" ? "Rosebank" : r.branch==="fourways" ? "Fourways" : r.branch||"—";
-    var branchColor = r.branch==="rosebank" ? "#00E5FF" : "var(--or)";
-    var statusColor = r.status==="active" ? "var(--green)" : "var(--red)";
-    var photoHtml = r.photo
-      ? '<img src="'+r.photo+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--gray-mid);flex-shrink:0;">'
-      : '<div style="width:38px;height:38px;border-radius:50%;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👤</div>';
-    html += '<div style="background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">'
-      + photoHtml
-      + '<div style="flex:1;min-width:0;">'
-      +   '<div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(r.name)+'</div>'
-      +   '<div style="font-size:11px;color:var(--gray);margin-top:1px;">'+esc(r.memberId)+' · <span style="color:'+statusColor+';font-weight:700;">'+r.status+'</span></div>'
-      + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;">'
-      +   '<div style="font-weight:800;font-size:14px;">'+timeStr+'</div>'
-      +   '<div style="font-size:10px;font-weight:700;color:'+branchColor+';background:#111;border-radius:8px;padding:2px 7px;margin-top:3px;display:inline-block;">'+branchLabel+'</div>'
-      + '</div>'
-      + '</div>';
-  });
-  el.innerHTML = html;
-}
-
-function deleteMember(id){
-  if(!confirm("Delete this member permanently?"))return;
-  saveMembers(getMembers().filter(function(m){return m.id!==id;}));
-  renderMembersList();
-  showMemberToast("🗑 Member deleted");
-}
-
-function showMemberToast(msg){
-  var t=document.getElementById("member-toast");
-  if(!t)return;
-  t.textContent=msg;t.style.opacity="1";
-  setTimeout(function(){t.style.opacity="0";},2200);
-}
-
-function copyPortalLink(){
-  var url=window.location.href.replace(/[^/]*$/,"1up-member-portal.html");
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(url).then(function(){showMemberToast("🔗 Link copied!");});
-  } else {
-    prompt("Copy this link:",url);
-  }
-}
-
-// ---- ADD / EDIT MEMBER MODAL ----
-function openAddMember(){
-  _editingMemberId=null; _editPhotoData=null;
-  document.getElementById("mem-edit-title").textContent="➕ Add Member";
-  document.getElementById("mem-edit-name").value="";
-  document.getElementById("mem-edit-email").value="";
-  document.getElementById("mem-edit-phone").value="";
-  document.getElementById("mem-edit-memberid").value=genMemberId();
-  document.getElementById("mem-edit-password").value="";
-  document.getElementById("mem-edit-type").value="Standard Monthly";
-  document.getElementById("mem-edit-status").value="active";
-  document.getElementById("mem-edit-expiry").value=defaultExpiry("Standard Monthly");
-  document.getElementById("mem-edit-joindate").value=new Date().toISOString().slice(0,10);
-  document.getElementById("mem-edit-photo-preview").innerHTML='<div style="font-size:36px;line-height:1;">👤</div>';
-  document.getElementById("mem-photo-capture").style.display="none";
-  document.getElementById("modal-member-edit").classList.add("open");
-}
-
-function openEditMember(id){
-  var m=getMembers().find(function(x){return x.id===id;});
-  if(!m)return;
-  _editingMemberId=id; _editPhotoData=m.photo||null;
-  document.getElementById("mem-edit-title").textContent="✏️ Edit Member";
-  document.getElementById("mem-edit-name").value=m.name||"";
-  document.getElementById("mem-edit-email").value=m.email||"";
-  document.getElementById("mem-edit-phone").value=m.phone||"";
-  document.getElementById("mem-edit-memberid").value=m.memberId||"";
-  document.getElementById("mem-edit-password").value="";
-  document.getElementById("mem-edit-type").value=m.memberType||m.type||"Standard Monthly";
-  document.getElementById("mem-edit-status").value=m.status||"active";
-  document.getElementById("mem-edit-expiry").value=m.expiry||"";
-  document.getElementById("mem-edit-joindate").value=m.joinDate||"";
-  document.getElementById("mem-edit-photo-preview").innerHTML=m.photo
-    ?'<img src="'+m.photo+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">'
-    :'<div style="font-size:36px;line-height:1;">👤</div>';
-  document.getElementById("mem-photo-capture").style.display="none";
-  document.getElementById("modal-member-edit").classList.add("open");
-}
-
-function closeMemEdit(){
-  document.getElementById("modal-member-edit").classList.remove("open");
-  stopPhotoStream();
-}
-
-function saveMemberEdit(){
-  var name=(document.getElementById("mem-edit-name").value||"").trim();
-  var email=(document.getElementById("mem-edit-email").value||"").trim();
-  var phone=(document.getElementById("mem-edit-phone").value||"").trim();
-  var memberId=(document.getElementById("mem-edit-memberid").value||"").trim();
-  var pw=(document.getElementById("mem-edit-password").value||"").trim();
-  var memberType=document.getElementById("mem-edit-type").value;
-  var status=document.getElementById("mem-edit-status").value;
-  var expiry=document.getElementById("mem-edit-expiry").value;
-  var joinDate=document.getElementById("mem-edit-joindate").value;
-  if(!name){alert("Full name is required.");return;}
-  if(!memberId){alert("Member ID is required.");return;}
-  var members=getMembers();
-  if(_editingMemberId){
-    var m=members.find(function(x){return x.id===_editingMemberId;});
-    if(!m)return;
-    m.name=name;m.email=email;m.phone=phone;m.memberId=memberId;
-    m.memberType=memberType;m.type=memberType;m.status=status;m.expiry=expiry;m.joinDate=joinDate;
-    if(pw)m.password=pw;
-    if(_editPhotoData)m.photo=_editPhotoData;
-  } else {
-    var newId=String(Math.floor(100000+Math.random()*900000));
-    members.push({id:newId,memberId:memberId,name:name,email:email,phone:phone,
-      status:status,expiry:expiry,memberType:memberType,type:memberType,
-      password:pw||("1up"+newId.slice(-3)),joinDate:joinDate,
-      photo:_editPhotoData||null,checkins:0,visits:[]});
-  }
-  saveMembers(members);
-  closeMemEdit();
-  renderMembersList();
-  showMemberToast(_editingMemberId?"✅ Member updated":"✅ Member added");
-}
-
-function genMemberId(){
-  var nums=getMembers().map(function(m){return parseInt((m.memberId||"").replace(/\D/g,""))||0;});
-  var next=(nums.length?Math.max.apply(null,nums):0)+1;
-  return "MEM-"+String(next).padStart(3,"0");
-}
-
-function defaultExpiry(type){
-  var d=new Date();
-  if(type&&type.includes("Yearly"))d.setFullYear(d.getFullYear()+1);
-  else d.setMonth(d.getMonth()+1);
-  return d.toISOString().slice(0,10);
-}
-
-function onMemTypeChange(){
-  var type=document.getElementById("mem-edit-type").value;
-  document.getElementById("mem-edit-expiry").value=defaultExpiry(type);
-}
-
-// ---- PHOTO CAPTURE ----
-function startPhotoCapture(){
-  var section=document.getElementById("mem-photo-capture");
-  var video=document.getElementById("mem-photo-video");
-  section.style.display="block";
-  navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false}).then(function(stream){
-    _photoStream=stream;video.srcObject=stream;video.play();
-  }).catch(function(e){
-    alert("Camera not available: "+e.message);section.style.display="none";
-  });
-}
-
-function snapPhoto(){
-  var video=document.getElementById("mem-photo-video");
-  var canvas=document.createElement("canvas");
-  canvas.width=video.videoWidth||320;canvas.height=video.videoHeight||240;
-  canvas.getContext("2d").drawImage(video,0,0);
-  _editPhotoData=canvas.toDataURL("image/jpeg",0.7);
-  document.getElementById("mem-edit-photo-preview").innerHTML='<img src="'+_editPhotoData+'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">';
-  stopPhotoStream();document.getElementById("mem-photo-capture").style.display="none";
-}
-
-function stopPhotoStream(){
-  if(_photoStream){_photoStream.getTracks().forEach(function(t){t.stop();});_photoStream=null;}
-}
-
-// ---- QR SCANNER ----
-var _scanStream=null,_scanRaf=null,_scanVideo=null,_scanCanvas=null,_scanCtx=null,_scanActive=false;
-
-// Init BarcodeDetector once if available
-var _barcodeDetector=null;
-if(typeof BarcodeDetector!=="undefined"){
-  try{_barcodeDetector=new BarcodeDetector({formats:["qr_code"]});}catch(e){}
-}
-
-function openScanner(){
-  document.getElementById("modal-scanner").classList.add("open");
-  var vp=document.getElementById("scanner-viewport");
-  vp.innerHTML="";
-  document.getElementById("scanner-status").textContent="Requesting camera…";
-  _scanActive=true;
-
-  // Build video element
-  _scanVideo=document.createElement("video");
-  _scanVideo.setAttribute("playsinline","");
-  _scanVideo.setAttribute("muted","");
-  _scanVideo.style.cssText="width:100%;height:100%;object-fit:cover;border-radius:10px;display:block;";
-  // Frame overlay
-  var frame=document.createElement("div");
-  frame.className="scanner-frame";
-  vp.style.position="relative";
-  vp.appendChild(_scanVideo);
-  vp.appendChild(frame);
-
-  _scanCanvas=document.createElement("canvas");
-  _scanCtx=_scanCanvas.getContext("2d");
-
-  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}})
-    .then(function(stream){
-      if(!_scanActive){stream.getTracks().forEach(function(t){t.stop();});return;}
-      _scanStream=stream;
-      _scanVideo.srcObject=stream;
-      _scanVideo.play();
-      _scanVideo.addEventListener("loadedmetadata",function(){
-        _scanCanvas.width=_scanVideo.videoWidth||640;
-        _scanCanvas.height=_scanVideo.videoHeight||480;
-        document.getElementById("scanner-status").textContent="📷 Point at the member QR code";
-        _scanRaf=requestAnimationFrame(scanTick);
-      });
-    })
-    .catch(function(err){
-      document.getElementById("scanner-status").textContent="⚠️ Camera denied: "+((err&&err.message)||"check browser permissions");
-    });
-}
-
-function scanTick(){
-  if(!_scanActive||!_scanVideo||_scanVideo.readyState<2){
-    _scanRaf=requestAnimationFrame(scanTick);return;
-  }
-  _scanCtx.drawImage(_scanVideo,0,0,_scanCanvas.width,_scanCanvas.height);
-
-  if(_barcodeDetector){
-    _barcodeDetector.detect(_scanCanvas).then(function(res){
-      if(!_scanActive)return;
-      if(res&&res.length){processScanResult(res[0].rawValue);}
-      else{_scanRaf=requestAnimationFrame(scanTick);}
-    }).catch(function(){_scanRaf=requestAnimationFrame(scanTick);});
-  } else if(typeof jsQR!=="undefined"){
-    var d=_scanCtx.getImageData(0,0,_scanCanvas.width,_scanCanvas.height);
-    var code=jsQR(d.data,d.width,d.height,{inversionAttempts:"dontInvert"});
-    if(code&&_scanActive){processScanResult(code.data);}
-    else{_scanRaf=requestAnimationFrame(scanTick);}
-  } else {
-    _scanRaf=requestAnimationFrame(scanTick);
-  }
-}
-
-function closeScanner(){
-  _scanActive=false;
-  if(_scanRaf){cancelAnimationFrame(_scanRaf);_scanRaf=null;}
-  if(_scanStream){_scanStream.getTracks().forEach(function(t){t.stop();});_scanStream=null;}
-  _scanVideo=null;_scanCanvas=null;_scanCtx=null;
-  document.getElementById("scanner-viewport").innerHTML="";
-  document.getElementById("modal-scanner").classList.remove("open");
-}
-
-function processScanResult(text){
-  var id=text.trim();
-  try{id=decodeURIComponent(id);}catch(e){}
-  // Strip MEMBER: prefix if present (handles both "551092" and "MEMBER:551092")
-  if(/^member:/i.test(id))id=id.replace(/^member:/i,"").trim();
-  closeScanner();
-  showScanResult(validateMember(id));
-}
-
-function validateMember(id){
-  var members=getMembers();
-  // Loose match: string compare after trimming, also try toString
-  var m=members.find(function(x){return String(x.id).trim()===String(id).trim();});
-  if(!m)return{valid:false,reason:"Member not found",name:"Unknown",id:id};
-  var today=new Date().toISOString().slice(0,10);
-  // Check if last visit was < 30 min ago (before logging new one)
-  var recentVisit=false;
-  if(m.visits&&m.visits.length){
-    var minsSince=(Date.now()-new Date(m.visits[0].ts).getTime())/60000;
-    if(minsSince<30)recentVisit=true;
-  }
-  if(m.status==="suspended")return{valid:false,reason:"Membership suspended",name:m.name,id:m.id,member:m,recentVisit:recentVisit};
-  if(m.status==="expired"||m.expiry<today)return{valid:false,reason:"Membership expired on "+formatDate(m.expiry),name:m.name,id:m.id,member:m,recentVisit:recentVisit};
-  // Log visit
-  if(!m.visits)m.visits=[];
-  m.visits.unshift({ts:new Date().toISOString(),branch:activeBranch||"fourways"});
-  if(m.visits.length>5)m.visits=m.visits.slice(0,5);
-  m.checkins=(m.checkins||0)+1;
-  saveMembers(members);
-  return{valid:true,name:m.name,id:m.id,member:m,recentVisit:recentVisit};
-}
-
-function showScanResult(result){
-  var m=result.member;
-  var valid=result.valid;
-  var accentCol=valid?"var(--green)":"var(--red)";
-  var accentLight=valid?"var(--green-light)":"var(--red-light)";
-
-  // Photo — large for ID verification
-  var photoHtml=m&&m.photo
-    ?'<img src="'+m.photo+'" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid '+accentCol+';box-shadow:0 0 0 4px '+accentLight+';">'
-    :'<div style="width:110px;height:110px;border-radius:50%;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:48px;border:4px solid '+accentCol+';box-shadow:0 0 0 4px '+accentLight+';">👤</div>';
-
-  // Last visit (visits[1] if valid since [0] was just logged)
-  var prevVisit=m&&m.visits&&m.visits.length?(valid?m.visits[1]:m.visits[0]):null;
-  var lvHtml=prevVisit
-    ?'<div style="font-size:11px;color:var(--gray);padding:6px 10px;background:var(--gray-light);border-radius:8px;margin-top:8px;">🕐 Last visit: '+formatDT(prevVisit.ts)+' · '+esc(prevVisit.branch||"")+'</div>'
-    :'<div style="font-size:11px;color:var(--gray);margin-top:8px;">🕐 No previous visits on record</div>';
-
-  var html='';
-  if(valid){
-    // Green status banner
-    html+='<div style="background:var(--green);border-radius:10px;padding:12px;text-align:center;margin-bottom:14px;">'+
-            '<div style="font-size:18px;font-weight:900;color:#fff;letter-spacing:1px;">✅ ACCESS GRANTED</div>'+
-          '</div>';
-    // Photo centred
-    html+='<div style="text-align:center;margin-bottom:14px;">'+photoHtml+'</div>';
-    // Name + ID
-    html+='<div style="text-align:center;margin-bottom:14px;">'+
-            '<div style="font-size:22px;font-weight:900;color:var(--dark);">'+esc(result.name)+'</div>'+
-            '<div style="font-size:12px;color:var(--gray);margin-top:2px;">'+(m?esc(m.memberId||m.id):"")+'</div>'+
-          '</div>';
-    // Info grid
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">'+
-            '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
-              '<div style="font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Type</div>'+
-              '<div style="font-size:11px;font-weight:800;margin-top:2px;">'+(m?esc(m.memberType||m.type||"—"):"—")+'</div>'+
-            '</div>'+
-            '<div style="background:var(--gray-light);border-radius:8px;padding:8px;text-align:center;">'+
-              '<div style="font-size:9px;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Expires</div>'+
-              '<div style="font-size:11px;font-weight:800;margin-top:2px;">'+(m?formatDate(m.expiry):"—")+'</div>'+
-            '</div>'+
-            '<div style="background:var(--green-light);border-radius:8px;padding:8px;text-align:center;">'+
-              '<div style="font-size:9px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Visits</div>'+
-              '<div style="font-size:11px;font-weight:800;color:var(--green);margin-top:2px;">'+(m?m.checkins||0:0)+'</div>'+
-            '</div>'+
-          '</div>';
-    html+=lvHtml;
-    if(result.recentVisit){
-      html+='<div style="background:var(--red-light);border:1.5px solid var(--red);border-radius:10px;padding:10px;margin-top:10px;text-align:center;">'+
-              '<div style="font-size:13px;font-weight:800;color:var(--red);">⚠️ Already scanned in last 30 min</div>'+
-            '</div>';
-    }
-  } else {
-    // Red status banner
-    html+='<div style="background:var(--red);border-radius:10px;padding:12px;text-align:center;margin-bottom:14px;">'+
-            '<div style="font-size:18px;font-weight:900;color:#fff;letter-spacing:1px;">❌ ACCESS DENIED</div>'+
-          '</div>';
-    html+='<div style="text-align:center;margin-bottom:14px;">'+photoHtml+'</div>';
-    html+='<div style="text-align:center;margin-bottom:12px;">'+
-            '<div style="font-size:20px;font-weight:900;color:var(--dark);">'+(result.name&&result.name!=="Unknown"?esc(result.name):"Member Not Found")+'</div>'+
-            '<div style="font-size:12px;color:var(--gray);margin-top:2px;">'+(m?esc(m.memberId||m.id):esc(result.id))+'</div>'+
-          '</div>';
-    html+='<div style="background:var(--red-light);border:1.5px solid var(--red);border-radius:10px;padding:12px;text-align:center;">'+
-            '<div style="font-size:14px;font-weight:800;color:var(--red);">'+esc(result.reason)+'</div>'+
-          '</div>';
-    html+=lvHtml;
-  }
-
-  document.getElementById("scan-result-body").innerHTML=html;
-  document.getElementById("scan-result-title").textContent="";
-  document.getElementById("modal-scan-result").classList.add("open");
-  // Refresh recent logins in background so it's up to date when staff opens that tab
-  try{renderRecentLogins();}catch(e){}
-  try{renderMembersList();}catch(e){}
-}
-
-function closeScanResult(){
-  document.getElementById("modal-scan-result").classList.remove("open");
-}
-
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
-initMembers();
 
 </script>
 <!-- STOCK CALCULATOR MODAL -->
@@ -3473,65 +2982,6 @@ initMembers();
   </div>
 </div>
 
-<!-- MEMBER ADD/EDIT MODAL -->
-<div class="modal-bg" id="modal-member-edit">
-  <div class="modal" style="max-height:92vh;overflow-y:auto;padding-bottom:20px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:sticky;top:0;background:#fff;z-index:1;padding-bottom:10px;border-bottom:1px solid var(--gray-mid);">
-      <div class="modal-title" id="mem-edit-title">Add Member</div>
-      <button class="btn btn-ghost btn-sm" onclick="closeMemEdit()">✕</button>
-    </div>
-    <!-- Photo -->
-    <div style="text-align:center;margin-bottom:16px;">
-      <div id="mem-edit-photo-preview" style="width:80px;height:80px;border-radius:50%;background:var(--gray-light);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--gray-mid);"></div>
-      <button class="btn btn-ghost btn-sm" onclick="startPhotoCapture()" style="font-size:11px;">📷 Take Photo</button>
-    </div>
-    <!-- Camera -->
-    <div id="mem-photo-capture" style="display:none;margin-bottom:14px;text-align:center;">
-      <video id="mem-photo-video" style="width:100%;max-width:240px;border-radius:12px;background:#000;" autoplay playsinline></video>
-      <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;">
-        <button class="btn btn-o btn-sm" onclick="snapPhoto()">📸 Snap</button>
-        <button class="btn btn-ghost btn-sm" onclick="stopPhotoStream();document.getElementById('mem-photo-capture').style.display='none'">Cancel</button>
-      </div>
-    </div>
-    <!-- Fields -->
-    <div class="form-group"><label>Full Name *</label><input id="mem-edit-name" type="text" placeholder="e.g. Sipho Khumalo"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="form-group"><label>Member ID *</label><input id="mem-edit-memberid" type="text" placeholder="MEM-001"></div>
-      <div class="form-group"><label>Join Date</label><input id="mem-edit-joindate" type="date"></div>
-    </div>
-    <div class="form-group"><label>Email</label><input id="mem-edit-email" type="email" placeholder="member@example.com"></div>
-    <div class="form-group"><label>Phone</label><input id="mem-edit-phone" type="tel" placeholder="082 000 1111"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="form-group">
-        <label>Membership Type</label>
-        <select id="mem-edit-type" onchange="onMemTypeChange()">
-          <option>Standard Monthly</option>
-          <option>Standard Yearly</option>
-          <option>Premium Monthly</option>
-          <option>Premium Yearly</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="mem-edit-status">
-          <option value="active">Active</option>
-          <option value="suspended">Suspended</option>
-          <option value="expired">Expired</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group"><label>Expiry Date</label><input id="mem-edit-expiry" type="date"></div>
-    <div class="form-group">
-      <label>Password <span style="font-size:10px;font-weight:400;color:var(--gray);">(leave blank to keep current)</span></label>
-      <input id="mem-edit-password" type="text" placeholder="New password...">
-    </div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="btn btn-o" style="flex:1;" onclick="saveMemberEdit()">💾 Save Member</button>
-      <button class="btn btn-ghost" onclick="closeMemEdit()">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <!-- WHATSAPP TEMPLATES MODAL -->
 <div class="modal-bg" id="modal-wa-templates">
   <div class="modal">
@@ -3548,6 +2998,10 @@ initMembers();
       <label>🏟️ Event / Venue Message</label>
       <textarea id="wat-event" rows="5" style="font-size:13px;"></textarea>
     </div>
+    <div class="form-group">
+      <label>⚽ Freestyle Football Message</label>
+      <textarea id="wat-freestyle" rows="5" style="font-size:13px;"></textarea>
+    </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="btn btn-o" style="flex:1;" onclick="saveWATemplates()">💾 Save Templates</button>
       <button class="btn btn-ghost" onclick="closeWATemplates()">Cancel</button>
@@ -3563,31 +3017,6 @@ initMembers();
     <button onclick="window.print()" style="margin-left:auto;background:transparent;color:var(--or);border:1.5px solid var(--or);border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;">🖨 Print</button>
   </div>
   <div id="sheet-overlay-body" style="padding:20px;font-family:Arial,sans-serif;color:#111;"></div>
-</div>
-
-<!-- QR SCANNER MODAL -->
-<div class="modal-bg top" id="modal-scanner">
-  <div class="modal modal-sm" style="border-radius:14px;max-height:90vh;padding:14px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="modal-title" style="font-size:15px;">📷 Scan Member QR</div>
-      <button class="btn btn-ghost btn-sm" onclick="closeScanner()">✕</button>
-    </div>
-    <div class="scanner-viewport" id="scanner-viewport"></div>
-    <div id="scanner-status" style="text-align:center;font-size:13px;font-weight:700;color:var(--gray);margin:8px 0;min-height:20px;"></div>
-    <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="closeScanner()">Cancel</button>
-  </div>
-</div>
-
-<!-- SCAN RESULT MODAL -->
-<div class="modal-bg" id="modal-scan-result">
-  <div class="modal modal-sm">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="modal-title" style="font-size:15px;" id="scan-result-title">Verification Result</div>
-      <button class="btn btn-ghost btn-sm" onclick="closeScanResult()">✕</button>
-    </div>
-    <div id="scan-result-body"></div>
-    <button class="btn btn-o btn-sm" style="width:100%;margin-top:8px;" onclick="closeScanResult()">Done</button>
-  </div>
 </div>
 
 </body>
