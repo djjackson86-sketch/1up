@@ -101,7 +101,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <option value="">Select event type...</option>
         <option>Corporate Event</option>
         <option>Brand Activation</option>
-        <option>Freestyle Football</option>
+        <option value="Freestyle Football">Freestyle Soccer</option>
         <option>School / Sports Day</option>
         <option>Competition / Tournament</option>
         <option>Filming / Shoot</option>
@@ -281,7 +281,7 @@ function submitEnquiry(){
   var dateRange=date+(enquiry.endDate&&enquiry.endDate!==date?" → "+enquiry.endDate:"");
   var timeRange=enquiry.startTime?(enquiry.startTime+(enquiry.endTime?" – "+enquiry.endTime:"")):"TBC";
   sendTelegram(
-    (isFreestyle?"⚽ <b>New Freestyle Football Enquiry</b>\n\n":"🏟️ <b>New Event Enquiry</b>\n\n")+
+    (isFreestyle?"⚽ <b>New Freestyle Soccer Enquiry</b>\n\n":"🏟️ <b>New Event Enquiry</b>\n\n")+
     "📍 <b>Branch:</b> "+branchLabel+"\n"+
     "🆔 <b>Ref:</b> "+ref+"\n\n"+
     "🏢 <b>Organiser:</b> "+name+(enquiry.contact?" ("+enquiry.contact+")":"")+"\n"+
@@ -307,7 +307,7 @@ function submitEnquiry(){
   if(type==="freestyle"){
     var et=document.getElementById("vf-etype");if(et)et.value="Freestyle Football";
     var aw=document.getElementById("vf-attendance-wrap");if(aw)aw.style.display="none";
-    var btn=document.getElementById("submit-btn");if(btn)btn.textContent="⚽ Submit Freestyle Football Enquiry";
+    var btn=document.getElementById("submit-btn");if(btn)btn.textContent="⚽ Submit Freestyle Soccer Enquiry";
     document.querySelectorAll("#vf-areas-grid .extra-btn").forEach(function(b){
       var txt=b.textContent.toLowerCase();
       if(txt.includes("soccer arena")||txt.includes("activation"))b.classList.add("selected");
