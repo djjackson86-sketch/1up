@@ -475,6 +475,15 @@ textarea{resize:vertical;min-height:70px;}
     <p style="font-size:13px;color:var(--gray);line-height:1.6;">Tap <strong>📥 Export</strong> in Bookings to download a CSV of all bookings.</p>
   </div>
   <div class="card">
+    <div style="font-weight:800;font-size:14px;margin-bottom:8px;">🗄️ Database Sync</div>
+    <p style="font-size:12px;color:var(--gray);line-height:1.5;margin-bottom:10px;">Turso database is connected via Render proxy. LocalStorage remains as fallback while migration is verified.</p>
+    <div id="db-status" style="font-size:12px;color:var(--gray);background:var(--gray-light);border-radius:8px;padding:8px;margin-bottom:10px;">Checking database...</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-o btn-sm" onclick="migrateLocalToDb()">⬆️ Migrate Local Data</button>
+      <button class="btn btn-ghost btn-sm" onclick="dbHydrateActiveBranch()">🔄 Load DB Data</button>
+    </div>
+  </div>
+  <div class="card">
     <div style="font-weight:800;font-size:14px;margin-bottom:10px;">📍 Branch Details</div>
     <div style="font-size:13px;color:var(--gray);line-height:2;">
       <strong style="color:var(--dark);">Fourways Mall</strong><br>
@@ -919,7 +928,89 @@ let bookingFilter="all";
 // ===== STORAGE =====
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
-function saveAll(){lsSet("1up_bk_"+activeBranch,bookings);lsSet("1up_inv",invCounter);}
+
+// ===== DATABASE SYNC (Turso via Render proxy) =====
+const DB_PROXY_URL="https://oneup-proxy.onrender.com";
+let dbOnline=false,dbSyncBusy=false;
+function setDbStatus(msg,type){
+  const el=document.getElementById("db-status");
+  if(!el)return;
+  const colors={ok:["#dcfce7","#166534"],warn:["#fef9c4","#92400e"],err:["#fee2e2","#991b1b"],info:["#f3f4f6","#6b7280"]};
+  const c=colors[type]||colors.info;
+  el.style.background=c[0];el.style.color=c[1];el.textContent=msg;
+}
+async function dbPost(path,payload){
+  const ctrl=new AbortController();
+  const timer=setTimeout(function(){ctrl.abort();},12000);
+  try{
+    const res=await fetch(DB_PROXY_URL+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload||{}),signal:ctrl.signal});
+    const data=await res.json();
+    if(!res.ok||data.error||data.ok===false)throw new Error(data.error||("HTTP "+res.status));
+    dbOnline=true;return data;
+  }finally{clearTimeout(timer);}
+}
+async function dbQuery(sql,params){const data=await dbPost("/api/query",{sql,params:params||[]});return data.rows||[];}
+async function dbRun(sql,params){return await dbPost("/api/run",{sql,params:params||[]});}
+function safeJson(v,d){try{return typeof v==="string"?JSON.parse(v):(v==null?d:v);}catch{return d;}}
+function normalizeLoadedBooking(raw){const b=Object.assign({},raw||{});if(!Array.isArray(b.documents))b.documents=[];return b;}
+function rowToRecord(row){return normalizeLoadedBooking(safeJson(row.raw_data,{}));}
+function recordField(o,names){for(const n of names){if(o&&o[n]!=null&&o[n]!=="")return o[n];}return "";}
+function baseBookingParams(record,type,branch){
+  const b=normalizeLoadedBooking(record);
+  const id=String(b.id||("bk_"+Date.now()+"_"+Math.random().toString(36).slice(2)));
+  if(!b.id)b.id=id;
+  const bookingType=type||b.bookingType||b.type||"party";
+  return [id,id,branch||b.branch||activeBranch,"staff",bookingType,b.status||"pending",
+    recordField(b,["name","customerName","contact"]),recordField(b,["phone","tel"]),recordField(b,["email"]),
+    recordField(b,["eventType","etype","type"]),recordField(b,["pkg","package","packageName","activity"]),
+    recordField(b,["date"]),recordField(b,["edate","endDate"]),recordField(b,["time","timeslot"]),recordField(b,["stime","startTime"]),recordField(b,["etime","endTime"]),
+    Number(recordField(b,["price","total"])||0),Number(recordField(b,["deposit"])||0),recordField(b,["vatOpt","vat"]),recordField(b,["notes","requirements"]),
+    JSON.stringify(b.areas||[]),JSON.stringify(b.services||[]),JSON.stringify(b.extras||[]),JSON.stringify(b)];
+}
+async function dbUpsertRecord(table,record,type,branch){
+  const sql=`INSERT OR REPLACE INTO ${table} (id,legacy_id,branch_id,source,booking_type,status,customer_name,customer_phone,customer_email,event_type,package_name,date,end_date,timeslot,start_time,end_time,price,deposit,vat_opt,notes,areas,services,extras,raw_data,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))`;
+  return await dbRun(sql,baseBookingParams(record,type,branch));
+}
+function dbMirrorPartyBookings(){
+  if(dbSyncBusy)return;
+  bookings.forEach(function(b){dbUpsertRecord("bookings",b,"party",activeBranch).catch(function(e){console.warn("DB party sync failed",e);setDbStatus("Database sync warning: "+e.message,"warn");});});
+  dbRun("UPDATE invoice_counter SET value=? WHERE id=1",[Number(invCounter)||1]).catch(function(){});
+}
+function dbMirrorVenueBookings(){
+  if(dbSyncBusy)return;
+  venueBookings.forEach(function(v){dbUpsertRecord("venue_bookings",v,v.bookingType||"event",activeBranch).catch(function(e){console.warn("DB venue sync failed",e);setDbStatus("Database sync warning: "+e.message,"warn");});});
+}
+async function dbHydrateActiveBranch(){
+  try{
+    setDbStatus("Loading database data...","info");
+    const partyRows=await dbQuery("SELECT raw_data FROM bookings WHERE branch_id=? ORDER BY date, created_at",[activeBranch]);
+    const venueRows=await dbQuery("SELECT raw_data FROM venue_bookings WHERE branch_id=? ORDER BY date, created_at",[activeBranch]);
+    if(partyRows.length){bookings=partyRows.map(rowToRecord);lsSet("1up_bk_"+activeBranch,bookings);}
+    if(venueRows.length){venueBookings=venueRows.map(rowToRecord);lsSet("1up_venue_"+activeBranch,venueBookings);}
+    try{const inv=await dbQuery("SELECT value FROM invoice_counter WHERE id=1",[]);if(inv.length&&inv[0].value)invCounter=Number(inv[0].value)||invCounter;}catch{}
+    setDbStatus("Database online: loaded "+partyRows.length+" party + "+venueRows.length+" event/freestyle records for "+activeBranch+".","ok");
+    renderDashboard();renderKanban();renderCalendar();if(typeof renderVenueList==="function")renderVenueList();
+  }catch(e){dbOnline=false;setDbStatus("Database unavailable — using local fallback. "+e.message,"err");}
+}
+async function migrateLocalToDb(){
+  if(dbSyncBusy)return;
+  dbSyncBusy=true;
+  try{
+    setDbStatus("Migrating local data to database...","info");
+    let partyCount=0,venueCount=0;
+    for(const br of ["fourways","rosebank"]){
+      const party=lsGet("1up_bk_"+br,[]);
+      for(const b of party){await dbUpsertRecord("bookings",b,"party",br);partyCount++;}
+      const venue=lsGet("1up_venue_"+br,[]);
+      for(const v of venue){await dbUpsertRecord("venue_bookings",v,v.bookingType||"event",br);venueCount++;}
+    }
+    await dbRun("UPDATE invoice_counter SET value=? WHERE id=1",[Number(lsGet("1up_inv",invCounter))||1]);
+    setDbStatus("Migration complete: "+partyCount+" party + "+venueCount+" event/freestyle records saved to Turso.","ok");
+    await dbHydrateActiveBranch();
+  }catch(e){setDbStatus("Migration failed: "+e.message,"err");}
+  finally{dbSyncBusy=false;}
+}
+function saveAll(){lsSet("1up_bk_"+activeBranch,bookings);lsSet("1up_inv",invCounter);dbMirrorPartyBookings();}
 function loadAll(){
   bookings=lsGet("1up_bk_"+activeBranch,[]);
   invCounter=lsGet("1up_inv",1);
@@ -2146,7 +2237,7 @@ function resetAll(){if(!confirm("Reset ALL data for "+activeBranch+" branch?"))r
 let venueBookings=[], venueEditId=null, venueFilter="all", venueMode="event";
 
 function loadVenue(){venueBookings=lsGet("1up_venue_"+activeBranch,[]);}
-function saveVenueAll(){lsSet("1up_venue_"+activeBranch,venueBookings);}
+function saveVenueAll(){lsSet("1up_venue_"+activeBranch,venueBookings);dbMirrorVenueBookings();}
 
 function setVFilter(f){
   venueFilter=f;
@@ -2758,6 +2849,7 @@ loadStock();
 renderDashboard();
 renderBookings();
 renderActivities();
+setTimeout(function(){dbHydrateActiveBranch();},500);
 
 // ===== STOCK CALCULATOR =====
 let _calcId="", _calcSc="", _calcUnitTypes=[];
