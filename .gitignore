@@ -1,0 +1,10 @@
+# Local credentials / generated helpers
+turso-access.txt
+apply_schema.sh
+
+# Local backups
+*.bak
+
+# Agent local working dirs
+.claude/
+.hermes/
