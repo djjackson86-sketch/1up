@@ -128,9 +128,7 @@ textarea{resize:vertical;min-height:70px;}
 .branch-pill.rb{background:#1a1a40;color:#00E5FF;}
 .cal-day.venue-block{background:#111;border-color:#111;}
 .cal-day.venue-block .cal-day-num{color:var(--or);}
-.cal-day.stock-warn{border-color:var(--red);}
 .cal-dot-venue{width:6px;height:6px;border-radius:50%;background:var(--or);display:inline-block;margin:1px;}
-.cal-dot-stock{width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;margin:1px;}
 .cal-legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 0 2px;font-size:11px;color:var(--gray);}
 .cal-legend-item{display:flex;align-items:center;gap:5px;font-weight:600;}
 /* CUSTOMER FORM STYLES */
@@ -213,7 +211,6 @@ textarea{resize:vertical;min-height:70px;}
     <div class="cal-legend">
       <div class="cal-legend-item"><span class="cal-dot"></span> Kids Party</div>
       <div class="cal-legend-item"><span class="cal-dot-venue"></span> Event / Freestyle</div>
-      <div class="cal-legend-item"><span class="cal-dot-stock"></span> Low stock</div>
     </div>
     <div class="cal-grid" id="cal-headers"></div>
     <div class="cal-grid" id="cal-body" style="margin-top:4px;"></div>
@@ -1469,30 +1466,6 @@ function renderDashboard(){
 }
 
 // ===== CALENDAR =====
-function getStockWarningDates(){
-  // Returns a Set of YYYY-MM-DD strings for next 30 days where low stock exists
-  const hasLow=checkHasLowStock();
-  if(!hasLow)return new Set();
-  // Flag next weekend + next 7 days as needing restock
-  const dates=new Set();
-  const now=new Date();
-  for(let i=1;i<=14;i++){
-    const d=new Date(now);d.setDate(now.getDate()+i);
-    dates.add(d.toISOString().slice(0,10));
-  }
-  return dates;
-}
-function checkHasLowStock(){
-  if(!stockData)return false;
-  const allItems=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets];
-  return allItems.some(item=>{
-    const sc=_storeCatOf(item.cat);
-    const d=stockData[sc]?.[item.id];
-    const qty=d!=null?d.qty:item.qty;
-    const rp=d!=null?d.reorderPt:item.reorderPt;
-    return stockStatus(qty,rp)!=="ok";
-  });
-}
 function renderCalendar(){
   const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
   document.getElementById("cal-title").textContent=months[calMonth]+" "+calYear;
@@ -1511,18 +1484,15 @@ function renderCalendar(){
       venueBlocked.add(d.toISOString().slice(0,10));
     }
   });
-  const stockWarnDates=getStockWarningDates();
   let html="";
   for(let i=0;i<offset;i++)html+='<div class="cal-empty"></div>';
   for(let d=1;d<=days;d++){
     const ds=calYear+"-"+pad(calMonth+1)+"-"+pad(d);
     const dayBooks=bookings.filter(b=>b.date===ds&&b.status!=="cancelled");
     const isVenueBlocked=venueBlocked.has(ds);
-    const isStockWarn=stockWarnDates.has(ds)&&d<=7; // only flag first 7 days ahead
-    let classes=`cal-day${ds===td?" today":""}${dayBooks.length?" has-booking":""}${isVenueBlocked?" venue-block":""}${isStockWarn&&!isVenueBlocked?" stock-warn":""}`;
+    let classes=`cal-day${ds===td?" today":""}${dayBooks.length?" has-booking":""}${isVenueBlocked?" venue-block":""}`;
     let dots=dayBooks.slice(0,2).map(()=>'<span class="cal-dot"></span>').join("");
     if(isVenueBlocked)dots+='<span class="cal-dot-venue"></span>';
-    if(isStockWarn&&d<=7)dots+='<span class="cal-dot-stock"></span>';
     html+=`<div class="${classes}" onclick="showDay('${ds}','${isVenueBlocked?'blocked':''}')">
       <div class="cal-day-num">${d}</div>${dots}
     </div>`;
@@ -1549,17 +1519,6 @@ function showDay(ds,flag=''){
       <div style="font-size:12px;font-weight:700;margin-bottom:4px;">🏟️ VENUE HIRE — BLOCKED FOR PARTIES</div>
       ${dayVenue.map(v=>`<div style="font-size:13px;color:#fff;">${v.name||"?"} · ${v.etype||"Event"} · ${v.stime||""}${v.etime?"–"+v.etime:""}</div>`).join("")}
     </div>`;
-  }
-  // Stock warning banner
-  if(checkHasLowStock()){
-    const td2=today();
-    const diff=(new Date(ds+"T00:00:00")-new Date(td2+"T00:00:00"))/(1000*60*60*24);
-    if(diff>=0&&diff<=7){
-      html+=`<div style="background:var(--red-light);border:1px solid var(--red);border-radius:10px;padding:10px 14px;margin-bottom:10px;cursor:pointer;" onclick="closeDay();showTab('stock');">
-        <div style="font-size:12px;font-weight:700;color:var(--red);">⚠️ LOW STOCK — Tap to view stock take</div>
-        <div style="font-size:11px;color:var(--red);margin-top:2px;">Some items need to be restocked before this date</div>
-      </div>`;
-    }
   }
   // Party bookings
   if(dayBooks.length){
