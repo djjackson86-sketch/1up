@@ -948,6 +948,12 @@ async function dbPost(path,payload){
 }
 async function dbQuery(sql,params){const data=await dbPost("/api/query",{sql,params:params||[]});return data.rows||[];}
 async function dbRun(sql,params){return await dbPost("/api/run",{sql,params:params||[]});}
+// Tombstone helpers: local deletes stay deleted even if the DB row is still there.
+function dbDeletedKey(table){return table==="bookings"?("1up_del_bk_"+activeBranch):("1up_del_vn_"+activeBranch);}
+function dbDeletedList(table){return (lsGet(dbDeletedKey(table),[])||[]).map(String);}
+function dbMarkDeleted(id,table){try{const k=dbDeletedKey(table);const a=lsGet(k,[]);if(a.indexOf(String(id))===-1){a.push(String(id));lsSet(k,a);}}catch(e){}}
+function dbClearDeleted(id,table){try{const k=dbDeletedKey(table);const a=(lsGet(k,[])||[]).filter(function(x){return x!==String(id);});lsSet(k,a);}catch(e){}}
+function dbDeleteBookingRow(table,id){return dbRun("DELETE FROM "+table+" WHERE id=? AND branch_id=?",[String(id),activeBranch]).then(function(r){if(r&&r.ok!==false)dbClearDeleted(id,table);return r;}).catch(function(e){console.warn("DB delete failed for "+table+" "+id,e);});}
 function safeJson(v,d){try{return typeof v==="string"?JSON.parse(v):(v==null?d:v);}catch{return d;}}
 function normalizeLoadedBooking(raw){const b=Object.assign({},raw||{});if(!Array.isArray(b.documents))b.documents=[];return b;}
 function rowToRecord(row){return normalizeLoadedBooking(safeJson(row.raw_data,{}));}
@@ -980,12 +986,17 @@ function dbMirrorVenueBookings(){
 async function dbHydrateActiveBranch(){
   try{
     setDbStatus("Loading database data...","info");
-    const partyRows=await dbQuery("SELECT raw_data FROM bookings WHERE branch_id=? ORDER BY date, created_at",[activeBranch]);
-    const venueRows=await dbQuery("SELECT raw_data FROM venue_bookings WHERE branch_id=? ORDER BY date, created_at",[activeBranch]);
-    if(partyRows.length){bookings=partyRows.map(rowToRecord);lsSet("1up_bk_"+activeBranch,bookings);}
-    if(venueRows.length){venueBookings=venueRows.map(rowToRecord);lsSet("1up_venue_"+activeBranch,venueBookings);}
+    const partyRows=await dbQuery("SELECT id, raw_data FROM bookings WHERE branch_id=? ORDER BY date, created_at",[activeBranch]);
+    const venueRows=await dbQuery("SELECT id, raw_data FROM venue_bookings WHERE branch_id=? ORDER BY date, created_at",[activeBranch]);
+    const delParty=dbDeletedList("bookings"),delVenue=dbDeletedList("venue_bookings");
+    const partyKeep=partyRows.filter(function(r){return delParty.indexOf(String(r.id))===-1;});
+    const venueKeep=venueRows.filter(function(r){return delVenue.indexOf(String(r.id))===-1;});
+    if(partyRows.length&&(partyKeep.length||delParty.length)){bookings=partyKeep.map(rowToRecord);lsSet("1up_bk_"+activeBranch,bookings);}
+    if(venueRows.length&&(venueKeep.length||delVenue.length)){venueBookings=venueKeep.map(rowToRecord);lsSet("1up_venue_"+activeBranch,venueBookings);}
+    partyRows.forEach(function(r){if(delParty.indexOf(String(r.id))>-1)dbDeleteBookingRow("bookings",r.id);});
+    venueRows.forEach(function(r){if(delVenue.indexOf(String(r.id))>-1)dbDeleteBookingRow("venue_bookings",r.id);});
     try{const inv=await dbQuery("SELECT value FROM invoice_counter WHERE id=1",[]);if(inv.length&&inv[0].value)invCounter=Number(inv[0].value)||invCounter;}catch{}
-    setDbStatus("Database online: loaded "+partyRows.length+" party + "+venueRows.length+" event/freestyle records for "+activeBranch+".","ok");
+    setDbStatus("Database online: loaded "+partyKeep.length+" party + "+venueKeep.length+" event/freestyle records for "+activeBranch+".","ok");
     renderDashboard();renderKanban();renderCalendar();if(typeof renderVenueList==="function")renderVenueList();
   }catch(e){dbOnline=false;setDbStatus("Database unavailable — using local fallback. "+e.message,"err");}
 }
@@ -1606,7 +1617,7 @@ function renderBookings(q=""){
   }).join("");
 }
 
-function delBook(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>+b.id!==+id);saveAll();renderDashboard();renderKanban();renderCalendar();}
+function delBook(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>+b.id!==+id);saveAll();dbMarkDeleted(id,"bookings");dbDeleteBookingRow("bookings",id);renderDashboard();renderKanban();renderCalendar();}
 function quickStatus(id,s){const b=bookings.find(x=>+x.id===+id);if(!b)return;b.status=s;saveAll();renderDashboard();renderKanban();renderCalendar();}
 
 // ===== ACTIVITIES =====
@@ -2327,7 +2338,7 @@ function saveVenue(){
 
 function closeVenue(){document.getElementById("modal-venue").classList.remove("open");venueEditId=null;venueMode="event";}
 function quickVStatus(id,s){const v=venueBookings.find(x=>+x.id===+id);if(!v)return;v.status=s;saveVenueAll();renderKanban();renderCalendar();}
-function delVenue(id){if(!confirm("Delete this venue hire booking?"))return;venueBookings=venueBookings.filter(x=>+x.id!==+id);saveVenueAll();renderKanban();renderCalendar();}
+function delVenue(id){if(!confirm("Delete this venue hire booking?"))return;venueBookings=venueBookings.filter(x=>+x.id!==+id);saveVenueAll();dbMarkDeleted(id,"venue_bookings");dbDeleteBookingRow("venue_bookings",id);renderKanban();renderCalendar();}
 
 function venueSmartFill(){
   const txt=document.getElementById("venue-smart").value.trim();
