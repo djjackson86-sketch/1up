@@ -309,6 +309,50 @@ textarea{resize:vertical;min-height:70px;}
 
 <!-- STOCK TAKE -->
 <div class="page" id="page-stock">
+  <!-- Top action bar: Add Item / Add Category / Delete Category -->
+  <div class="card" style="padding:10px 12px;margin-bottom:10px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-o btn-sm" onclick="skTogglePanel('add-item-panel')">➕ Add Item</button>
+      <button class="btn btn-ghost btn-sm" onclick="skTogglePanel('add-cat-panel')">➕ Add Category</button>
+      <button class="btn btn-ghost btn-sm" onclick="skTogglePanel('del-cat-panel')">🗑 Delete Category</button>
+    </div>
+
+    <!-- Add New Item bar (revealed by "Add Item") -->
+    <div id="add-item-panel" style="display:none;margin-top:12px;">
+      <div style="font-weight:800;font-size:14px;margin-bottom:10px;">➕ Add New Item</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div class="form-group" style="margin:0;"><label>Item Name</label><input id="new-item-name" placeholder="e.g. Monster Energy 500ml"></div>
+        <div class="form-group" style="margin:0;"><label>Category</label>
+          <select id="new-item-cat"></select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div class="form-group" style="margin:0;"><label>Unit</label><input id="new-item-unit" placeholder="e.g. can, bag, kg"></div>
+        <div class="form-group" style="margin:0;"><label>Reorder Pt</label><input id="new-item-min" type="number" placeholder="e.g. 12" min="0"></div>
+        <div class="form-group" style="margin:0;"><label>Order Qty</label><input id="new-item-cost" type="number" placeholder="e.g. 24" min="0"></div>
+      </div>
+      <button class="btn btn-o" style="width:100%;" onclick="addStockItem()">✅ Add Item</button>
+    </div>
+
+    <!-- Add Category bar -->
+    <div id="add-cat-panel" style="display:none;margin-top:12px;">
+      <div style="font-weight:800;font-size:14px;margin-bottom:10px;">➕ Add New Category</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div class="form-group" style="margin:0;"><label>Category Name</label><input id="new-cat-name" placeholder="e.g. Hot Food"></div>
+        <div class="form-group" style="margin:0;"><label>Icon (optional)</label><input id="new-cat-emoji" placeholder="e.g. 🌭" maxlength="4"></div>
+      </div>
+      <button class="btn btn-o" style="width:100%;" onclick="addCategory()">✅ Add Category</button>
+    </div>
+
+    <!-- Delete Category bar -->
+    <div id="del-cat-panel" style="display:none;margin-top:12px;">
+      <div style="font-weight:800;font-size:14px;margin-bottom:10px;">🗑 Delete Category</div>
+      <div class="form-group" style="margin:0 0 10px;"><label>Category</label><select id="del-cat-key"></select></div>
+      <div style="font-size:11px;color:var(--gray);margin-bottom:10px;">Items in a deleted category are moved to Uncategorised — stock items are never deleted here.</div>
+      <button class="btn btn-ghost" style="width:100%;border-color:#fca5a5;color:var(--red);" onclick="deleteCategory()">🗑 Delete Category</button>
+    </div>
+  </div>
+
   <!-- Stats -->
   <div class="stats-grid" style="margin-bottom:12px;">
     <div class="stat-card"><div class="stat-num" id="sk-total" style="font-size:20px;">0</div><div class="stat-label">Items</div></div>
@@ -323,14 +367,7 @@ textarea{resize:vertical;min-height:70px;}
       <span class="search-icon">🔍</span>
       <input type="text" id="stock-search" placeholder="Search items..." oninput="renderStockTable()">
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="btn btn-sm" id="scat-all" onclick="setStockCat('all')" style="background:#111;color:var(--or);">All</button>
-      <button class="btn btn-sm btn-ghost" id="scat-machines" onclick="setStockCat('machines')">☕ Machines</button>
-      <button class="btn btn-sm btn-ghost" id="scat-drinks" onclick="setStockCat('drinks')">🥤 Drinks</button>
-      <button class="btn btn-sm btn-ghost" id="scat-snacks" onclick="setStockCat('snacks')">🍿 Snacks</button>
-      <button class="btn btn-sm btn-ghost" id="scat-sweets" onclick="setStockCat('sweets')">🍭 Sweets</button>
-      <button class="btn btn-sm btn-ghost" id="scat-low" onclick="setStockCat('low')">⚠️ Low/Out</button>
-    </div>
+    <div id="stock-cat-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
   </div>
 
   <!-- Action Buttons -->
@@ -341,33 +378,6 @@ textarea{resize:vertical;min-height:70px;}
 
   <!-- Stock Item Cards -->
   <div id="stock-tbody"></div>
-
-  <!-- Add Custom Item -->
-  <div class="card">
-    <div style="font-weight:800;font-size:14px;margin-bottom:10px;">➕ Add New Item</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div class="form-group" style="margin:0;"><label>Item Name</label><input id="new-item-name" placeholder="e.g. Monster Energy 500ml"></div>
-      <div class="form-group" style="margin:0;"><label>Category</label>
-        <select id="new-item-cat">
-          <option value="machines">☕ Machines</option>
-          <option value="energy">⚡ Energy Drinks</option>
-          <option value="fizzy">🫧 Fizzy Drinks</option>
-          <option value="slush">🧊 Slush</option>
-          <option value="coffee">☕ Coffee</option>
-          <option value="boba">🧋 Boba</option>
-          <option value="water">💧 Water</option>
-          <option value="snacks">🍿 Snacks</option>
-          <option value="sweets">🍭 Sweets</option>
-        </select>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div class="form-group" style="margin:0;"><label>Unit</label><input id="new-item-unit" placeholder="e.g. can, bag, kg"></div>
-      <div class="form-group" style="margin:0;"><label>Reorder Pt</label><input id="new-item-min" type="number" placeholder="e.g. 12" min="0"></div>
-      <div class="form-group" style="margin:0;"><label>Order Qty</label><input id="new-item-cost" type="number" placeholder="e.g. 24" min="0"></div>
-    </div>
-    <button class="btn btn-o" style="width:100%;" onclick="addStockItem()">➕ Add Item</button>
-  </div>
 </div>
 
 <!-- VENUE HIRE MODAL -->
@@ -2444,6 +2454,194 @@ const STOCK_DEF={
 
 let stockData={}, stockCatFilter="all";
 
+// ===== STOCK CATEGORIES (per branch) =====
+// A "category" is a top-level section on the stock page (chips) and a bucket inside stockData.
+// Persisted additively at 1up_stock_cats_<branch>; default cats are hidden with a `deleted` flag,
+// never code-erased. Stock items are never deleted when a category goes away.
+const STOCK_CATS_DEFAULT=[
+  {key:"machines",name:"Machines",label:"☕ Machines"},
+  {key:"drinks",  name:"Drinks",  label:"🥤 Drinks"},
+  {key:"snacks",  name:"Snacks",  label:"🍿 Snacks"},
+  {key:"sweets",  name:"Sweets",  label:"🍭 Sweets"}
+];
+const STOCK_CAT_UNCAT="_uncat";
+let stockCats=[];
+
+function _stockCatsRaw(){ const v=lsGet("1up_stock_cats_"+activeBranch,null); return Array.isArray(v)?v:[]; }
+function _stockCatsSave(list){ lsSet("1up_stock_cats_"+activeBranch,list); }
+
+// Def bucket per category (creates the array for custom categories)
+function stockDefArr(key){ if(!STOCK_DEF[key])STOCK_DEF[key]=[]; return STOCK_DEF[key]; }
+
+// Every visible item def, tagged with its category key
+function stockAllDefs(){
+  const out=[];
+  stockCats.forEach(c=>{
+    stockDefArr(c.key).forEach(i=>out.push({...i,storeCat:c.key}));
+  });
+  return out;
+}
+
+function stockCatLabel(c){ return (c.emoji?c.emoji+" ":"")+(c.name||c.key); }
+
+// Resolve the visible category list for the active branch
+function loadStockCats(){
+  const raw=_stockCatsRaw();
+  const byKey={};
+  raw.forEach(c=>{ if(c&&c.key)byKey[c.key]=c; });
+  const out=[];
+  STOCK_CATS_DEFAULT.forEach(c=>{
+    const s=byKey[c.key];
+    if(s&&s.deleted)return;
+    out.push({key:c.key,name:(s&&s.name)||c.name,emoji:(s&&s.emoji)||"",label:(s&&s.label)||c.label,isDefault:true});
+  });
+  raw.forEach(c=>{
+    if(!c||!c.key||c.deleted)return;
+    if(out.some(x=>x.key===c.key))return;
+    out.push({key:c.key,name:c.name||c.key,emoji:c.emoji||"",isDefault:false});
+  });
+  stockCats=out;
+  if(!stockCats.length)stockCats=[{key:STOCK_CAT_UNCAT,name:"Uncategorised",emoji:"📦",isDefault:false}];
+}
+
+// Create the Uncategorised category on demand (default target when a category is deleted)
+function ensureUncatCat(){
+  let cat=stockCats.find(c=>c.key===STOCK_CAT_UNCAT);
+  if(cat)return cat.key;
+  cat={key:STOCK_CAT_UNCAT,name:"Uncategorised",emoji:"📦",isDefault:false};
+  stockCats.push(cat);
+  const raw=_stockCatsRaw().filter(c=>c&&c.key!==STOCK_CAT_UNCAT);
+  raw.push({key:STOCK_CAT_UNCAT,name:"Uncategorised",emoji:"📦"});
+  _stockCatsSave(raw);
+  if(!stockData[STOCK_CAT_UNCAT])stockData[STOCK_CAT_UNCAT]={};
+  stockDefArr(STOCK_CAT_UNCAT);
+  return STOCK_CAT_UNCAT;
+}
+
+function slugStockCat(name){
+  let k=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
+  if(!k)k="cat";
+  if(!/^[a-z]/.test(k))k="cat_"+k;
+  return k;
+}
+
+function renderStockCats(){
+  const wrap=document.getElementById("stock-cat-chips");
+  if(!wrap)return;
+  if(!stockCats.some(c=>c.key===stockCatFilter)&&["all","low"].indexOf(stockCatFilter)===-1)stockCatFilter="all";
+  const chips=[{key:"all",label:"All"}]
+    .concat(stockCats.map(c=>({key:c.key,label:stockCatLabel(c)})))
+    .concat([{key:"low",label:"⚠️ Low/Out"}]);
+  wrap.innerHTML=chips.map(ch=>
+    `<button class="btn btn-sm btn-ghost" id="scat-${ch.key}" onclick="setStockCat('${ch.key}')">${ch.label}</button>`
+  ).join("");
+  setStockCat(stockCatFilter);
+}
+
+function renderNewItemCatOptions(){
+  const sel=document.getElementById("new-item-cat");
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML=stockCats.map(c=>`<option value="${c.key}">${stockCatLabel(c)}</option>`).join("");
+  if(cur&&stockCats.some(c=>c.key===cur))sel.value=cur;
+}
+
+function renderDelCatOptions(){
+  const sel=document.getElementById("del-cat-key");
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML=stockCats.map(c=>{
+    const n=stockDefArr(c.key).length;
+    return `<option value="${c.key}">${stockCatLabel(c)}${n?" ("+n+" item"+(n===1?"":"s")+")":""}</option>`;
+  }).join("");
+  if(cur&&stockCats.some(c=>c.key===cur))sel.value=cur;
+}
+
+function skTogglePanel(id){
+  ["add-item-panel","add-cat-panel","del-cat-panel"].forEach(p=>{
+    const el=document.getElementById(p);
+    if(!el)return;
+    if(p!==id){el.style.display="none";return;}
+    const opening=el.style.display==="none"||!el.style.display;
+    el.style.display=opening?"block":"none";
+    if(opening&&p==="add-item-panel"){
+      renderNewItemCatOptions();
+      const n=document.getElementById("new-item-name");if(n)n.focus();
+    }
+    if(opening&&p==="del-cat-panel")renderDelCatOptions();
+    if(opening&&p==="add-cat-panel"){
+      const c=document.getElementById("new-cat-name");if(c)c.focus();
+    }
+  });
+}
+
+function addCategory(){
+  const nameEl=document.getElementById("new-cat-name");
+  const emojiEl=document.getElementById("new-cat-emoji");
+  const name=(nameEl?.value||"").trim();
+  if(!name){alert("Enter a category name.");return;}
+  const emoji=(emojiEl?.value||"").trim();
+  const key=slugStockCat(name);
+  if(stockCats.some(c=>c.key===key)){alert("A category with that name already exists.");return;}
+  const raw=_stockCatsRaw().filter(c=>c&&c.key!==key);
+  raw.push({key,name,emoji});
+  _stockCatsSave(raw);
+  loadStockCats();
+  if(!stockData[key])stockData[key]={};
+  stockDefArr(key);
+  saveStockData();
+  if(nameEl)nameEl.value="";
+  if(emojiEl)emojiEl.value="";
+  renderStockCats();renderNewItemCatOptions();renderDelCatOptions();renderStockTable();
+  showStockToast("✅ Category added: "+name);
+}
+
+function deleteCategory(){
+  const sel=document.getElementById("del-cat-key");
+  const key=sel?sel.value:"";
+  if(!key){alert("Choose a category to delete.");return;}
+  const cat=stockCats.find(c=>c.key===key);
+  if(!cat){alert("That category no longer exists.");return;}
+  if(stockCats.length<=1){alert("Keep at least one category.");return;}
+  const defs=stockDefArr(key);
+  const count=defs.length;
+  let target="";
+  if(count>0){
+    if(!confirm(cat.name+" has "+count+" item"+(count===1?"":"s")+".\n\nDelete the category and move those items to Uncategorised? No stock items will be deleted."))return;
+    target=ensureUncatCat();
+  } else {
+    if(!confirm('Delete the category "'+cat.name+'"?'))return;
+  }
+  if(target&&count>0){
+    defs.slice().forEach(item=>{
+      const rec=(stockData[key]||{})[item.id];
+      const moved=rec?{...rec}:{};
+      delete moved.deleted;delete moved.movedTo;
+      moved.qty=moved.qty??item.qty??0;
+      moved.reorderPt=moved.reorderPt??item.reorderPt??0;
+      moved.orderQty=moved.orderQty??item.orderQty??0;
+      moved.unit=moved.unit||item.unit||"unit";
+      moved.name=moved.name||item.name||item.id;
+      moved.subcat=moved.subcat||item.cat||target;
+      if(!stockData[target])stockData[target]={};
+      stockData[target][item.id]=moved;
+      const tarr=stockDefArr(target);
+      if(!tarr.find(x=>x.id===item.id))tarr.push({...item,cat:item.cat||target});
+      if(!stockData[key])stockData[key]={};
+      stockData[key][item.id]={deleted:true};   // tombstone so the def cannot resurrect
+    });
+  }
+  const raw=_stockCatsRaw().filter(c=>c&&c.key!==key);
+  if(STOCK_CATS_DEFAULT.some(d=>d.key===key))raw.push({key,deleted:true});
+  _stockCatsSave(raw);
+  loadStockCats();
+  if(!stockData[key])stockData[key]={};
+  saveStockData();
+  if(stockCatFilter===key)stockCatFilter="all";
+  renderStockCats();renderNewItemCatOptions();renderDelCatOptions();renderStockTable();
+  showStockToast(target?"🗑 Category deleted · items moved to Uncategorised":"🗑 Category deleted");
+}
+
 // Returns {singleName, unitTypes:[{name,size}]} largest-first, migrating old hasCase/hasPack fields
 function getUnitTypes(d, item){
   const singleName=d?.singleName||(item?.unit)||"unit";
@@ -2458,40 +2656,68 @@ function largestUnit(unitTypes,singleName){
   if(!unitTypes||!unitTypes.length)return{name:singleName,size:1};
   return unitTypes.reduce((a,b)=>b.size>a.size?b:a);
 }
-const _storeCatOf=c=>c==="machines"?"machines":["energy","fizzy","slush","coffee","boba","water"].includes(c)?"drinks":c==="snacks"?"snacks":"sweets";
+function _storeCatOf(c){
+  if(stockCats.some(x=>x.key===c))return c;
+  return c==="machines"?"machines":["energy","fizzy","slush","coffee","boba","water"].includes(c)?"drinks":c==="snacks"?"snacks":"sweets";
+}
 
 function loadStock(){
-  const saved=lsGet("1up_stock_"+activeBranch,null);
-  stockData={machines:{},drinks:{},snacks:{},sweets:{}};
-  [...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets].forEach(item=>{
-    const sc=_storeCatOf(item.cat);
-    const prev=saved&&saved[sc]&&saved[sc][item.id];
-    if(prev?.deleted){["machines","drinks","snacks","sweets"].forEach(k=>{const idx=STOCK_DEF[k].findIndex(x=>x.id===item.id);if(idx!==-1)STOCK_DEF[k].splice(idx,1);});return;}
-    stockData[sc][item.id]={
-      qty:      prev!=null?(prev.qty??item.qty):item.qty,
-      reorderPt:prev!=null?(prev.reorderPt??prev.min??item.reorderPt):item.reorderPt,
-      orderQty: prev!=null?(prev.orderQty??item.orderQty):item.orderQty,
-      stockTakeTime:prev?.stockTakeTime||"",
-      unit:     prev?.unit||item.unit,
-      singleName:prev?.singleName||prev?.unit||item.unit,
-      unitTypes: prev?.unitTypes!==undefined?prev.unitTypes:undefined,
-      name:     prev?.name||item.name,
-      subcat:   item.cat
-    };
+  const saved=lsGet("1up_stock_"+activeBranch,null)||null;
+  loadStockCats();
+  stockData={};
+  stockCats.forEach(c=>{stockData[c.key]={};});
+  // Rebuild each category from its def bucket, applying saved values + tombstones
+  stockCats.forEach(c=>{
+    stockDefArr(c.key).slice().forEach(item=>{
+      const prev=saved&&saved[c.key]&&saved[c.key][item.id];
+      if(prev?.deleted||prev?.movedTo){
+        const arr=stockDefArr(c.key);
+        const idx=arr.findIndex(x=>x.id===item.id);
+        if(idx!==-1)arr.splice(idx,1);
+        return;
+      }
+      stockData[c.key][item.id]={
+        qty:      prev!=null?(prev.qty??item.qty):item.qty,
+        reorderPt:prev!=null?(prev.reorderPt??prev.min??item.reorderPt):item.reorderPt,
+        orderQty: prev!=null?(prev.orderQty??item.orderQty):item.orderQty,
+        stockTakeTime:prev?.stockTakeTime||"",
+        unit:     prev?.unit||item.unit,
+        singleName:prev?.singleName||prev?.unit||item.unit,
+        unitTypes: prev?.unitTypes!==undefined?prev.unitTypes:undefined,
+        name:     prev?.name||item.name,
+        subcat:   item.cat
+      };
+    });
   });
-  // Restore custom items
+  // Restore saved items (custom items + items moved between categories)
   if(saved){
+    const orphans=[];
+    const restore=(id,d,dest)=>{
+      if(!stockData[dest])stockData[dest]={};
+      if(stockData[dest][id])return;
+      stockData[dest][id]={qty:d.qty||0,reorderPt:d.reorderPt??d.min??0,orderQty:d.orderQty||0,stockTakeTime:d.stockTakeTime||"",unit:d.unit||"unit",name:d.name||id,subcat:d.subcat||dest};
+      if(d.singleName)stockData[dest][id].singleName=d.singleName;
+      if(d.unitTypes!==undefined)stockData[dest][id].unitTypes=d.unitTypes;
+      const defArr=stockDefArr(dest);
+      if(!defArr.find(x=>x.id===id))defArr.push({id,name:d.name||id,cat:d.subcat||dest,unit:d.unit||"unit",qty:d.qty||0,reorderPt:d.reorderPt??0,orderQty:d.orderQty??0});
+    };
     Object.entries(saved).forEach(([sc,items])=>{
+      if(!items||typeof items!=="object")return;
+      const known=stockCats.some(c=>c.key===sc);
       Object.entries(items).forEach(([id,d])=>{
-        if(d?.deleted)return;
-        if(!stockData[sc][id]){
-          stockData[sc][id]={qty:d.qty||0,reorderPt:d.reorderPt??d.min??0,orderQty:d.orderQty||0,stockTakeTime:d.stockTakeTime||"",unit:d.unit||"unit",name:d.name||id,subcat:d.subcat||sc};
-          const defArr=STOCK_DEF[sc]||STOCK_DEF.sweets;
-          if(!defArr.find(x=>x.id===id))defArr.push({id,name:d.name||id,cat:d.subcat||sc,unit:d.unit||"unit",qty:d.qty||0,reorderPt:d.reorderPt??0,orderQty:d.orderQty||0});
-        }
+        if(!d||typeof d!=="object")return;
+        if(d.deleted||d.movedTo)return;
+        if(known)restore(id,d,sc);else orphans.push([id,d]);
       });
     });
+    // Items left in a category that no longer exists are re-homed, never dropped
+    if(orphans.length){
+      const target=ensureUncatCat();
+      orphans.forEach(([id,d])=>restore(id,d,target));
+      saveStockData();
+    }
   }
+  renderStockCats();renderNewItemCatOptions();renderDelCatOptions();
 }
 
 function saveStockData(){lsSet("1up_stock_"+activeBranch,stockData);}
@@ -2504,20 +2730,15 @@ function stockStatus(qty,rp){
 
 function setStockCat(c){
   stockCatFilter=c;
-  document.querySelectorAll("[id^='scat-']").forEach(b=>{b.style.background="var(--gray-light)";b.style.color="var(--dark)";});
+  document.querySelectorAll("[id^='scat-']").forEach(b=>{b.className="btn btn-sm btn-ghost";b.style.background="";b.style.color="";});
   const el=document.getElementById("scat-"+c);
-  if(el){el.style.background="#111";el.style.color="var(--or)";}
+  if(el){el.className="btn btn-sm";el.style.background="#111";el.style.color="var(--or)";}
   renderStockTable();
 }
 
 function renderStockTable(){
   const q=(document.getElementById("stock-search")||{}).value?.toLowerCase()||"";
-  const allDefs=[
-    ...STOCK_DEF.machines.map(i=>({...i,storeCat:"machines"})),
-    ...STOCK_DEF.drinks.map(i=>({...i,storeCat:"drinks"})),
-    ...STOCK_DEF.snacks.map(i=>({...i,storeCat:"snacks"})),
-    ...STOCK_DEF.sweets.map(i=>({...i,storeCat:"sweets"}))
-  ];
+  const allDefs=stockAllDefs();
 
   // Stats always over all items
   let total=0,ok=0,low=0,out=0;
@@ -2637,10 +2858,10 @@ function skSaveQty(id,sc){
   }
   _updateStatusBadge(id,val,stockData[sc][id].reorderPt??0);
   // refresh stats
-  const allDefs=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets];
+  const allDefs=stockAllDefs();
   let total=0,ok=0,low=0,out=0;
   allDefs.forEach(i=>{
-    const s_c=_storeCatOf(i.cat);
+    const s_c=i.storeCat;
     const dv=stockData[s_c]?.[i.id];
     const s=stockStatus(dv!=null?dv.qty:i.qty,dv!=null?dv.reorderPt:i.reorderPt);
     total++;if(s==="ok")ok++;else if(s==="low")low++;else out++;
@@ -2654,8 +2875,8 @@ function deleteStockItem(id,sc){
   if(!confirm("Delete this item from the stock list?"))return;
   if(!stockData[sc][id])stockData[sc][id]={};
   stockData[sc][id].deleted=true;
-  // Remove from STOCK_DEF so it stays gone on re-render
-  ["machines","drinks","snacks","sweets"].forEach(k=>{
+  // Remove from its category bucket so it stays gone on re-render
+  Object.keys(STOCK_DEF).forEach(k=>{
     const idx=STOCK_DEF[k].findIndex(x=>x.id===id);
     if(idx!==-1)STOCK_DEF[k].splice(idx,1);
   });
@@ -2676,12 +2897,7 @@ function _updateStatusBadge(id,qty,rp){
 }
 
 function genOrderSheet(){
-  const allDefs=[
-    ...STOCK_DEF.machines.map(i=>({...i,storeCat:"machines"})),
-    ...STOCK_DEF.drinks.map(i=>({...i,storeCat:"drinks"})),
-    ...STOCK_DEF.snacks.map(i=>({...i,storeCat:"snacks"})),
-    ...STOCK_DEF.sweets.map(i=>({...i,storeCat:"sweets"}))
-  ];
+  const allDefs=stockAllDefs();
   const branch=activeBranch==="fourways"?"Fourways Mall":"Rosebank";
   const now=new Date();
   const dateStr=now.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" "+now.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
@@ -2725,12 +2941,7 @@ function genOrderSheet(){
 }
 
 function genStockTakeSheet(){
-  const allDefs=[
-    ...STOCK_DEF.machines.map(i=>({...i,storeCat:"machines"})),
-    ...STOCK_DEF.drinks.map(i=>({...i,storeCat:"drinks"})),
-    ...STOCK_DEF.snacks.map(i=>({...i,storeCat:"snacks"})),
-    ...STOCK_DEF.sweets.map(i=>({...i,storeCat:"sweets"}))
-  ];
+  const allDefs=stockAllDefs();
   const branch=activeBranch==="fourways"?"Fourways Mall":"Rosebank";
   const now=new Date();
   const dateStr=now.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" "+now.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});
@@ -2773,6 +2984,7 @@ function addStockItem(){
   const name=document.getElementById("new-item-name").value.trim();
   if(!name){alert("Enter an item name.");return;}
   const cat=document.getElementById("new-item-cat").value;
+  if(!stockCats.some(c=>c.key===cat)){alert("Choose a category for this item.");return;}
   const unit=document.getElementById("new-item-unit").value.trim()||"unit";
   const rp=+document.getElementById("new-item-min").value||0;
   const oq=+document.getElementById("new-item-cost").value||0;
@@ -2780,13 +2992,14 @@ function addStockItem(){
   const id="custom_"+Date.now();
   if(!stockData[sc])stockData[sc]={};
   stockData[sc][id]={qty:0,reorderPt:rp,orderQty:oq,stockTakeTime:"",unit,name,subcat:cat};
-  const defArr=STOCK_DEF[sc]||STOCK_DEF.sweets;
+  const defArr=stockDefArr(sc);
   defArr.push({id,name,cat,unit,qty:0,reorderPt:rp,orderQty:oq});
   saveStockData();
   document.getElementById("new-item-name").value="";
   document.getElementById("new-item-unit").value="";
   document.getElementById("new-item-min").value="";
   document.getElementById("new-item-cost").value="";
+  renderDelCatOptions();
   renderStockTable();
   showStockToast("✅ Item added!");
 }
@@ -2832,7 +3045,7 @@ let _calcId="", _calcSc="", _calcUnitTypes=[];
 function openStockCalc(id,sc){
   _calcId=id; _calcSc=sc;
   const d=stockData[sc]?.[id];
-  const defItem=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets].find(x=>x.id===id);
+  const defItem=stockAllDefs().find(x=>x.id===id);
   const{singleName,unitTypes}=getUnitTypes(d,defItem||{});
   _calcUnitTypes=unitTypes;
   document.getElementById("calc-item-name").textContent=d?.name||id;
@@ -2888,7 +3101,7 @@ let _editId="", _editSc="", _editUnitTypes=[];
 function openStockEdit(id,sc){
   _editId=id; _editSc=sc;
   const d=stockData[sc]?.[id];
-  const defItem=[...STOCK_DEF.machines,...STOCK_DEF.drinks,...STOCK_DEF.snacks,...STOCK_DEF.sweets].find(x=>x.id===id);
+  const defItem=stockAllDefs().find(x=>x.id===id);
   document.getElementById("edit-item-name").textContent=d?.name||defItem?.name||id;
   const{singleName,unitTypes}=getUnitTypes(d,defItem||{});
   document.getElementById("edit-single-name").value=singleName;
